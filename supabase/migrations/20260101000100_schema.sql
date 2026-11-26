@@ -412,7 +412,47 @@ as $$
   );
 $$;
 
-create or replace function public.guard_survey_content_immutable()
+-- A trigger function can only reference fields that exist on the row it is
+-- handed. `surveys` has `id`; `survey_sections` and `questions` have
+-- `survey_id`. PL/pgSQL resolves every field reference against the actual
+-- record type, so one shared function referencing both would fail with
+-- "record new has no field survey_id". Hence two functions.
+
+-- Drop the previous single-function form and its triggers, if present.
+drop trigger if exists surveys_guard_immutable on public.surveys;
+drop trigger if exists survey_sections_guard_immutable on public.survey_sections;
+drop trigger if exists questions_guard_immutable on public.questions;
+drop function if exists public.guard_survey_content_immutable();
+
+-- ---- surveys: block content edits, allow status / lock / timestamp changes ----
+
+create or replace function public.guard_survey_immutable()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if (new.title, new.description, new.confirmation_message, new.slug,
+      new.collects_email, new.email_required)
+     is distinct from
+     (old.title, old.description, old.confirmation_message, old.slug,
+      old.collects_email, old.email_required)
+  then
+    if public.survey_has_responses(old.id) or coalesce(old.is_locked, false) then
+      raise exception
+        'Survey % already has responses (or is locked): its content is immutable. Create a new survey instead.',
+        old.id
+        using errcode = 'check_violation';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+-- ---- sections and questions: no content changes once answered or locked ----
+
+create or replace function public.guard_survey_child_immutable()
 returns trigger
 language plpgsql
 set search_path = ''
@@ -421,35 +461,22 @@ declare
   target_survey uuid;
   locked        boolean;
 begin
-  -- OLD is unassigned on INSERT and NEW is unassigned on DELETE, so resolve the
-  -- target survey per operation rather than coalescing across both records.
+  -- OLD is unassigned on INSERT and NEW is unassigned on DELETE.
   if tg_op = 'DELETE' then
-    target_survey := case when tg_table_name = 'surveys' then old.id else old.survey_id end;
+    target_survey := old.survey_id;
   else
-    target_survey := case when tg_table_name = 'surveys' then new.id else new.survey_id end;
+    target_survey := new.survey_id;
   end if;
 
   if target_survey is null then
-    return case when tg_op = 'DELETE' then old else new end;
+    if tg_op = 'DELETE' then
+      return old;
+    else
+      return new;
+    end if;
   end if;
 
   select s.is_locked into locked from public.surveys s where s.id = target_survey;
-
-  -- Allow flipping status/lock/closed_at on the surveys row itself; block content edits.
-  if tg_table_name = 'surveys' and tg_op = 'UPDATE' then
-    if (new.title, new.description, new.confirmation_message, new.slug, new.collects_email, new.email_required)
-       is distinct from
-       (old.title, old.description, old.confirmation_message, old.slug, old.collects_email, old.email_required)
-    then
-      if public.survey_has_responses(target_survey) or coalesce(old.is_locked, false) then
-        raise exception
-          'Survey % already has responses (or is locked): its content is immutable. Create a new survey instead.',
-          target_survey
-          using errcode = 'check_violation';
-      end if;
-    end if;
-    return new;
-  end if;
 
   if public.survey_has_responses(target_survey) or coalesce(locked, false) then
     raise exception
@@ -458,24 +485,25 @@ begin
       using errcode = 'check_violation';
   end if;
 
-  return case when tg_op = 'DELETE' then old else new end;
+  if tg_op = 'DELETE' then
+    return old;
+  else
+    return new;
+  end if;
 end;
 $$;
 
-drop trigger if exists surveys_guard_immutable on public.surveys;
 create trigger surveys_guard_immutable
   before update on public.surveys
-  for each row execute function public.guard_survey_content_immutable();
+  for each row execute function public.guard_survey_immutable();
 
-drop trigger if exists survey_sections_guard_immutable on public.survey_sections;
 create trigger survey_sections_guard_immutable
   before insert or update or delete on public.survey_sections
-  for each row execute function public.guard_survey_content_immutable();
+  for each row execute function public.guard_survey_child_immutable();
 
-drop trigger if exists questions_guard_immutable on public.questions;
 create trigger questions_guard_immutable
   before insert or update or delete on public.questions
-  for each row execute function public.guard_survey_content_immutable();
+  for each row execute function public.guard_survey_child_immutable();
 
 -- Responses are append-only: block edits to submitted answers.
 create or replace function public.guard_answers_append_only()

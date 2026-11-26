@@ -251,7 +251,10 @@ describe("answer integrity is enforced in the database", () => {
 
 describe("the baseline survey becomes immutable", () => {
   it("guards surveys, sections and questions once responses exist", () => {
-    expect(schemaFlat).toContain("create or replace function public.guard_survey_content_immutable()");
+    expect(schemaFlat).toContain("create or replace function public.guard_survey_immutable()");
+    expect(schemaFlat).toContain(
+      "create or replace function public.guard_survey_child_immutable()",
+    );
     for (const trigger of [
       "surveys_guard_immutable",
       "survey_sections_guard_immutable",
@@ -261,13 +264,45 @@ describe("the baseline survey becomes immutable", () => {
     }
   });
 
+  it("gives surveys and its child tables separate trigger functions", () => {
+    // `surveys` has `id`; `survey_sections`/`questions` have `survey_id`.
+    // PL/pgSQL resolves field references against the real record type, so one
+    // shared function touching both fails with
+    // "record new has no field survey_id" — even inside an untaken CASE branch.
+    const bodyOf = (fn: string) =>
+      schemaSql.match(
+        new RegExp(`create or replace function public\\.${fn}\\(\\)[\\s\\S]*?\\$\\$;`, "u"),
+      )?.[0] ?? "";
+
+    const surveysFn = bodyOf("guard_survey_immutable");
+    const childFn = bodyOf("guard_survey_child_immutable");
+
+    expect(surveysFn).not.toBe("");
+    expect(childFn).not.toBe("");
+
+    // The surveys guard must never reference survey_id...
+    expect(surveysFn).not.toMatch(/\b(new|old)\.survey_id\b/u);
+    // ...and the child guard must never reference a bare .id as the survey key.
+    expect(childFn).toMatch(/\bold\.survey_id\b/u);
+    expect(childFn).toMatch(/\bnew\.survey_id\b/u);
+    expect(childFn).not.toMatch(/\b(new|old)\.id\b/u);
+  });
+
+  it("drops the previous single-function guard so a re-run is clean", () => {
+    expect(schemaFlat).toContain(
+      "drop function if exists public.guard_survey_content_immutable()",
+    );
+  });
+
   it("explains that a new survey is the correct path", () => {
     expect(schemaFlat).toMatch(/Create a new survey instead/u);
   });
 
   it("handles INSERT and DELETE without touching an unassigned record", () => {
     // OLD is unassigned on INSERT and NEW on DELETE; the guard must branch first.
-    expect(schemaFlat).toContain("if tg_op = 'DELETE' then target_survey := case when tg_table_name = 'surveys' then old.id else old.survey_id end");
+    expect(schemaFlat).toContain(
+      "if tg_op = 'DELETE' then target_survey := old.survey_id; else target_survey := new.survey_id; end if;",
+    );
   });
 });
 
