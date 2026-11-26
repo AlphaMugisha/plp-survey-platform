@@ -35,7 +35,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html
+      lang="en"
+      className={inter.variable}
+      // Browser extensions (password managers, writing assistants) inject
+      // attributes into <html> before React hydrates, which React otherwise
+      // reports as a hydration mismatch. This suppresses that noise on this
+      // element only — it does not affect any of our own markup.
+      suppressHydrationWarning
+    >
       <body className="min-h-dvh bg-canvas">
         <a
           href="#main"

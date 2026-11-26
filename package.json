@@ -5,7 +5,10 @@
   "description": "Peace and Love Proclaimers — PLP School Curriculum survey platform",
   "scripts": {
     "clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
-    "dev": "next dev",
+    "predev": "node scripts/guard-next-cache.mjs dev",
+    "dev": "next dev --turbopack",
+    "dev:webpack": "next dev",
+    "prebuild": "node scripts/guard-next-cache.mjs build",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
