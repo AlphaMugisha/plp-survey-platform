@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --ring-offset: #f7f7f2;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    font-variant-numeric: tabular-nums;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Visible, on-brand focus ring everywhere — never remove the indicator */
+  :focus-visible {
+    @apply outline-none ring-2 ring-forest-500 ring-offset-2;
+    ring-offset-color: var(--ring-offset);
+  }
+
+  ::selection {
+    background-color: rgba(47, 163, 107, 0.22);
+    color: #0d2b21;
+  }
+
+  /* Headings use the display serif for editorial contrast */
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    font-weight: 600;
+  }
+
+  /* Honour the OS reduced-motion preference across the whole app */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ---------- Layered background system ---------- */
+
+  /* Soft cream page wash with a faint dot grid — gives surfaces something to sit on */
+  .bg-canvas {
+    background-color: #f7f7f2;
+    background-image:
+      radial-gradient(ellipse 80% 55% at 50% -10%, rgba(47, 163, 107, 0.09), transparent 70%),
+      radial-gradient(ellipse 60% 50% at 100% 0%, rgba(213, 168, 75, 0.07), transparent 65%);
+  }
+
+  .bg-dotgrid {
+    background-image: radial-gradient(rgba(18, 59, 45, 0.1) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Dark forest panel used by the hero and admin shell */
+  .bg-forest-panel {
+    background-color: #0d2b21;
+    background-image:
+      radial-gradient(ellipse 70% 60% at 15% 0%, rgba(47, 163, 107, 0.26), transparent 62%),
+      radial-gradient(ellipse 55% 50% at 92% 12%, rgba(213, 168, 75, 0.16), transparent 60%),
+      linear-gradient(160deg, #15402f 0%, #0d2b21 52%, #061512 100%);
+  }
+
+  /* ---------- Surfaces ---------- */
+
+  .card-surface {
+    @apply rounded-card border border-border/80 bg-surface shadow-card;
+  }
+
+  /* Elegant hairline + top light catch, the detail that reads as "premium" */
+  .card-lux {
+    @apply relative rounded-card border border-border/70 bg-surface shadow-card;
+  }
+  .card-lux::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(18, 59, 45, 0.06));
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .card-interactive {
+    @apply transition-all duration-300 ease-premium;
+  }
+  .card-interactive:hover {
+    @apply -translate-y-0.5 shadow-raised;
+  }
+
+  /* ---------- Glow accents ---------- */
+
+  /* Blurred colour blob for hero / section lighting */
+  .glow-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(68px);
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #f7ebcf 0%, #e0c274 42%, #d5a84b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-forest {
+    background: linear-gradient(135deg, #1b513d 0%, #123b2d 55%, #2c6a4b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Thin gold rule used under section eyebrows */
+  .rule-gold {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(213, 168, 75, 0.85), rgba(213, 168, 75, 0));
+  }
+
+  /* ---------- Scrollbars inside tall panels ---------- */
+  .scroll-slim {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(18, 59, 45, 0.22) transparent;
+  }
+  .scroll-slim::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scroll-slim::-webkit-scrollbar-thumb {
+    background: rgba(18, 59, 45, 0.2);
+    border-radius: 9999px;
+  }
+  .scroll-slim::-webkit-scrollbar-thumb:hover {
+    background: rgba(18, 59, 45, 0.34);
+  }
+  .scroll-slim::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  /* Keeps wide content (tables, charts) from pushing the page sideways */
+  .overflow-x-panel {
+    @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Screen-reader-only, but focusable (skip links) */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "fingerprint": "82d0822acee1900a32397c45a3f651c129fe390d744c6f106748dd6cbc7845fa",
+  "algorithm": "sha256",
+  "updatedAt": "2026-11-25",
+  "sections": 5,
+  "questions": 28,
+  "required": 27,
+  "schools": 180,
+  "note": "Baseline fingerprint of the verified survey content. Regenerate ONLY with `npm run verify:survey -- --update` after an intentional, re-verified content change."
+}
