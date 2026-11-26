@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProgressRail } from "./progress-rail";
 import { QuestionField } from "./question-field";
 import { ReviewPanel } from "./review-panel";
+import { ScaleKey } from "./scale-key";
 import {
   allQuestions,
   isScaleLegend,
@@ -35,6 +36,9 @@ import { REVIEW_STEP_INDEX, fieldsForStep, surveySteps } from "@/lib/survey/step
 import { cn } from "@/lib/utils";
 
 const DRAFT_KEY = "plp-survey-draft-v1";
+
+/** One scale key per section; every rating question references it. */
+const SCALE_LEGEND_ID = "section-scale-key";
 
 type SubmitState =
   | { status: "idle" }
@@ -76,6 +80,28 @@ export function SurveyForm() {
   const step = surveySteps[stepIndex]!;
   const isReview = step.kind === "review";
   const values = watch();
+
+  /**
+   * A section description is either prose, the scale legend, or prose followed
+   * by the legend after a blank line. Split them so the prose reads as prose
+   * and the legend becomes a proper key — without altering either.
+   */
+  const { prose, legend } = React.useMemo(() => {
+    const text = step.description;
+    if (!text) return { prose: null as string | null, legend: null as string | null };
+
+    const blocks = text
+      .split(/\n{2,}/u)
+      .map((b) => b.trim())
+      .filter(Boolean);
+    const legendBlocks = blocks.filter((b) => isScaleLegend(b));
+    const proseBlocks = blocks.filter((b) => !isScaleLegend(b));
+
+    return {
+      prose: proseBlocks.length > 0 ? proseBlocks.join("\n\n") : null,
+      legend: legendBlocks.length > 0 ? legendBlocks[0]! : null,
+    };
+  }, [step.description]);
 
   /* ---------------- Draft persistence ----------------
      Answers survive an accidental refresh or a dropped connection. Stored only
@@ -346,27 +372,18 @@ export function SurveyForm() {
               {step.kind === "section" && step.section ? step.section.plainTitle : step.title}
             </h2>
 
-            {/* Exact original section description. For section steps this is the
-                authoritative text, including the scale legend. */}
-            {step.description && (
-              <p
-                className={cn(
-                  "mt-3 max-w-2xl whitespace-pre-line text-pretty leading-relaxed",
-                  isScaleLegend(step.description)
-                    ? "text-[0.875rem] text-ink-muted"
-                    : "text-[1.0625rem] text-ink-soft",
-                )}
-              >
-                {step.description}
+            {/* The section's own text. Where it is prose it reads as prose;
+                where it is the scale legend it becomes the scale key below. */}
+            {prose && (
+              <p className="mt-3 max-w-2xl whitespace-pre-line text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
+                {prose}
               </p>
             )}
 
-            {/* Keep the full, exact section title visible even though the heading
-                above shows the shortened form. */}
-            {step.kind === "section" && step.section && (
-              <p className="mt-3 text-[0.75rem] font-medium uppercase tracking-[0.12em] text-plp-500">
-                {step.section.title}
-              </p>
+            {/* Shown once for the whole section. Every rating question below
+                points at it through aria-describedby. */}
+            {legend && (
+              <ScaleKey legend={legend} id={SCALE_LEGEND_ID} className="mt-5 max-w-2xl" />
             )}
           </header>
 
@@ -438,6 +455,7 @@ export function SurveyForm() {
                   control={control}
                   errors={errors}
                   index={i + 1}
+                  scaleLegendId={legend ? SCALE_LEGEND_ID : undefined}
                 />
               ))}
             </div>

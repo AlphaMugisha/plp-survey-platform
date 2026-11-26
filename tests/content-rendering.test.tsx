@@ -10,10 +10,12 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useForm } from "react-hook-form";
 import { QuestionField } from "@/components/survey/question-field";
+import { ScaleKey } from "@/components/survey/scale-key";
 import { SchoolCombobox } from "@/components/survey/school-combobox";
 import { ReviewPanel } from "@/components/survey/review-panel";
 import {
   allQuestions,
+  isScaleLegend,
   schools,
   scaleOptions,
   surveySections,
@@ -191,5 +193,64 @@ describe("rendered review screen", () => {
     );
     expect(screen.getByText(/1 required answer is still missing/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Required — not answered/i).length).toBeGreaterThan(0);
+  });
+});
+
+describe("the repeated scale legend is shown once, not 21 times", () => {
+  /** Mounts a question the way a section step does: with a shared scale key. */
+  function SharedLegendHarness({ question }: { question: Question }) {
+    const form = useForm<SurveyFormValues>({ defaultValues: { [question.fieldKey]: "" } });
+    return (
+      <>
+        <ScaleKey legend={question.description ?? ""} id="section-scale-key" />
+        <QuestionField
+          question={question}
+          control={form.control}
+          errors={form.formState.errors}
+          scaleLegendId="section-scale-key"
+        />
+      </>
+    );
+  }
+
+  const ratingQuestion = allQuestions.find(
+    (q) => q.options?.length === 5 && q.description && isScaleLegend(q.description),
+  )!;
+
+  it("does not repeat the legend under the question", () => {
+    render(<SharedLegendHarness question={ratingQuestion} />);
+    // The question's own help paragraph is not rendered a second time.
+    expect(document.getElementById(`${ratingQuestion.fieldKey}__desc`)).toBeNull();
+  });
+
+  it("still announces the scale to screen readers, per question", () => {
+    render(<SharedLegendHarness question={ratingQuestion} />);
+    const group = screen.getByRole("radiogroup");
+    expect(group).toHaveAttribute("aria-describedby", expect.stringContaining("section-scale-key"));
+  });
+
+  it("keeps every word of the legend on the page", () => {
+    render(<ScaleKey legend={ratingQuestion.description!} id="k" />);
+    const key = document.getElementById("k")!;
+    // Each "n = wording" point survives verbatim somewhere in the key.
+    for (const point of ratingQuestion.description!.split("|").map((p) => p.trim())) {
+      expect(key.textContent).toContain(point);
+    }
+  });
+
+  it("falls back to plain text if the legend is not in the expected shape", () => {
+    render(<ScaleKey legend="Just a sentence with no separators." id="k2" />);
+    expect(document.getElementById("k2")!.textContent).toBe(
+      "Just a sentence with no separators.",
+    );
+  });
+
+  it("still renders help text normally when there is no shared key", () => {
+    // Questions outside a scale section must keep their own description.
+    const { unmount } = render(<QuestionHarness question={ratingQuestion} />);
+    expect(document.getElementById(`${ratingQuestion.fieldKey}__desc`)?.textContent).toBe(
+      ratingQuestion.description,
+    );
+    unmount();
   });
 });

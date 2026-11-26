@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RequiredMark, OptionalMark } from "@/components/ui/label";
 import { RatingOptionGroup } from "./rating-option-group";
 import { SchoolCombobox } from "./school-combobox";
-import type { Question } from "@/lib/survey/source";
+import { isScaleLegend, type Question } from "@/lib/survey/source";
 import { cn } from "@/lib/utils";
 import type { SurveyFormValues } from "@/lib/survey/schema";
 
@@ -23,18 +23,34 @@ export function QuestionField({
   control,
   errors,
   index,
+  scaleLegendId,
 }: {
   question: Question;
   control: Control<SurveyFormValues>;
   errors: FieldErrors<SurveyFormValues>;
   /** 1-based number shown beside the question. Presentation only. */
   index?: number;
+  /**
+   * Id of a shared scale key rendered once for the whole section. When given,
+   * this question's own help text — which is the same legend repeated — is not
+   * drawn again, but is still announced via aria-describedby.
+   */
+  scaleLegendId?: string;
 }) {
   const error = errors[question.fieldKey];
   const message = typeof error?.message === "string" ? error.message : undefined;
 
   const fieldId = question.fieldKey;
-  const descId = question.description ? `${fieldId}__desc` : undefined;
+
+  // The 21 rating questions all repeat their section's scale legend. When the
+  // section already shows it, point at that one element instead of drawing the
+  // same sentence under every question.
+  const usesSharedLegend = Boolean(
+    scaleLegendId && question.description && isScaleLegend(question.description),
+  );
+
+  const ownDescId = question.description && !usesSharedLegend ? `${fieldId}__desc` : undefined;
+  const descId = usesSharedLegend ? scaleLegendId : ownDescId;
   const errorId = message ? `${fieldId}__error` : undefined;
   const describedBy = [descId, errorId].filter(Boolean).join(" ") || undefined;
 
@@ -87,12 +103,12 @@ export function QuestionField({
             )}
           </LabelTag>
 
-          {/* ---- Help text, verbatim. Kept visually quiet because the option
-                   rows below already spell out the same scale in full. ---- */}
-          {question.description && (
+          {/* ---- Help text, verbatim — but only when it is not the section's
+                   scale legend repeated for the twenty-first time. ---- */}
+          {question.description && !usesSharedLegend && (
             <p
-              id={descId}
-              className="mt-2 whitespace-pre-line text-[0.8125rem] leading-relaxed text-ink-faint"
+              id={ownDescId}
+              className="mt-2 whitespace-pre-line text-[0.8125rem] leading-relaxed text-ink-muted"
             >
               {question.description}
             </p>
