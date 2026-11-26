@@ -8,6 +8,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
+import { ApplicationWindowNotice } from "@/components/site/application-window-notice";
 import { PhotoSlot } from "@/components/site/photo-slot";
 import { ImigongoBand, ImigongoPanel, ImigongoPattern } from "@/components/brand/imigongo";
 import { Logo } from "@/components/brand/logo";
@@ -91,6 +92,10 @@ export default function LandingPage() {
                 {/* The original intro, verbatim */}
                 {introBody}
               </p>
+
+              <div className="mt-6 max-w-xl">
+                <ApplicationWindowNotice />
+              </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button asChild size="xl" className="group w-full sm:w-auto">

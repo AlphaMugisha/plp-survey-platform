@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SurveyForm } from "@/components/survey/survey-form";
 import { SetupNotice } from "@/components/site/setup-notice";
+import { ApplicationWindowNotice } from "@/components/site/application-window-notice";
 import { Logo } from "@/components/brand/logo";
 import { surveySource } from "@/lib/survey/source";
 
@@ -31,6 +32,10 @@ export default function SurveyPage() {
 
       <main id="main" className="container max-w-6xl pb-24 pt-8">
         <SetupNotice context="submit" />
+
+        <div className="mb-6">
+          <ApplicationWindowNotice />
+        </div>
 
         {/* The exact form title, carried through from the source */}
         <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-plp-500">
