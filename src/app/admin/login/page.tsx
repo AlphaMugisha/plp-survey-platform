@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, ShieldAlert, ShieldCheck } from "lucide-react";
 import { LoginForm } from "@/components/admin/login-form";
 import { Logo } from "@/components/brand/logo";
-import { GlowBlob } from "@/components/motion/reveal";
 import { SetupNotice } from "@/components/site/setup-notice";
 import { getAdminSession } from "@/lib/admin/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -30,14 +29,10 @@ export default async function AdminLoginPage({
   return (
     <main
       id="main"
-      className="relative flex min-h-dvh items-center justify-center overflow-hidden px-5 py-14"
+      className="flex min-h-dvh items-center justify-center bg-canvas px-5 py-14"
     >
-      <GlowBlob
-        color="radial-gradient(circle, rgba(47,163,107,0.18), transparent 70%)"
-        className="-top-24 left-1/2 size-[30rem] -translate-x-1/2"
-      />
 
-      <div className="relative w-full max-w-md">
+      <div className="w-full max-w-md">
         <Link
           href="/"
           className="mb-7 inline-flex items-center gap-1.5 rounded-xl text-[0.8125rem] font-medium text-ink-muted transition-colors hover:text-plp-700"

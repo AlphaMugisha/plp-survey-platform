@@ -1,18 +1,16 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  CheckCircle2,
-  ChevronDown,
+  Check,
   Clock3,
   ListChecks,
   Lock,
-  School,
+  ShieldCheck,
 } from "lucide-react";
-import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Reveal, RevealGroup, RevealItem, GlowBlob } from "@/components/motion/reveal";
 import {
   estimatedMinutes,
   headerParagraphs,
@@ -31,52 +29,69 @@ const [curriculumLine, introBody, privacyNote] = [
   headerParagraphs[2] ?? "",
 ];
 
+/**
+ * Facts about Peace and Love Proclaimers.
+ *
+ * These are taken from published sources about the organisation, not written
+ * as marketing copy. If any detail is out of date, correct it here — this is
+ * the only place in the app that describes PLP itself.
+ *
+ * Sources: The New Times (Rwanda), PLP's own channels, LinkedIn.
+ */
+const ABOUT_PLP = {
+  founded: "16 July 2007",
+  foundedBy: "a group of seven Rwandan students",
+  base: "Kigali, Rwanda",
+  members: "200+",
+  countries: "Rwanda, India, the USA and Malaysia",
+  walkToRemember: 25,
+} as const;
+
 export default function LandingPage() {
   return (
-    <div className="relative">
-      {/* ================= HERO — one job: get people started ================= */}
-      <section className="relative overflow-hidden bg-plp-panel">
-        <GlowBlob
-          color="radial-gradient(circle, rgba(143,198,238,0.38), transparent 70%)"
-          className="-left-28 -top-36 size-[34rem]"
-        />
-        <GlowBlob
-          color="radial-gradient(circle, rgba(29,117,189,0.55), transparent 70%)"
-          className="-right-24 top-4 size-[30rem]"
-          drift={false}
-        />
-        <span
-          aria-hidden="true"
-          className="bg-dotgrid absolute inset-0 opacity-30 [mask-image:radial-gradient(ellipse_at_top,black,transparent_75%)]"
-        />
+    <div className="min-h-dvh bg-white">
+      {/* ===================== HEADER ===================== */}
+      <header className="sticky top-0 z-40 border-b border-border bg-white/95 backdrop-blur-sm">
+        <div className="container flex items-center justify-between gap-4 py-3.5">
+          <Link href="/" className="rounded-lg transition-opacity hover:opacity-80">
+            <Logo showTagline />
+          </Link>
 
-        <div className="relative mx-auto flex min-h-[44rem] max-w-5xl flex-col px-5 sm:px-8">
-          <SiteHeader tone="dark" />
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin"
+              className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-[0.8125rem] font-medium text-ink-muted transition-colors hover:bg-plp-50 hover:text-plp-700 sm:inline-flex"
+            >
+              <ShieldCheck className="size-4" aria-hidden="true" />
+              Staff sign in
+            </Link>
+            <Button asChild size="sm" className="shrink-0">
+              <Link href="/survey">Start the survey</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
 
-          <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
-            <Reveal>
-              <Badge variant="onDark" size="lg" className="mb-8">
+      <main id="main">
+        {/* ===================== HERO ===================== */}
+        <section className="border-b border-border bg-paper">
+          <div className="container grid gap-12 py-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:py-20">
+            <div>
+              <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-plp-600">
                 {curriculumLine}
-              </Badge>
-            </Reveal>
+              </p>
 
-            <Reveal delay={0.05}>
-              <h1 className="max-w-3xl text-balance font-display text-display-sm font-bold text-white sm:text-display-md lg:text-display-lg">
+              <h1 className="mt-4 text-balance font-display text-[2rem] font-bold leading-[1.15] tracking-tight text-plp-900 sm:text-[2.5rem] lg:text-[2.875rem]">
                 {surveySource.form_title}
               </h1>
-            </Reveal>
 
-            <Reveal delay={0.1}>
-              <p className="mt-6 max-w-xl text-pretty text-[1.0625rem] leading-relaxed text-accent-200/90">
-                A short, honest snapshot of where you are today — before the PLP programme
-                begins. No right answers. No marks.
+              <p className="mt-5 max-w-xl text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
+                {/* The original intro, verbatim */}
+                {introBody}
               </p>
-            </Reveal>
 
-            {/* ---------- THE START ACTION ---------- */}
-            <Reveal delay={0.16}>
-              <div className="mt-10 flex flex-col items-center gap-5">
-                <Button asChild variant="hero" size="hero" className="group w-full sm:w-auto">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Button asChild size="xl" className="group w-full sm:w-auto">
                   <Link href="/survey">
                     Start the survey
                     <ArrowRight
@@ -85,265 +100,145 @@ export default function LandingPage() {
                     />
                   </Link>
                 </Button>
-
-                {/* Answers the two questions that stop people clicking */}
-                <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[0.875rem] text-accent-200/80">
-                  {[
-                    `About ${estimatedMinutes} minutes`,
-                    "No account needed",
-                    "Your answers stay private",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-1.5">
-                      <CheckCircle2 className="size-4 text-accent-300" aria-hidden="true" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-[0.875rem] text-ink-muted">
+                  Takes about {estimatedMinutes} minutes · No account needed
+                </p>
               </div>
-            </Reveal>
-          </div>
+            </div>
 
-          {/* scroll affordance */}
-          <div className="flex justify-center pb-10">
-            <a
-              href="#how-it-works"
-              className="group inline-flex flex-col items-center gap-1.5 rounded-xl px-4 py-2 text-[0.75rem] font-medium uppercase tracking-[0.14em] text-white/55 transition-colors hover:text-white"
-            >
-              What you&apos;ll be asked
-              <ChevronDown className="size-4 animate-nudge-down" aria-hidden="true" />
-            </a>
+            {/* At-a-glance card */}
+            <div className="card-surface p-6 sm:p-7">
+              <h2 className="font-display text-[1.0625rem] font-bold text-plp-800">
+                Before you begin
+              </h2>
+              <dl className="mt-5 divide-y divide-border">
+                <Row
+                  icon={<Clock3 className="size-[1.0625rem]" aria-hidden="true" />}
+                  label="Estimated time"
+                  value={`About ${estimatedMinutes} minutes`}
+                  note="An estimate only. There is no timer."
+                />
+                <Row
+                  icon={<ListChecks className="size-[1.0625rem]" aria-hidden="true" />}
+                  label="Questions"
+                  value={`${surveyStats.questionCount} across ${surveyStats.sectionCount} sections`}
+                  note={`${surveyStats.requiredCount} required, ${surveyStats.optionalCount} optional.`}
+                />
+                <Row
+                  icon={<Lock className="size-[1.0625rem]" aria-hidden="true" />}
+                  label="Privacy"
+                  value="Seen only by PLP staff"
+                  note="Never shown publicly or to other students."
+                />
+              </dl>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <main id="main">
-        {/* ================= HOW IT WORKS ================= */}
-        <section id="how-it-works" className="container scroll-mt-8 pt-20 sm:pt-24">
-          <Reveal>
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-plp-500">
+        {/* ===================== ABOUT PLP ===================== */}
+        <section className="border-b border-border bg-white">
+          <div className="container py-14 lg:py-20">
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+              <div>
+                <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-plp-600">
+                  About us
+                </p>
+                <h2 className="mt-3 font-display text-[1.75rem] font-bold tracking-tight text-plp-900 sm:text-[2rem]">
+                  Peace and Love Proclaimers
+                </h2>
+              </div>
+
+              <div className="space-y-4 text-[1.0625rem] leading-relaxed text-ink-soft">
+                <p>
+                  PLP is a youth-led Rwandan organisation founded on{" "}
+                  <strong className="font-semibold text-plp-800">{ABOUT_PLP.founded}</strong> by{" "}
+                  {ABOUT_PLP.foundedBy}, and based in {ABOUT_PLP.base}. It works for unity, peace
+                  and development — run by young people, for young people.
+                </p>
+                <p>
+                  PLP runs clubs in secondary schools and universities across Rwanda, and has
+                  grown to {ABOUT_PLP.members} members across {ABOUT_PLP.countries}. Its
+                  best-known initiative, <strong className="font-semibold text-plp-800">Walk
+                  to Remember</strong>, began in Rwanda in 2009 and has since been held in{" "}
+                  {ABOUT_PLP.walkToRemember} countries.
+                </p>
+                <p>
+                  The <strong className="font-semibold text-plp-800">PLP Academy</strong> is its
+                  educational programme, built to develop writing, public speaking,
+                  entrepreneurship, critical thinking and peacebuilding. This survey is part of
+                  the school curriculum that programme delivers.
+                </p>
+              </div>
+            </div>
+
+            {/* Real figures only */}
+            <dl className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat value="2007" label="Founded in Kigali" />
+              <Stat value={ABOUT_PLP.members} label="Members, in four countries" />
+              <Stat
+                value={String(ABOUT_PLP.walkToRemember)}
+                label="Countries have held Walk to Remember"
+              />
+              <Stat
+                value={String(surveyStats.schoolCount)}
+                label="Schools listed in this survey"
+              />
+            </dl>
+          </div>
+        </section>
+
+        {/* ===================== HOW IT WORKS ===================== */}
+        <section className="border-b border-border bg-paper">
+          <div className="container py-14 lg:py-20">
+            <div className="max-w-2xl">
+              <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-plp-600">
                 How it works
               </p>
-              <h2 className="mt-4 text-balance font-display text-display-sm font-bold tracking-tight text-plp-800">
+              <h2 className="mt-3 font-display text-[1.75rem] font-bold tracking-tight text-plp-900 sm:text-[2rem]">
                 Three steps, start to finish
               </h2>
+              <p className="mt-4 text-[1.0625rem] leading-relaxed text-ink-muted">
+                There are no right or wrong answers, and nothing here affects your grades.
+              </p>
             </div>
-          </Reveal>
 
-          <RevealGroup as="ol" className="mx-auto mt-12 grid max-w-4xl gap-5 sm:grid-cols-3">
-            {[
-              {
-                n: 1,
-                title: "Your details",
-                body: "Your email, name, school and year level. The school list is searchable.",
-              },
-              {
-                n: 2,
-                title: "Five short sections",
-                body: `${surveyStats.questionCount} questions, shown a few at a time. You can go back and change anything.`,
-              },
-              {
-                n: 3,
-                title: "Review and submit",
-                body: "Check everything on one screen, then send. That's it.",
-              },
-            ].map((step) => (
-              <RevealItem as="li" key={step.n}>
-                <div className="card-lux h-full p-6">
+            <ol className="mt-10 grid gap-5 sm:grid-cols-3">
+              {[
+                {
+                  n: 1,
+                  title: "Your details",
+                  body: "Your email, name, school and year level. The school list is searchable.",
+                },
+                {
+                  n: 2,
+                  title: "Five short sections",
+                  body: `${surveyStats.questionCount} questions, shown a few at a time. You can go back and change anything.`,
+                },
+                {
+                  n: 3,
+                  title: "Review and submit",
+                  body: "Check everything on one screen, then send.",
+                },
+              ].map((step) => (
+                <li key={step.n} className="card-surface p-6">
                   <span
                     aria-hidden="true"
-                    className="inline-flex size-11 items-center justify-center rounded-xl bg-plp-sheen font-display text-[1.0625rem] font-bold text-white shadow-button"
+                    className="inline-flex size-9 items-center justify-center rounded-lg bg-plp-600 text-[0.9375rem] font-bold text-white"
                   >
                     {step.n}
                   </span>
-                  <h3 className="mt-5 font-display text-lg font-bold tracking-tight text-plp-800">
+                  <h3 className="mt-4 font-display text-[1.0625rem] font-bold text-plp-800">
                     {step.title}
                   </h3>
-                  <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-ink-muted">
+                  <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
                     {step.body}
                   </p>
-                </div>
-              </RevealItem>
-            ))}
-          </RevealGroup>
+                </li>
+              ))}
+            </ol>
 
-          {/* Second chance to start, right where the question is answered */}
-          <Reveal delay={0.1}>
-            <div className="mt-10 flex justify-center">
-              <Button asChild size="xl" className="group">
-                <Link href="/survey">
-                  Start now
-                  <ArrowRight
-                    className="transition-transform duration-300 ease-premium group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
-                </Link>
-              </Button>
-            </div>
-          </Reveal>
-        </section>
-
-        {/* ================= WHY ================= */}
-        <section className="container pt-20 sm:pt-24">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
-            <Reveal>
-              <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-plp-500">
-                Why we ask
-              </p>
-              <div className="rule-accent mt-3 max-w-[6rem]" />
-              <h2 className="mt-5 text-balance font-display text-display-sm font-bold tracking-tight text-plp-800">
-                A starting point, not a test
-              </h2>
-            </Reveal>
-
-            <Reveal delay={0.08}>
-              <div className="space-y-5 text-[1.0625rem] leading-relaxed text-ink-soft">
-                {/* The original intro text, verbatim */}
-                <p>{introBody}</p>
-                <p>
-                  You will answer a similar survey at the end of each term and again at the end
-                  of the year. Comparing those answers is how we measure growth — yours, your
-                  school&apos;s, and the programme&apos;s.
-                </p>
-                <p className="font-semibold text-plp-700">
-                  There are no right or wrong answers, and nothing here affects your grades.
-                </p>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* ================= SECTIONS ================= */}
-        <section className="container pt-20 sm:pt-24">
-          <Reveal>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-plp-500">
-                  The sections
-                </p>
-                <div className="rule-accent mt-3 max-w-[6rem]" />
-                <h2 className="mt-5 font-display text-display-sm font-bold tracking-tight text-plp-800">
-                  What you will be asked
-                </h2>
-              </div>
-              <p className="max-w-sm text-[0.9375rem] leading-relaxed text-ink-muted">
-                Five sections, shown one at a time so you can focus. Your answers are kept as you
-                move between them.
-              </p>
-            </div>
-          </Reveal>
-
-          <RevealGroup as="ul" className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {surveySections.map((section) => (
-              <RevealItem as="li" key={section.index}>
-                <article className="card-lux card-interactive group h-full p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <span
-                      className="inline-flex size-11 items-center justify-center rounded-xl bg-plp-sheen font-display text-[0.9375rem] font-bold text-white shadow-button transition-shadow duration-300 ease-premium group-hover:shadow-glow-brand"
-                      aria-hidden="true"
-                    >
-                      {section.shortLabel}
-                    </span>
-                    <Badge variant="neutral" size="sm">
-                      {section.questions.length}{" "}
-                      {section.questions.length === 1 ? "question" : "questions"}
-                    </Badge>
-                  </div>
-
-                  <h3 className="mt-5 font-display text-lg font-bold leading-snug tracking-tight text-plp-800">
-                    {section.plainTitle}
-                  </h3>
-
-                  <p className="mt-3 text-[0.9375rem] leading-relaxed text-ink-muted">
-                    {section.description && !isScaleLegend(section.description)
-                      ? section.description.split(/\n{2,}/u)[0]
-                      : section.questions.length >= 5
-                        ? "Rated on a five-point scale, from Strongly Disagree to Strongly Agree."
-                        : "Written answers in your own words."}
-                  </p>
-                </article>
-              </RevealItem>
-            ))}
-
-            <RevealItem as="li">
-              <article className="card-lux flex h-full flex-col justify-center border-dashed p-6 text-center">
-                <p className="font-display text-lg font-bold tracking-tight text-plp-800">
-                  Ready?
-                </p>
-                <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
-                  You can stop and come back — your answers are saved in this browser.
-                </p>
-                <Button asChild size="md" className="mt-5 w-full">
-                  <Link href="/survey">Start the survey</Link>
-                </Button>
-              </article>
-            </RevealItem>
-          </RevealGroup>
-        </section>
-
-        {/* ================= PRIVACY ================= */}
-        <section className="container pt-20 sm:pt-24">
-          <Reveal>
-            <div className="relative overflow-hidden rounded-panel bg-plp-panel px-6 py-10 shadow-raised sm:px-10 sm:py-12">
-              <GlowBlob
-                color="radial-gradient(circle, rgba(143,198,238,0.28), transparent 70%)"
-                className="-right-16 -top-24 size-[22rem]"
-                drift={false}
-              />
-              <div className="relative grid gap-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-12">
-                <span
-                  className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-accent-300"
-                  aria-hidden="true"
-                >
-                  <Lock className="size-6" />
-                </span>
-
-                <div>
-                  <h2 className="font-display text-2xl font-bold tracking-tight text-white sm:text-[1.75rem]">
-                    Your privacy
-                  </h2>
-
-                  {/* The original privacy sentence, verbatim */}
-                  <p className="mt-4 max-w-2xl text-pretty text-[1.0625rem] leading-relaxed text-accent-200/90">
-                    {privacyNote}
-                  </p>
-
-                  <ul className="mt-7 grid gap-3 text-[0.9375rem] text-accent-200/75 sm:grid-cols-2">
-                    {[
-                      "Only PLP programme staff can see individual answers.",
-                      "Your answers are never shown publicly or to other students.",
-                      "Results are reported as school and programme averages.",
-                      "Your email is collected so later surveys can be matched to this one.",
-                    ].map((item) => (
-                      <li key={item} className="flex gap-2.5">
-                        <span
-                          aria-hidden="true"
-                          className="mt-[0.5rem] size-1.5 shrink-0 rounded-full bg-accent-300"
-                        />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </section>
-
-        {/* ================= CLOSING ================= */}
-        <section className="container pb-28 pt-20 sm:pb-24 sm:pt-24">
-          <Reveal>
-            <div className="card-lux flex flex-col items-center gap-6 p-10 text-center sm:p-12">
-              <div>
-                <h2 className="text-balance font-display text-display-sm font-bold tracking-tight text-plp-800">
-                  Ready when you are
-                </h2>
-                <p className="mx-auto mt-3 max-w-xl text-[1.0625rem] leading-relaxed text-ink-muted">
-                  Answer honestly, at your own pace. You will see a review of everything before
-                  it is submitted.
-                </p>
-              </div>
-              <Button asChild variant="primary" size="hero" className="group w-full sm:w-auto">
+            <div className="mt-9">
+              <Button asChild size="lg" className="group w-full sm:w-auto">
                 <Link href="/survey">
                   Start the survey
                   <ArrowRight
@@ -352,50 +247,170 @@ export default function LandingPage() {
                   />
                 </Link>
               </Button>
-
-              <dl className="mt-2 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[0.875rem] text-ink-muted">
-                <Fact
-                  icon={<Clock3 className="size-4" />}
-                  text={`About ${estimatedMinutes} minutes`}
-                />
-                <Fact
-                  icon={<ListChecks className="size-4" />}
-                  text={`${surveyStats.questionCount} questions`}
-                />
-                <Fact
-                  icon={<School className="size-4" />}
-                  text={`${surveyStats.schoolCount} schools listed`}
-                />
-              </dl>
             </div>
-          </Reveal>
+          </div>
+        </section>
 
-          <SiteFooter />
+        {/* ===================== SECTIONS ===================== */}
+        <section className="border-b border-border bg-white">
+          <div className="container py-14 lg:py-20">
+            <div className="max-w-2xl">
+              <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-plp-600">
+                The survey
+              </p>
+              <h2 className="mt-3 font-display text-[1.75rem] font-bold tracking-tight text-plp-900 sm:text-[2rem]">
+                What you will be asked
+              </h2>
+              <p className="mt-4 text-[1.0625rem] leading-relaxed text-ink-muted">
+                Five sections, shown one at a time. Your answers are kept as you move between
+                them, so you can stop and come back.
+              </p>
+            </div>
+
+            <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {surveySections.map((section) => (
+                <li key={section.index}>
+                  <article className="card-surface h-full p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <span
+                        className="inline-flex size-9 items-center justify-center rounded-lg bg-plp-50 text-[0.875rem] font-bold text-plp-700"
+                        aria-hidden="true"
+                      >
+                        {section.shortLabel}
+                      </span>
+                      <Badge variant="neutral" size="sm">
+                        {section.questions.length}{" "}
+                        {section.questions.length === 1 ? "question" : "questions"}
+                      </Badge>
+                    </div>
+
+                    <h3 className="mt-4 font-display text-[1.0625rem] font-bold leading-snug text-plp-800">
+                      {section.plainTitle}
+                    </h3>
+
+                    <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
+                      {section.description && !isScaleLegend(section.description)
+                        ? section.description.split(/\n{2,}/u)[0]
+                        : section.questions.length >= 5
+                          ? "Rated on a five-point scale, from Strongly Disagree to Strongly Agree."
+                          : "Written answers in your own words."}
+                    </p>
+                  </article>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* ===================== PRIVACY ===================== */}
+        <section className="border-b border-border bg-paper">
+          <div className="container py-14 lg:py-20">
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+              <div>
+                <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-plp-600">
+                  Privacy
+                </p>
+                <h2 className="mt-3 font-display text-[1.75rem] font-bold tracking-tight text-plp-900 sm:text-[2rem]">
+                  Who sees your answers
+                </h2>
+              </div>
+
+              <div>
+                {/* The original privacy sentence, verbatim */}
+                <p className="text-[1.0625rem] leading-relaxed text-ink-soft">{privacyNote}</p>
+
+                <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {[
+                    "Only PLP programme staff can see individual answers.",
+                    "Your answers are never shown publicly or to other students.",
+                    "Results are reported as school and programme averages.",
+                    "Your email is collected so later surveys can be matched to this one.",
+                  ].map((item) => (
+                    <li key={item} className="flex gap-2.5 text-[0.9375rem] text-ink-soft">
+                      <Check
+                        className="mt-0.5 size-4 shrink-0 text-plp-600"
+                        aria-hidden="true"
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================== CLOSING ===================== */}
+        <section className="bg-white">
+          <div className="container py-14 lg:py-20">
+            <div className="rounded-card border border-plp-200 bg-plp-50 p-8 text-center sm:p-10">
+              <h2 className="font-display text-[1.5rem] font-bold tracking-tight text-plp-900 sm:text-[1.75rem]">
+                Ready when you are
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-[1.0625rem] leading-relaxed text-ink-soft">
+                Answer honestly, at your own pace. You will see a review of everything before it
+                is submitted.
+              </p>
+              <Button asChild size="xl" className="group mt-7 w-full sm:w-auto">
+                <Link href="/survey">
+                  Start the survey
+                  <ArrowRight
+                    className="transition-transform duration-300 ease-premium group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </Button>
+            </div>
+
+            <SiteFooter />
+          </div>
         </section>
       </main>
-
-      {/* ============ Sticky start bar — mobile only, always reachable ============ */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 p-3 backdrop-blur-md sm:hidden">
-        <Button asChild size="lg" className="w-full">
-          <Link href="/survey">
-            Start the survey
-            <ArrowRight aria-hidden="true" />
-          </Link>
-        </Button>
-      </div>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
 
-function Fact({ icon, text }: { icon: React.ReactNode; text: string }) {
+function Row({
+  icon,
+  label,
+  value,
+  note,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  note: string;
+}) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-plp-500" aria-hidden="true">
+    <div className="flex gap-3.5 py-4 first:pt-0 last:pb-0">
+      <span className="mt-0.5 shrink-0 text-plp-600" aria-hidden="true">
         {icon}
       </span>
-      {text}
+      <div className="min-w-0">
+        <dt className="text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">
+          {label}
+        </dt>
+        <dd className="mt-1 text-[0.9375rem] font-medium text-plp-800">{value}</dd>
+        <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-muted">{note}</p>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="card-surface p-5">
+      <dt className="sr-only">{label}</dt>
+      <dd>
+        <span className="block font-display text-[1.875rem] font-bold leading-none tracking-tight text-plp-700">
+          {value}
+        </span>
+        <span className="mt-2 block text-[0.875rem] leading-relaxed text-ink-muted">
+          {label}
+        </span>
+      </dd>
     </div>
   );
 }

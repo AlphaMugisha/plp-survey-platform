@@ -4,7 +4,6 @@ import { Lock, ShieldCheck } from "lucide-react";
 import { SuccessSeal } from "@/components/survey/success-seal";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/brand/logo";
-import { GlowBlob } from "@/components/motion/reveal";
 import { surveySource, headerParagraphs } from "@/lib/survey/source";
 
 export const metadata: Metadata = {
@@ -15,19 +14,9 @@ export default function ThankYouPage() {
   const privacyNote = headerParagraphs[2] ?? "";
 
   return (
-    <main id="main" className="relative flex min-h-dvh items-center justify-center overflow-hidden px-5 py-14">
-      {/* layered lighting */}
-      <GlowBlob
-        color="radial-gradient(circle, rgba(47,163,107,0.20), transparent 70%)"
-        className="-top-20 left-1/2 size-[32rem] -translate-x-1/2"
-      />
-      <GlowBlob
-        color="radial-gradient(circle, rgba(213,168,75,0.16), transparent 70%)"
-        className="bottom-0 right-0 size-[24rem]"
-        drift={false}
-      />
+    <main id="main" className="flex min-h-dvh items-center justify-center bg-canvas px-5 py-14">
 
-      <div className="relative w-full max-w-xl">
+      <div className="w-full max-w-xl">
         <div className="card-lux overflow-hidden text-center">
           {/* Forest crest */}
           <div className="relative overflow-hidden bg-plp-panel px-6 pb-10 pt-12">
