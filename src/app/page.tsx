@@ -8,6 +8,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
+import { PhotoSlot } from "@/components/site/photo-slot";
+import { ImigongoBand, ImigongoPanel, ImigongoPattern } from "@/components/brand/imigongo";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -75,7 +77,7 @@ export default function LandingPage() {
       <main id="main">
         {/* ===================== HERO ===================== */}
         <section className="border-b border-border bg-paper">
-          <div className="container grid gap-12 py-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:gap-16 lg:py-20">
+          <div className="container grid gap-12 py-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start lg:gap-16 lg:py-20">
             <div>
               <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-plp-600">
                 {curriculumLine}
@@ -106,8 +108,21 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* At-a-glance card */}
-            <div className="card-surface p-6 sm:p-7">
+            {/* Lead visual — a real photo if one has been supplied, otherwise
+                imigongo artwork. See public/images/README.md. */}
+            <div className="space-y-5">
+              <PhotoSlot
+                name="hero"
+                alt="Students taking part in a Peace and Love Proclaimers school session"
+                width={1200}
+                height={960}
+                priority
+                className="aspect-[5/4] rounded-card border border-border shadow-card"
+                fallback={<ImigongoPanel className="size-full" />}
+              />
+
+              {/* At-a-glance card */}
+              <div className="card-surface p-6 sm:p-7">
               <h2 className="font-display text-[1.0625rem] font-bold text-plp-800">
                 Before you begin
               </h2>
@@ -130,9 +145,12 @@ export default function LandingPage() {
                   value="Seen only by PLP staff"
                   note="Never shown publicly or to other students."
                 />
-              </dl>
+                </dl>
+              </div>
             </div>
           </div>
+
+          <ImigongoBand />
         </section>
 
         {/* ===================== ABOUT PLP ===================== */}
@@ -146,6 +164,17 @@ export default function LandingPage() {
                 <h2 className="mt-3 font-display text-[1.75rem] font-bold tracking-tight text-plp-900 sm:text-[2rem]">
                   Peace and Love Proclaimers
                 </h2>
+
+                <PhotoSlot
+                  name="about"
+                  alt="Members of Peace and Love Proclaimers at a community activity in Rwanda"
+                  width={1000}
+                  height={750}
+                  className="mt-6 aspect-[4/3] rounded-card border border-border shadow-card"
+                  fallback={
+                    <ImigongoPattern id="imigongo-about" tone="light" scale={0.75} />
+                  }
+                />
               </div>
 
               <div className="space-y-4 text-[1.0625rem] leading-relaxed text-ink-soft">
@@ -343,7 +372,16 @@ export default function LandingPage() {
         {/* ===================== CLOSING ===================== */}
         <section className="bg-white">
           <div className="container py-14 lg:py-20">
-            <div className="rounded-card border border-plp-200 bg-plp-50 p-8 text-center sm:p-10">
+            <div className="relative overflow-hidden rounded-card border border-plp-200 bg-plp-50 p-8 text-center sm:p-10">
+              {/* Imigongo artwork, held well back so the text stays dominant */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.07]"
+              >
+                <ImigongoPattern id="imigongo-cta" tone="light" scale={0.6} />
+              </div>
+
+              <div className="relative">
               <h2 className="font-display text-[1.5rem] font-bold tracking-tight text-plp-900 sm:text-[1.75rem]">
                 Ready when you are
               </h2>
@@ -360,6 +398,7 @@ export default function LandingPage() {
                   />
                 </Link>
               </Button>
+              </div>
             </div>
 
             <SiteFooter />
