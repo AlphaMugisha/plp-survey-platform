@@ -200,8 +200,8 @@ function FilterSelect({
         className={cn(
           "h-12 w-full appearance-none rounded-xl border border-border bg-surface pl-4 pr-9",
           "text-[0.9375rem] text-ink shadow-subtle",
-          "transition-all duration-200 ease-premium hover:border-forest-200",
-          "focus:border-forest-400 focus:shadow-glow-emerald focus:outline-none",
+          "transition-all duration-200 ease-premium hover:border-plp-200",
+          "focus:border-plp-400 focus:shadow-glow-brand focus:outline-none",
         )}
       >
         <option value="">{placeholder}</option>

@@ -16,8 +16,8 @@ export const dynamic = "force-dynamic";
 /**
  * Admin shell.
  *
- * Visually distinct from the participant experience — a dark forest rail
- * against a cream workspace — while using the same palette, radii, shadows and
+ * Visually distinct from the participant experience — a deep navy rail
+ * against a paper workspace — while using the same palette, radii, shadows and
  * type scale, so it reads as the same product.
  *
  * The login page renders its own full-screen layout, so this shell only wraps
@@ -32,10 +32,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-dvh lg:flex">
       {/* ---------- Sidebar (desktop) ---------- */}
-      <aside className="relative hidden w-64 shrink-0 overflow-hidden bg-forest-panel lg:flex lg:flex-col">
+      <aside className="relative hidden w-64 shrink-0 overflow-hidden bg-plp-panel lg:flex lg:flex-col">
         <span
           aria-hidden="true"
-          className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-cream/15 to-transparent"
+          className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-paper/15 to-transparent"
         />
 
         <div className="relative flex h-full flex-col p-5">
@@ -45,10 +45,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           >
             <LogoMark tone="dark" className="size-7" />
             <span className="flex flex-col leading-none">
-              <span className="font-display text-[0.9375rem] font-semibold text-cream-warm">
+              <span className="font-display text-[0.9375rem] font-semibold text-paper-warm">
                 PLP Dashboard
               </span>
-              <span className="mt-1 text-[0.625rem] font-medium uppercase tracking-[0.14em] text-cream/45">
+              <span className="mt-1 text-[0.625rem] font-medium uppercase tracking-[0.14em] text-paper/45">
                 Programme staff
               </span>
             </span>
@@ -57,19 +57,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <AdminNav />
 
           <div className="mt-auto pt-6">
-            <div className="rounded-2xl border border-cream/12 bg-cream/[0.06] p-3.5">
+            <div className="rounded-2xl border border-paper/12 bg-paper/[0.06] p-3.5">
               <div className="flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-gold-sheen font-display text-[0.8125rem] font-semibold text-forest-900"
+                  className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent-sheen font-display text-[0.8125rem] font-semibold text-plp-900"
                 >
                   {initialsOf(session.profile.full_name ?? session.email)}
                 </span>
                 <div className="min-w-0">
-                  <p className="truncate text-[0.8125rem] font-medium text-cream-warm">
+                  <p className="truncate text-[0.8125rem] font-medium text-paper-warm">
                     {session.profile.full_name ?? session.email}
                   </p>
-                  <p className="truncate text-[0.6875rem] text-cream/50">{session.email}</p>
+                  <p className="truncate text-[0.6875rem] text-paper/50">{session.email}</p>
                 </div>
               </div>
 
@@ -80,7 +80,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 <form action="/auth/signout" method="post">
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[0.75rem] font-medium text-cream/60 transition-colors hover:bg-cream/10 hover:text-cream-warm"
+                    className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[0.75rem] font-medium text-paper/60 transition-colors hover:bg-paper/10 hover:text-paper-warm"
                   >
                     <LogOut className="size-3.5" aria-hidden="true" />
                     Sign out
@@ -93,18 +93,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </aside>
 
       {/* ---------- Mobile top bar ---------- */}
-      <div className="relative overflow-hidden bg-forest-panel px-5 py-4 lg:hidden">
+      <div className="relative overflow-hidden bg-plp-panel px-5 py-4 lg:hidden">
         <div className="relative flex items-center justify-between gap-4">
           <Link href="/admin" className="flex items-center gap-2.5">
             <LogoMark tone="dark" className="size-6" />
-            <span className="font-display text-[0.9375rem] font-semibold text-cream-warm">
+            <span className="font-display text-[0.9375rem] font-semibold text-paper-warm">
               PLP Dashboard
             </span>
           </Link>
           <form action="/auth/signout" method="post">
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.75rem] font-medium text-cream/65 hover:bg-cream/10 hover:text-cream-warm"
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[0.75rem] font-medium text-paper/65 hover:bg-paper/10 hover:text-paper-warm"
             >
               <LogOut className="size-3.5" aria-hidden="true" />
               Sign out

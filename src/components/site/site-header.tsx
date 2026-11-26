@@ -31,8 +31,8 @@ export function SiteHeader({
           "inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-[0.8125rem] font-medium",
           "transition-colors duration-200",
           tone === "dark"
-            ? "text-cream/65 hover:bg-cream/10 hover:text-cream-warm"
-            : "text-ink-muted hover:bg-forest-50 hover:text-forest-700",
+            ? "text-paper/65 hover:bg-paper/10 hover:text-paper-warm"
+            : "text-ink-muted hover:bg-plp-50 hover:text-plp-700",
         )}
       >
         <ShieldCheck className="size-4" aria-hidden="true" />

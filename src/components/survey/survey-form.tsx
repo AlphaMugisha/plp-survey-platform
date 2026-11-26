@@ -263,7 +263,7 @@ export function SurveyForm() {
       {/* Full-bleed within the container: the negative margins must match the
           container's own padding at every breakpoint (1.25rem / 2rem / 2.5rem),
           otherwise content scrolls through an uncovered strip at each edge. */}
-      <div className="sticky top-0 z-30 -mx-5 mb-8 border-b border-border/70 bg-cream/85 px-5 py-4 backdrop-blur-md sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10">
+      <div className="sticky top-0 z-30 -mx-5 mb-8 border-b border-border/70 bg-paper/85 px-5 py-4 backdrop-blur-md sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10">
         <ProgressRail
           steps={surveySteps}
           current={stepIndex}
@@ -274,10 +274,10 @@ export function SurveyForm() {
       </div>
 
       {draftRestored && stepIndex === furthest && (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-forest-200 bg-forest-50/70 p-4">
-          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-forest-600" aria-hidden="true" />
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-plp-200 bg-plp-50/70 p-4">
+          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-plp-600" aria-hidden="true" />
           <div className="min-w-0">
-            <p className="text-[0.9375rem] font-medium text-forest-800">
+            <p className="text-[0.9375rem] font-medium text-plp-800">
               We restored your saved answers.
             </p>
             <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-ink-muted">
@@ -287,7 +287,7 @@ export function SurveyForm() {
           <button
             type="button"
             onClick={() => setDraftRestored(false)}
-            className="ml-auto shrink-0 rounded-lg px-2 py-1 text-[0.8125rem] font-medium text-forest-700 hover:bg-forest-100"
+            className="ml-auto shrink-0 rounded-lg px-2 py-1 text-[0.8125rem] font-medium text-plp-700 hover:bg-plp-100"
           >
             Dismiss
           </button>
@@ -330,7 +330,7 @@ export function SurveyForm() {
           {/* Step heading */}
           <header className="mb-7">
             <div className="flex flex-wrap items-center gap-2.5">
-              <Badge variant="gold" size="sm">
+              <Badge variant="accent" size="sm">
                 Step {stepIndex + 1} of {surveySteps.length}
               </Badge>
               {step.kind === "section" && (
@@ -341,7 +341,7 @@ export function SurveyForm() {
               )}
             </div>
 
-            <h2 className="mt-4 text-balance font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-forest-800 sm:text-[2rem]">
+            <h2 className="mt-4 text-balance font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-plp-800 sm:text-[2rem]">
               {/* Section steps show the exact original section title */}
               {step.kind === "section" && step.section ? step.section.plainTitle : step.title}
             </h2>
@@ -364,7 +364,7 @@ export function SurveyForm() {
             {/* Keep the full, exact section title visible even though the heading
                 above shows the shortened form. */}
             {step.kind === "section" && step.section && (
-              <p className="mt-3 text-[0.75rem] font-medium uppercase tracking-[0.12em] text-forest-500">
+              <p className="mt-3 text-[0.75rem] font-medium uppercase tracking-[0.12em] text-plp-500">
                 {step.section.title}
               </p>
             )}
@@ -377,7 +377,7 @@ export function SurveyForm() {
                 <div className="flex gap-3.5 sm:gap-4">
                   <span
                     aria-hidden="true"
-                    className="mt-0.5 hidden size-7 shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-600 sm:inline-flex"
+                    className="mt-0.5 hidden size-7 shrink-0 items-center justify-center rounded-lg bg-plp-50 text-plp-600 sm:inline-flex"
                   >
                     <Mail className="size-4" />
                   </span>

@@ -3,24 +3,26 @@
  *
  * ---------------------------------------------------------------------------
  * The 5-point scale is DIVERGING data, not categorical: it runs
- * disagree <- neutral -> agree. So it gets two opposite-temperature poles with a
- * neutral midpoint, per the diverging rule — amber (low confidence) through a
- * neutral gray to forest green (high confidence). Amber and green are both brand
- * colours, so the chart reads as part of the product.
+ * disagree <- neutral -> agree. So it gets two opposite-temperature poles with
+ * a neutral gray midpoint. PLP blue is the "agree" pole (on brand), and a warm
+ * amber is the "disagree" pole — the warm hue is a DATA ENCODING, not a brand
+ * colour. A diverging scale needs two temperatures, and the brand supplies only
+ * one; using two blues would make the ends indistinguishable.
  *
  * Validated with the dataviz validator against the white panel surface:
  *
- *   #A36A1F,#D9A94E,#E8E6DF,#5F9E7B,#174935  --mode light --surface #FFFFFF
- *     [PASS] CVD separation      worst adjacent dE 19.0 (deutan) / 18.3 (tritan)
- *     [PASS] Normal-vision floor worst adjacent dE 19.1
- *     [WARN] Contrast vs surface #D9A94E 2.16, #E8E6DF 1.25
+ *   #A8571C,#E09B45,#E8E6DF,#5BA8E0,#124D7E  --mode light --surface #FFFFFF
+ *     [PASS] CVD separation      worst adjacent dE 19.8 (deutan) / 19.8 (tritan)
+ *     [PASS] Normal-vision floor worst adjacent dE 20.1
+ *     [WARN] Contrast vs surface #E09B45 2.35, #E8E6DF 1.25, #5BA8E0 2.59
  *
- * The two FAILs the validator also reports — "lightness band" and "chroma floor"
- * — are CATEGORICAL checks that a diverging ramp is supposed to violate: the ramp
- * deliberately spans a wide lightness range and its midpoint must read as gray.
+ * The two FAILs the validator also reports — "lightness band" and "chroma
+ * floor" — are CATEGORICAL checks that a diverging ramp is supposed to violate:
+ * the ramp deliberately spans a wide lightness range and its midpoint must read
+ * as gray.
  *
- * The contrast WARN is NOT dismissed. Its required relief ships with every chart
- * that uses this ramp:
+ * The contrast WARN is NOT dismissed. Its required relief ships with every
+ * chart that uses this ramp:
  *   1. a legend is always present,
  *   2. percentages are visible labels wherever they fit,
  *   3. a table view of the same numbers is available.
@@ -30,24 +32,25 @@
 
 /** Diverging 5-step ramp, in original option order (1 -> 5). */
 export const SCALE_RAMP = [
-  "#A36A1F", // 1 — strongly disagree  (dark amber pole)
-  "#D9A94E", // 2 — disagree           (light amber)
+  "#A8571C", // 1 — strongly disagree  (dark amber pole)
+  "#E09B45", // 2 — disagree           (light amber)
   "#E8E6DF", // 3 — neutral            (gray midpoint)
-  "#5F9E7B", // 4 — agree              (light green)
-  "#174935", // 5 — strongly agree     (dark green pole)
+  "#5BA8E0", // 4 — agree              (light PLP blue)
+  "#124D7E", // 5 — strongly agree     (deep PLP blue pole)
 ] as const;
 
 /**
- * Single-series bar hue. A lone colour is checked for contrast, not CVD
- * separation: #2C6A4B is 5.0:1 on white, comfortably above 3:1.
+ * Single-series bar hue — the PLP brand Denim. A lone colour is checked for
+ * contrast, not CVD separation: #1D75BD passes the validator on all counts
+ * against a white surface.
  */
-export const SERIES_HUE = "#2C6A4B";
+export const SERIES_HUE = "#1D75BD";
 
 /** Chart chrome — recessive, one step off the surface. Hairline and solid. */
 export const CHART_INK = {
-  grid: "#E2E4DC",
-  axis: "#A4ADA6",
-  axisText: "#77827A",
+  grid: "#DCE6F0",
+  axis: "#93A3B3",
+  axisText: "#5E7083",
   surface: "#FFFFFF",
 } as const;
 

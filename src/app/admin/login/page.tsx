@@ -40,7 +40,7 @@ export default async function AdminLoginPage({
       <div className="relative w-full max-w-md">
         <Link
           href="/"
-          className="mb-7 inline-flex items-center gap-1.5 rounded-xl text-[0.8125rem] font-medium text-ink-muted transition-colors hover:text-forest-700"
+          className="mb-7 inline-flex items-center gap-1.5 rounded-xl text-[0.8125rem] font-medium text-ink-muted transition-colors hover:text-plp-700"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           Back to the survey
@@ -50,8 +50,8 @@ export default async function AdminLoginPage({
           <Logo className="mb-7" />
 
           <div className="mb-1 flex items-center gap-2">
-            <ShieldCheck className="size-[1.125rem] text-forest-600" aria-hidden="true" />
-            <h1 className="font-display text-[1.5rem] font-semibold tracking-tight text-forest-800">
+            <ShieldCheck className="size-[1.125rem] text-plp-600" aria-hidden="true" />
+            <h1 className="font-display text-[1.5rem] font-semibold tracking-tight text-plp-800">
               Staff sign in
             </h1>
           </div>
@@ -61,9 +61,9 @@ export default async function AdminLoginPage({
           </p>
 
           {reason === "denied" && (
-            <div className="mb-6 flex items-start gap-3 rounded-2xl border border-gold-400/40 bg-gold-100/50 p-4">
+            <div className="mb-6 flex items-start gap-3 rounded-2xl border border-accent-400/40 bg-accent-100/50 p-4">
               <ShieldAlert
-                className="mt-0.5 size-5 shrink-0 text-gold-600"
+                className="mt-0.5 size-5 shrink-0 text-accent-600"
                 aria-hidden="true"
               />
               <p className="text-[0.875rem] leading-relaxed text-ink-soft">

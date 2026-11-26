@@ -60,7 +60,7 @@ export function QuestionField({
         {index !== undefined && (
           <span
             aria-hidden="true"
-            className="mt-0.5 hidden size-7 shrink-0 select-none items-center justify-center rounded-lg bg-forest-50 font-display text-[0.8125rem] font-semibold text-forest-600 sm:inline-flex"
+            className="mt-0.5 hidden size-7 shrink-0 select-none items-center justify-center rounded-lg bg-plp-50 font-display text-[0.8125rem] font-semibold text-plp-600 sm:inline-flex"
           >
             {index}
           </span>

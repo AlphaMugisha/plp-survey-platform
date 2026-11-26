@@ -115,11 +115,11 @@ export function SchoolCombobox({
             "flex h-12 w-full items-center justify-between gap-3 rounded-xl border bg-surface px-4",
             "text-left text-[0.9375rem] shadow-subtle",
             "transition-all duration-200 ease-premium",
-            "hover:border-forest-200",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-500 focus-visible:ring-offset-2",
+            "hover:border-plp-200",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plp-500 focus-visible:ring-offset-2",
             "disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60",
             invalid ? "border-destructive" : "border-border",
-            open && !invalid && "border-forest-400 shadow-glow-emerald",
+            open && !invalid && "border-plp-400 shadow-glow-brand",
           )}
         >
           <span className="flex min-w-0 items-center gap-2.5">
@@ -206,13 +206,13 @@ export function SchoolCombobox({
                     className={cn(
                       "flex cursor-pointer items-center gap-2.5 rounded-xl px-3.5 py-2.5",
                       "text-[0.9375rem] leading-snug transition-colors duration-150",
-                      active ? "bg-forest-50 text-forest-800" : "text-ink-soft",
-                      selected && "font-medium text-forest-800",
+                      active ? "bg-plp-50 text-plp-800" : "text-ink-soft",
+                      selected && "font-medium text-plp-800",
                     )}
                   >
                     <Check
                       className={cn(
-                        "size-4 shrink-0 text-forest-600",
+                        "size-4 shrink-0 text-plp-600",
                         selected ? "opacity-100" : "opacity-0",
                       )}
                       aria-hidden="true"
@@ -225,7 +225,7 @@ export function SchoolCombobox({
             )}
           </div>
 
-          <div className="border-t border-border/70 bg-cream px-4 py-2.5 text-[0.75rem] text-ink-faint">
+          <div className="border-t border-border/70 bg-paper px-4 py-2.5 text-[0.75rem] text-ink-faint">
             {filtered.length} of {options.length} schools
           </div>
         </Popover.Content>

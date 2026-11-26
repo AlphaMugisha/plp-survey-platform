@@ -37,12 +37,12 @@ function ChartTooltip({
 
   return (
     <div className="rounded-xl border border-border bg-surface px-3.5 py-2.5 shadow-raised">
-      <p className="text-[0.8125rem] font-medium text-forest-800">
+      <p className="text-[0.8125rem] font-medium text-plp-800">
         {(point?.payload?.fullLabel as string) ?? label}
       </p>
       <p className="mt-1 text-[0.8125rem] text-ink-muted">
         {valueLabel}:{" "}
-        <span className="font-semibold tabular-nums text-forest-700">
+        <span className="font-semibold tabular-nums text-plp-700">
           {point?.value}
           {suffix}
         </span>
@@ -97,7 +97,7 @@ export function YearLevelChart({
             tickLine={false}
           />
           <Tooltip
-            cursor={{ fill: "rgba(18,59,45,0.04)" }}
+            cursor={{ fill: "rgba(10,39,65,0.05)" }}
             content={<ChartTooltip valueLabel="Responses" />}
           />
           <Bar
@@ -155,7 +155,7 @@ export function SectionMeanChart({
             tickLine={false}
           />
           <Tooltip
-            cursor={{ fill: "rgba(18,59,45,0.04)" }}
+            cursor={{ fill: "rgba(10,39,65,0.05)" }}
             content={<ChartTooltip valueLabel="Mean" />}
           />
           <Bar
@@ -253,8 +253,8 @@ export function DistributionBars({
                 "inline-flex items-center gap-1.5 rounded-[0.625rem] px-2.5 py-1.5",
                 "text-[0.75rem] font-medium transition-colors duration-200",
                 view === mode
-                  ? "bg-surface text-forest-800 shadow-subtle"
-                  : "text-ink-muted hover:text-forest-700",
+                  ? "bg-surface text-plp-800 shadow-subtle"
+                  : "text-ink-muted hover:text-plp-700",
               )}
             >
               <Icon className="size-3.5" aria-hidden="true" />
@@ -269,7 +269,7 @@ export function DistributionBars({
           {rows.map((row) => (
             <li key={row.key}>
               <div className="flex items-baseline justify-between gap-4">
-                <p className="min-w-0 text-[0.875rem] font-medium leading-snug text-forest-800">
+                <p className="min-w-0 text-[0.875rem] font-medium leading-snug text-plp-800">
                   {row.label}
                 </p>
                 <p className="shrink-0 text-[0.75rem] tabular-nums text-ink-faint">
@@ -311,7 +311,7 @@ export function DistributionBars({
                           className="text-[0.6875rem] font-semibold tabular-nums"
                           /* In-fill label: the one place text takes a colour
                              chosen for contrast against the fill itself. */
-                          style={{ color: darkFill ? "#FBFAF5" : "#19251F" }}
+                          style={{ color: darkFill ? "#FFFFFF" : "#0A1A2B" }}
                         >
                           {Math.round(percent)}%
                         </span>
@@ -370,7 +370,7 @@ export function DistributionBars({
                       {segment.count}
                     </td>
                   ))}
-                  <td className="py-2.5 pl-2 text-right text-[0.8125rem] font-semibold tabular-nums text-forest-800">
+                  <td className="py-2.5 pl-2 text-right text-[0.8125rem] font-semibold tabular-nums text-plp-800">
                     {row.total}
                   </td>
                 </tr>

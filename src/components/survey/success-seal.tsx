@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
- * Submission success animation — a gold seal with a drawn tick and two
+ * Submission success animation — a brand seal with a drawn tick and two
  * expanding rings. With reduced motion requested, the seal simply appears:
  * the tick is already drawn and the rings do not pulse.
  */
@@ -18,7 +18,7 @@ export function SuccessSeal() {
           <motion.span
             key={delay}
             aria-hidden="true"
-            className="absolute inset-0 rounded-full border border-emerald-glow/50"
+            className="absolute inset-0 rounded-full border border-plp-glow/50"
             initial={{ scale: 0.7, opacity: 0.7 }}
             animate={{ scale: 1.65, opacity: 0 }}
             transition={{
@@ -32,7 +32,7 @@ export function SuccessSeal() {
 
       {/* seal */}
       <motion.div
-        className="relative flex size-20 items-center justify-center rounded-full bg-gold-sheen shadow-[0_0_0_1px_rgba(213,168,75,0.6),0_8px_32px_-6px_rgba(213,168,75,0.55)]"
+        className="relative flex size-20 items-center justify-center rounded-full bg-accent-sheen shadow-[0_0_0_1px_rgba(213,168,75,0.6),0_8px_32px_-6px_rgba(213,168,75,0.55)]"
         initial={{ scale: reduce ? 1 : 0.6, opacity: reduce ? 1 : 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{

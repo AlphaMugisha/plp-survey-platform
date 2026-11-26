@@ -109,7 +109,7 @@ export default async function AdminOverviewPage() {
                   : undefined
               }
               icon={<ClipboardList className="size-4" />}
-              tone="forest"
+              tone="brand"
             />
             <StatCard
               label="Participating students"
@@ -132,7 +132,7 @@ export default async function AdminOverviewPage() {
               value={`${completionPercent}%`}
               sub={`${stats.answeredCells.toLocaleString()} of ${stats.expectedCells.toLocaleString()} possible answers`}
               icon={<GraduationCap className="size-4" />}
-              tone="gold"
+              tone="accent"
             />
           </div>
 
@@ -204,7 +204,7 @@ export default async function AdminOverviewPage() {
             <div className="overflow-x-panel">
               <table className="w-full min-w-[38rem] border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-border bg-cream/50">
+                  <tr className="border-b border-border bg-paper/50">
                     <Th>Student</Th>
                     <Th>School</Th>
                     <Th>Year</Th>
@@ -215,12 +215,12 @@ export default async function AdminOverviewPage() {
                   {stats.recent.map((row) => (
                     <tr
                       key={row.id}
-                      className="border-b border-border/60 transition-colors last:border-0 hover:bg-forest-50/40"
+                      className="border-b border-border/60 transition-colors last:border-0 hover:bg-plp-50/40"
                     >
                       <td className="px-5 py-3.5">
                         <Link
                           href={`/admin/responses/${row.id}`}
-                          className="text-[0.875rem] font-medium text-forest-700 underline-offset-4 hover:underline"
+                          className="text-[0.875rem] font-medium text-plp-700 underline-offset-4 hover:underline"
                         >
                           {row.full_name}
                         </Link>
@@ -284,14 +284,14 @@ function StatRow({
     <div className="flex gap-3.5">
       <span
         aria-hidden="true"
-        className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-600"
+        className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-plp-50 text-plp-600"
       >
         {icon}
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <dt className="text-[0.875rem] text-ink-soft">{label}</dt>
-          <dd className="font-display text-[0.9375rem] font-semibold tabular-nums text-forest-800">
+          <dd className="font-display text-[0.9375rem] font-semibold tabular-nums text-plp-800">
             {value}
           </dd>
         </div>

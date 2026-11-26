@@ -27,7 +27,7 @@ function RequiredMark({ className }: { className?: string }) {
       title="Required"
       aria-label="required"
     >
-      <span className="inline-block size-1.5 rounded-full bg-gold-400 align-middle" />
+      <span className="inline-block size-1.5 rounded-full bg-accent-400 align-middle" />
     </span>
   );
 }

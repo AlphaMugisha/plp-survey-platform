@@ -88,7 +88,7 @@ export function SurveyManager({
           <p
             className={[
               "text-[0.9375rem] leading-relaxed",
-              result.ok ? "text-forest-800" : "text-destructive",
+              result.ok ? "text-plp-800" : "text-destructive",
             ].join(" ")}
           >
             {result.ok ? result.message : result.error}
@@ -123,7 +123,7 @@ export function SurveyManager({
                       ? "success"
                       : survey.status === "closed"
                         ? "neutral"
-                        : "gold"
+                        : "accent"
                   }
                   size="md"
                 >
@@ -286,7 +286,7 @@ export function SurveyManager({
                   name="templateSurveyId"
                   required
                   defaultValue={surveys[0]?.id ?? ""}
-                  className="h-12 w-full appearance-none rounded-xl border border-border bg-surface px-4 text-[0.9375rem] text-ink shadow-subtle focus:border-forest-400 focus:shadow-glow-emerald focus:outline-none"
+                  className="h-12 w-full appearance-none rounded-xl border border-border bg-surface px-4 text-[0.9375rem] text-ink shadow-subtle focus:border-plp-400 focus:shadow-glow-brand focus:outline-none"
                 >
                   {surveys.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -366,7 +366,7 @@ function Fact({ label, value }: { label: string; value: string }) {
       <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">
         {label}
       </dt>
-      <dd className="mt-1 font-display text-[1.125rem] font-semibold tabular-nums text-forest-800">
+      <dd className="mt-1 font-display text-[1.125rem] font-semibold tabular-nums text-plp-800">
         {value}
       </dd>
     </div>

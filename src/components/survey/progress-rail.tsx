@@ -32,7 +32,7 @@ export function ProgressRail({
       {/* ---- Bar ---- */}
       <div className="flex items-center gap-4">
         <div
-          className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-forest-100"
+          className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-plp-100"
           role="progressbar"
           aria-valuenow={Math.round(percent)}
           aria-valuemin={0}
@@ -40,7 +40,7 @@ export function ProgressRail({
           aria-label="Overall completion"
         >
           <motion.span
-            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-forest-600 via-forest-500 to-emerald-accent"
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-plp-600 via-plp-500 to-plp-accent"
             initial={false}
             animate={{ width: `${percent}%` }}
             transition={{ duration: reduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -71,11 +71,11 @@ export function ProgressRail({
                 className={cn(
                   "inline-flex items-center gap-2 rounded-xl border px-3 py-2",
                   "text-[0.8125rem] font-medium transition-all duration-250 ease-premium",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-500 focus-visible:ring-offset-2",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plp-500 focus-visible:ring-offset-2",
                   isCurrent
-                    ? "border-forest-500 bg-forest-50 text-forest-800 shadow-glow-emerald"
+                    ? "border-plp-500 bg-plp-50 text-plp-800 shadow-glow-brand"
                     : isDone
-                      ? "border-border bg-surface text-forest-700 hover:border-forest-300 hover:bg-forest-50/60"
+                      ? "border-border bg-surface text-plp-700 hover:border-plp-300 hover:bg-plp-50/60"
                       : "border-transparent bg-transparent text-ink-faint",
                   !reachable && "cursor-not-allowed",
                 )}
@@ -85,9 +85,9 @@ export function ProgressRail({
                   className={cn(
                     "inline-flex size-5 items-center justify-center rounded-full text-[0.6875rem] font-semibold tabular-nums transition-colors duration-250",
                     isCurrent
-                      ? "bg-forest-sheen text-cream-warm"
+                      ? "bg-plp-sheen text-paper-warm"
                       : isDone
-                        ? "bg-forest-100 text-forest-700"
+                        ? "bg-plp-100 text-plp-700"
                         : "bg-muted text-ink-faint",
                   )}
                 >

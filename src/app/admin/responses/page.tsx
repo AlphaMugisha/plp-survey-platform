@@ -145,7 +145,7 @@ export default async function ResponsesPage({
             <div className="overflow-x-panel">
               <table className="w-full min-w-[52rem] border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-border bg-cream/50">
+                  <tr className="border-b border-border bg-paper/50">
                     <Th>Student</Th>
                     <Th>Email</Th>
                     <Th>School</Th>
@@ -160,12 +160,12 @@ export default async function ResponsesPage({
                   {result.rows.map((row) => (
                     <tr
                       key={row.id}
-                      className="border-b border-border/60 transition-colors last:border-0 hover:bg-forest-50/40"
+                      className="border-b border-border/60 transition-colors last:border-0 hover:bg-plp-50/40"
                     >
                       <td className="px-5 py-3.5">
                         <Link
                           href={`/admin/responses/${row.id}`}
-                          className="text-[0.875rem] font-medium text-forest-700 underline-offset-4 hover:underline"
+                          className="text-[0.875rem] font-medium text-plp-700 underline-offset-4 hover:underline"
                         >
                           {row.full_name}
                         </Link>
@@ -187,7 +187,7 @@ export default async function ResponsesPage({
                       <td className="px-5 py-3.5 text-right">
                         <Link
                           href={`/admin/responses/${row.id}`}
-                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[0.8125rem] font-medium text-forest-700 transition-colors hover:bg-forest-50"
+                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[0.8125rem] font-medium text-plp-700 transition-colors hover:bg-plp-50"
                         >
                           Open
                           <ChevronRight className="size-3.5" aria-hidden="true" />

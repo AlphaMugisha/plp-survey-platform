@@ -113,7 +113,7 @@ export default async function AnalyticsPage() {
 
       {/* ---- How the numbers are produced ---- */}
       <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-surface p-4 shadow-subtle sm:p-5">
-        <Info className="mt-0.5 size-[1.125rem] shrink-0 text-forest-600" aria-hidden="true" />
+        <Info className="mt-0.5 size-[1.125rem] shrink-0 text-plp-600" aria-hidden="true" />
         <p className="text-[0.8125rem] leading-relaxed text-ink-muted">
           Averages are calculated from each answer&apos;s position in the original option
           ordering, where <strong className="font-medium text-ink-soft">1</strong> is{" "}
@@ -131,7 +131,7 @@ export default async function AnalyticsPage() {
             label="Overall mean"
             value={formatMean(overallMean)}
             sub={`across all rating questions, out of ${SCALE_MAX}`}
-            tone="forest"
+            tone="brand"
           />
           {ratedSections.slice(0, 3).map((section) => (
             <StatCard
@@ -193,7 +193,7 @@ export default async function AnalyticsPage() {
               title={section.title}
               description={`Mean rating per question, out of ${SCALE_MAX}.`}
               actions={
-                <Badge variant="forest" size="sm">
+                <Badge variant="brand" size="sm">
                   Section mean {formatMean(section.mean)}
                 </Badge>
               }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { surveySource } from "@/lib/survey/source";
 
@@ -9,14 +9,8 @@ const inter = Inter({
   variable: "--font-sans",
 });
 
-/* A high-contrast display serif — gives the headings an editorial voice that a
-   default sans cannot, and keeps the product from reading as a template. */
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-display",
-  axes: ["SOFT", "WONK"],
-});
+/* The brand is clean and modern rather than editorial, so headings use the same
+   family at a heavier weight and tighter tracking instead of a display serif. */
 
 export const metadata: Metadata = {
   title: {
@@ -36,16 +30,16 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#123B2D",
+  themeColor: "#1D75BD",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" className={inter.variable}>
       <body className="min-h-dvh bg-canvas">
         <a
           href="#main"
-          className="sr-only-focusable fixed left-4 top-4 z-50 rounded-xl bg-forest-700 px-4 py-2.5 text-sm font-medium text-cream-warm shadow-raised"
+          className="sr-only-focusable fixed left-4 top-4 z-50 rounded-xl bg-plp-700 px-4 py-2.5 text-sm font-medium text-paper-warm shadow-raised"
         >
           Skip to main content
         </a>

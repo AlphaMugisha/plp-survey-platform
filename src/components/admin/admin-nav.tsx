@@ -38,16 +38,16 @@ export function AdminNav({ orientation = "vertical" }: { orientation?: "vertical
               "group relative flex shrink-0 items-center gap-2.5 rounded-xl px-3.5 py-2.5",
               "text-[0.875rem] font-medium transition-all duration-250 ease-premium",
               active
-                ? "bg-cream/15 text-cream-warm"
-                : "text-cream/55 hover:bg-cream/10 hover:text-cream-warm",
+                ? "bg-paper/15 text-paper-warm"
+                : "text-paper/55 hover:bg-paper/10 hover:text-paper-warm",
             )}
           >
-            {/* active indicator — a gold bar on the leading edge */}
+            {/* active indicator — a light bar on the leading edge */}
             {active && (
               <span
                 aria-hidden="true"
                 className={cn(
-                  "absolute bg-gold-sheen",
+                  "absolute bg-accent-sheen",
                   orientation === "vertical"
                     ? "left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r"
                     : "inset-x-3 bottom-0 h-0.5 rounded-t",
@@ -57,7 +57,7 @@ export function AdminNav({ orientation = "vertical" }: { orientation?: "vertical
             <Icon
               className={cn(
                 "size-[1.0625rem] shrink-0 transition-colors",
-                active ? "text-gold-300" : "text-cream/45 group-hover:text-cream/70",
+                active ? "text-accent-300" : "text-paper/45 group-hover:text-paper/70",
               )}
               aria-hidden="true"
             />

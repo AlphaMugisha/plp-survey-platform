@@ -164,7 +164,7 @@ function AnswerList({
             {answer === null ? (
               <span className="text-[0.9375rem] italic text-ink-faint">Not answered</span>
             ) : (
-              <span className="whitespace-pre-line break-words text-[0.9375rem] font-medium leading-relaxed text-forest-800">
+              <span className="whitespace-pre-line break-words text-[0.9375rem] font-medium leading-relaxed text-plp-800">
                 {answer}
               </span>
             )}
@@ -188,7 +188,7 @@ function Meta({
     <div className="flex gap-3">
       <span
         aria-hidden="true"
-        className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-600"
+        className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-plp-50 text-plp-600"
       >
         {icon}
       </span>
@@ -196,7 +196,7 @@ function Meta({
         <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">
           {label}
         </p>
-        <p className="mt-1 break-words text-[0.875rem] font-medium text-forest-800">{value}</p>
+        <p className="mt-1 break-words text-[0.875rem] font-medium text-plp-800">{value}</p>
       </div>
     </div>
   );

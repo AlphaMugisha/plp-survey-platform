@@ -71,10 +71,10 @@ export function RatingOptionGroup({
                 "flex cursor-pointer items-center gap-4 rounded-2xl border bg-surface",
                 "px-4 py-3.5 sm:px-5",
                 "transition-all duration-250 ease-premium",
-                "peer-focus-visible:ring-2 peer-focus-visible:ring-forest-500 peer-focus-visible:ring-offset-2",
-                "hover:border-forest-300 hover:bg-forest-50/40",
+                "peer-focus-visible:ring-2 peer-focus-visible:ring-plp-500 peer-focus-visible:ring-offset-2",
+                "hover:border-plp-300 hover:bg-plp-50/40",
                 selected
-                  ? "border-forest-500 bg-forest-50/70 shadow-glow-emerald"
+                  ? "border-plp-500 bg-plp-50/70 shadow-glow-brand"
                   : "border-border shadow-subtle",
                 invalid && !selected && "border-destructive/40",
                 disabled && "cursor-not-allowed opacity-60",
@@ -88,7 +88,7 @@ export function RatingOptionGroup({
                   "font-medium tabular-nums",
                   "transition-all duration-250 ease-premium",
                   selected
-                    ? "bg-forest-sheen text-cream-warm shadow-button"
+                    ? "bg-plp-sheen text-paper-warm shadow-button"
                     : "border border-border bg-muted/60 text-ink-muted",
                 )}
               >
@@ -99,7 +99,7 @@ export function RatingOptionGroup({
               <span
                 className={cn(
                   "text-[0.9375rem] leading-snug transition-colors duration-250",
-                  selected ? "font-medium text-forest-800" : "text-ink-soft",
+                  selected ? "font-medium text-plp-800" : "text-ink-soft",
                 )}
               >
                 {option}

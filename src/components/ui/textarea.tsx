@@ -16,13 +16,13 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         "text-[0.9375rem] leading-relaxed text-ink",
         "shadow-subtle transition-all duration-200 ease-premium",
         "placeholder:text-ink-faint",
-        "hover:border-forest-200",
+        "hover:border-plp-200",
         "focus:outline-none focus:ring-0",
         "disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-60",
         "scroll-slim",
         invalid
           ? "border-destructive focus:border-destructive focus:shadow-[0_0_0_3px_rgba(180,52,42,0.12)]"
-          : "border-border focus:border-forest-400 focus:shadow-glow-emerald",
+          : "border-border focus:border-plp-400 focus:shadow-glow-brand",
         className,
       )}
       {...props}

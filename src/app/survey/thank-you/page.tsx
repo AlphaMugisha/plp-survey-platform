@@ -30,13 +30,13 @@ export default function ThankYouPage() {
       <div className="relative w-full max-w-xl">
         <div className="card-lux overflow-hidden text-center">
           {/* Forest crest */}
-          <div className="relative overflow-hidden bg-forest-panel px-6 pb-10 pt-12">
+          <div className="relative overflow-hidden bg-plp-panel px-6 pb-10 pt-12">
             <span
               aria-hidden="true"
-              className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-cream/25 to-transparent"
+              className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-paper/25 to-transparent"
             />
             <SuccessSeal />
-            <h1 className="mt-7 text-balance font-display text-[1.875rem] font-semibold leading-tight tracking-tight text-cream-warm sm:text-[2.125rem]">
+            <h1 className="mt-7 text-balance font-display text-[1.875rem] font-semibold leading-tight tracking-tight text-paper-warm sm:text-[2.125rem]">
               Your survey is in
             </h1>
           </div>
@@ -86,15 +86,15 @@ function Assurance({
   body: string;
 }) {
   return (
-    <div className="flex items-start gap-3.5 rounded-2xl border border-border/70 bg-cream/50 p-4">
+    <div className="flex items-start gap-3.5 rounded-2xl border border-border/70 bg-paper/50 p-4">
       <span
-        className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-600"
+        className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-plp-50 text-plp-600"
         aria-hidden="true"
       >
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-[0.9375rem] font-medium text-forest-800">{title}</p>
+        <p className="text-[0.9375rem] font-medium text-plp-800">{title}</p>
         <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-muted">{body}</p>
       </div>
     </div>

@@ -47,9 +47,9 @@ export function ReviewPanel({
 
         return (
           <section key={step.id} className="card-lux overflow-hidden">
-            <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 bg-cream/60 px-5 py-4 sm:px-6">
+            <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 bg-paper/60 px-5 py-4 sm:px-6">
               <div className="min-w-0">
-                <h3 className="font-display text-[1.0625rem] font-semibold leading-snug tracking-tight text-forest-800">
+                <h3 className="font-display text-[1.0625rem] font-semibold leading-snug tracking-tight text-plp-800">
                   {step.kind === "section" && step.section
                     ? step.section.title
                     : step.title}
@@ -59,10 +59,10 @@ export function ReviewPanel({
                 type="button"
                 onClick={() => onEditStep(stepIndex)}
                 className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-forest-700/20 bg-surface px-3 py-1.5",
-                  "text-[0.8125rem] font-medium text-forest-700 shadow-subtle",
-                  "transition-all duration-200 ease-premium hover:border-forest-700/35 hover:bg-forest-50",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-500 focus-visible:ring-offset-2",
+                  "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-plp-700/20 bg-surface px-3 py-1.5",
+                  "text-[0.8125rem] font-medium text-plp-700 shadow-subtle",
+                  "transition-all duration-200 ease-premium hover:border-plp-700/35 hover:bg-plp-50",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plp-500 focus-visible:ring-offset-2",
                 )}
               >
                 <Pencil className="size-3.5" aria-hidden="true" />
@@ -126,7 +126,7 @@ function ReviewRow({
       <dd className="min-w-0">
         {hasValue ? (
           /* whitespace-pre-line keeps paragraph line breaks the student typed */
-          <span className="whitespace-pre-line break-words text-[0.9375rem] font-medium leading-relaxed text-forest-800">
+          <span className="whitespace-pre-line break-words text-[0.9375rem] font-medium leading-relaxed text-plp-800">
             {value}
           </span>
         ) : missing ? (
