@@ -35,8 +35,10 @@ import {
 } from "@/lib/survey/schema";
 import { REVIEW_STEP_INDEX, fieldsForStep, surveySteps } from "@/lib/survey/steps";
 import { cn } from "@/lib/utils";
+import type { ApplicationWindowStatus } from "@/lib/survey/application-window";
 
 const DRAFT_KEY = "plp-survey-draft-v1";
+const NO_MISSING_FIELDS = new Set<string>();
 
 /** One scale key per section; every rating question references it. */
 const SCALE_LEGEND_ID = "section-scale-key";
@@ -46,9 +48,14 @@ type SubmitState =
   | { status: "submitting" }
   | { status: "error"; message: string; detail?: string[] };
 
-export function SurveyForm() {
+export function SurveyForm({
+  previewStatus,
+}: {
+  previewStatus?: Exclude<ApplicationWindowStatus, "open">;
+}) {
   const router = useRouter();
   const reduce = useReducedMotion();
+  const preview = Boolean(previewStatus);
 
   const [stepIndex, setStepIndex] = React.useState(0);
   const [furthest, setFurthest] = React.useState(0);
@@ -109,6 +116,7 @@ export function SurveyForm() {
      in this browser and cleared the moment the response is accepted. */
 
   React.useEffect(() => {
+    if (preview) return;
     try {
       const saved = window.localStorage.getItem(DRAFT_KEY);
       if (!saved) return;
@@ -132,9 +140,10 @@ export function SurveyForm() {
     } catch {
       // A corrupt draft must never block the survey.
     }
-  }, [reset]);
+  }, [preview, reset]);
 
   React.useEffect(() => {
+    if (preview) return;
     const timer = window.setTimeout(() => {
       try {
         window.localStorage.setItem(
@@ -151,7 +160,7 @@ export function SurveyForm() {
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [values, stepIndex, furthest]);
+  }, [values, stepIndex, furthest, preview]);
 
   /* ---------------- Progress ---------------- */
 
@@ -191,7 +200,9 @@ export function SurveyForm() {
 
   async function goNext() {
     const fields = fieldsForStep(step) as Array<keyof SurveyFormValues>;
-    const valid = fields.length === 0 ? true : await trigger(fields, { shouldFocus: false });
+    const valid = preview || fields.length === 0
+      ? true
+      : await trigger(fields, { shouldFocus: false });
 
     if (!valid) {
       // Move focus to the first field that failed, so keyboard and screen-reader
@@ -221,6 +232,7 @@ export function SurveyForm() {
   /* ---------------- Submit ---------------- */
 
   async function onSubmit(formValues: SurveyFormValues) {
+    if (preview) return;
     setSubmitState({ status: "submitting" });
 
     // Answers are keyed by the ORIGINAL Google entry id, so the payload cannot
@@ -302,6 +314,20 @@ export function SurveyForm() {
           percent={percent}
         />
       </div>
+
+      {preview && (
+        <div
+          role="status"
+          className="mb-6 rounded-2xl border border-plp-200 bg-plp-50/70 p-4 sm:p-5"
+        >
+          <p className="text-[0.9375rem] font-semibold text-plp-800">Preview only</p>
+          <p className="mt-1 text-[0.875rem] leading-relaxed text-ink-soft">
+            {previewStatus === "upcoming"
+              ? "You can look through the questions, but answers and submissions are disabled until applications open."
+              : "You can look through the questions, but the application period is closed and answers and submissions are disabled."}
+          </p>
+        </div>
+      )}
 
       {draftRestored && stepIndex === furthest && (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-plp-200 bg-plp-50/70 p-4">
@@ -428,6 +454,7 @@ export function SurveyForm() {
                         placeholder="you@example.com"
                         invalid={Boolean(errors.email)}
                         aria-describedby={errors.email ? "email__error" : undefined}
+                        disabled={preview}
                         {...register("email")}
                       />
                     </div>
@@ -452,6 +479,7 @@ export function SurveyForm() {
                         placeholder="e.g. South Africa"
                         invalid={Boolean(errors.country_of_origin)}
                         aria-describedby={errors.country_of_origin ? "country_of_origin__error" : undefined}
+                        disabled={preview}
                         {...register("country_of_origin")}
                       />
                     </div>
@@ -476,6 +504,7 @@ export function SurveyForm() {
                   control={control}
                   errors={errors}
                   index={i + 1}
+                  disabled={preview}
                 />
               ))}
             </div>
@@ -492,6 +521,7 @@ export function SurveyForm() {
                   errors={errors}
                   index={i + 1}
                   scaleLegendId={legend ? SCALE_LEGEND_ID : undefined}
+                  disabled={preview}
                 />
               ))}
             </div>
@@ -502,7 +532,7 @@ export function SurveyForm() {
             <ReviewPanel
               values={getValues()}
               onEditStep={jumpTo}
-              missingFields={missingFields}
+              missingFields={preview ? NO_MISSING_FIELDS : missingFields}
             />
           )}
             </div>
@@ -526,15 +556,15 @@ export function SurveyForm() {
 
         {isReview ? (
           <Button
-            type="submit"
+            type={preview ? "button" : "submit"}
             size="lg"
             variant="accent"
             loading={submitting}
-            disabled={submitting || missingFields.size > 0}
+            disabled={preview || submitting || missingFields.size > 0}
             className="w-full sm:w-auto"
           >
-            {submitting ? "Submitting…" : "Submit survey"}
-            {!submitting && <Send aria-hidden="true" />}
+            {preview ? "Preview only" : submitting ? "Submitting…" : "Submit survey"}
+            {!preview && !submitting && <Send aria-hidden="true" />}
           </Button>
         ) : (
           <Button
@@ -553,7 +583,7 @@ export function SurveyForm() {
         )}
       </div>
 
-      {isReview && missingFields.size > 0 && (
+      {isReview && !preview && missingFields.size > 0 && (
         <p className="mt-3 text-right text-[0.8125rem] text-ink-muted">
           Complete the {missingFields.size} missing required{" "}
           {missingFields.size === 1 ? "answer" : "answers"} to submit.

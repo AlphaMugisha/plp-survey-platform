@@ -48,27 +48,11 @@ export default function SurveyPage() {
         </p>
         <div className="rule-accent mt-3 max-w-[6rem]" />
 
-        {applicationStatus === "open" ? (
-          <div className="mt-8">
-            <SurveyForm />
-          </div>
-        ) : (
-          <div
-            role="status"
-            className="mt-8 rounded-2xl border border-plp-200 bg-white p-6 sm:p-8"
-          >
-            <h1 className="font-display text-[1.5rem] font-semibold tracking-tight text-plp-800">
-              {applicationStatus === "upcoming"
-                ? "Applications are not open yet"
-                : "Applications are closed"}
-            </h1>
-            <p className="mt-3 max-w-2xl text-[1rem] leading-relaxed text-ink-soft">
-              {applicationStatus === "upcoming"
-                ? "Please come back at midnight on Friday, November 27, 2026 (Johannesburg time) to apply."
-                : "The application period ended on Thursday, January 7, 2027."}
-            </p>
-          </div>
-        )}
+        <div className="mt-8">
+          <SurveyForm
+            previewStatus={applicationStatus === "open" ? undefined : applicationStatus}
+          />
+        </div>
       </main>
     </div>
   );

@@ -24,6 +24,7 @@ export function QuestionField({
   errors,
   index,
   scaleLegendId,
+  disabled = false,
 }: {
   question: Question;
   control: Control<SurveyFormValues>;
@@ -36,6 +37,8 @@ export function QuestionField({
    * drawn again, but is still announced via aria-describedby.
    */
   scaleLegendId?: string;
+  /** Prevents answers while showing the survey as a read-only preview. */
+  disabled?: boolean;
 }) {
   const error = errors[question.fieldKey];
   const message = typeof error?.message === "string" ? error.message : undefined;
@@ -145,6 +148,7 @@ export function QuestionField({
                       onBlur={field.onBlur}
                       invalid={Boolean(message)}
                       describedBy={describedBy}
+                      disabled={disabled}
                     />
                   );
                 }
@@ -159,6 +163,7 @@ export function QuestionField({
                       onBlur={field.onBlur}
                       invalid={Boolean(message)}
                       describedBy={describedBy}
+                      disabled={disabled}
                     />
                   );
                 }
@@ -174,6 +179,7 @@ export function QuestionField({
                       invalid={Boolean(message)}
                       aria-describedby={describedBy}
                       placeholder="Write your answer…"
+                      disabled={disabled}
                     />
                   );
                 }
@@ -188,6 +194,7 @@ export function QuestionField({
                     aria-describedby={describedBy}
                     placeholder="Your answer"
                     autoComplete={question.title.toLowerCase().includes("name") ? "name" : "off"}
+                    disabled={disabled}
                   />
                 );
               }}
