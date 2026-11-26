@@ -4,7 +4,9 @@
  */
 import { describe, expect, it } from "vitest";
 import { matchesSearch, searchKey } from "@/lib/utils";
-import { schools } from "@/lib/survey/source";
+// The search helper is generic, so exercise it against the full official
+// list rather than whatever subset a deployment happens to offer.
+import { sourceSchools as schools } from "@/lib/survey/source";
 
 function find(query: string): string[] {
   return schools.filter((name) => matchesSearch(name, query));

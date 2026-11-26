@@ -11,11 +11,16 @@ import {
   nameQuestion,
   scaleOptions,
   schoolQuestion,
+  yearLevelQuestion,
   surveySections,
 } from "@/lib/survey/source";
 import { surveySteps } from "@/lib/survey/steps";
 
-const SCHOOL = "Green Hills Academy";
+// Whatever school this deployment offers. With a single-school deployment
+// the field is pre-filled and shown as settled rather than as a dropdown.
+const SCHOOL = schoolQuestion.options![0]!;
+const SINGLE_SCHOOL = schoolQuestion.options!.length === 1;
+const YEAR = yearLevelQuestion.options![0]!;
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -37,17 +42,20 @@ async function fillDetails(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/^Email/u), "student@example.org");
   await user.type(screen.getByLabelText(nameQuestion.title), "Alice Uwase");
 
-  // The combobox trigger is a <button> that the question's <label> points at, so
-  // its computed accessible name comes from the label rather than its own
-  // "Choose" placeholder text. Target it by its stable id instead.
-  const schoolTrigger = document.getElementById(schoolQuestion.fieldKey);
-  expect(schoolTrigger).not.toBeNull();
-  await user.click(schoolTrigger!);
+  // One school means there is no choice to make: the value is pre-filled and
+  // shown as settled, so there is no combobox to open.
+  if (!SINGLE_SCHOOL) {
+    // The trigger is a <button> the question's <label> points at, so its
+    // accessible name comes from the label, not its placeholder. Target it
+    // by its stable id instead.
+    const schoolTrigger = document.getElementById(schoolQuestion.fieldKey);
+    expect(schoolTrigger).not.toBeNull();
+    await user.click(schoolTrigger!);
+    const listbox = await screen.findByRole("listbox", { name: "Schools" });
+    await user.click(within(listbox).getByRole("option", { name: SCHOOL }));
+  }
 
-  const listbox = await screen.findByRole("listbox", { name: "Schools" });
-  await user.click(within(listbox).getByRole("option", { name: SCHOOL }));
-
-  await user.click(screen.getByRole("radio", { name: "S4" }));
+  await user.click(screen.getByRole("radio", { name: YEAR }));
 }
 
 /** Answer every rating question on the current section step (if it has any). */
@@ -82,10 +90,18 @@ describe("initial state", () => {
     expect(screen.getByText("Your details")).toBeInTheDocument();
   });
 
-  it("shows the progress indicator at 0%", () => {
+  it("starts the progress indicator from whatever is pre-filled", () => {
     render(<SurveyForm />);
     const bar = screen.getByRole("progressbar", { name: /Overall completion/u });
-    expect(bar).toHaveAttribute("aria-valuenow", "0");
+    // A single-school deployment answers the school question in advance, so
+    // the bar legitimately starts just above zero.
+    const shown = Number(bar.getAttribute("aria-valuenow"));
+    if (SINGLE_SCHOOL) {
+      expect(shown).toBeGreaterThan(0);
+      expect(shown).toBeLessThan(10);
+    } else {
+      expect(shown).toBe(0);
+    }
   });
 
   it("disables Previous on the first step", () => {
@@ -112,13 +128,17 @@ describe("required-field validation blocks navigation", () => {
       expect(screen.getByText("Your email address is required.")).toBeInTheDocument();
     });
 
-    // The school question's own help text happens to be the same sentence as its
-    // error message, so assert on the live-region alerts rather than page text.
+    // The school question's own help text is the same sentence as its error
+    // message, so assert on the live-region alerts rather than page text.
     const alerts = screen.getAllByRole("alert").map((a) => a.textContent ?? "");
-    expect(alerts.some((t) => t.includes("Please select your school from the list."))).toBe(
-      true,
-    );
     expect(alerts.some((t) => t.includes("This answer is required."))).toBe(true);
+
+    if (!SINGLE_SCHOOL) {
+      // Only asked for when there is actually a school to choose.
+      expect(
+        alerts.some((t) => t.includes("Please select your school from the list.")),
+      ).toBe(true);
+    }
   });
 
   it("advances once the details are valid", async () => {

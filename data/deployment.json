@@ -1,0 +1,18 @@
+{
+  "name": "New Generation Academy — club recruitment",
+  "rationale": "This deployment is a recruitment drive at New Generation Academy, which is not yet one of the 180 schools on the official PLP form. Running the baseline survey with the school and year levels fixed to that school lets PLP gather accurate numbers before the school is added to the official form.",
+  "appliedOn": "2026-11-26",
+  "overrides": {
+    "schools": {
+      "reason": "Single-school recruitment drive. Everyone answering is at New Generation Academy, so the 180-school dropdown is replaced by that one value and filled in automatically.",
+      "replacesSourceOptions": true,
+      "options": ["New Generation Academy"]
+    },
+    "yearLevels": {
+      "reason": "New Generation Academy uses Grade 7 to Grade 10, not the S1-S6 levels on the official form.",
+      "replacesSourceOptions": true,
+      "options": ["Grade 7", "Grade 8", "Grade 9", "Grade 10"]
+    }
+  },
+  "note": "data/survey-source.json remains the untouched, verified extract of the original Google Form. Everything above is a documented deviation for THIS deployment only. `npm run verify:survey` checks the source is still intact AND lists these deviations, so nothing here is silent. To return to the official form, delete the entries under \"overrides\"."
+}

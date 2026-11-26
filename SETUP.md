@@ -167,6 +167,58 @@ with, rather than showing a form that cannot work.
 
 > Resetting a password signs that account out everywhere else, since a reset
 > usually means the old password is no longer trusted.
+## 6c. Deployment overrides (this install: New Generation Academy)
+
+`data/survey-source.json` is the verified extract of the original Google Form
+and is **never** edited for one rollout. Where a rollout genuinely needs
+different answer options, they are declared in **`data/deployment.json`**.
+
+This install declares two:
+
+| Override | Official form | This deployment | Why |
+|---|---|---|---|
+| School list | 180 schools | **New Generation Academy** | Recruitment drive at a school not yet on the official form |
+| Year levels | S1–S6 | **Grade 7 – Grade 10** | The school grades its years that way |
+
+Everything else — question wording, help text, ordering, required flags, the
+original Google entry ids — comes from the source file unchanged.
+
+### Applying it to the database
+
+Run **`supabase/migrations/20260101000800_deployment_overrides.sql`** in the SQL
+Editor. It adds the school, narrows the two option lists, and **deactivates**
+(never deletes) the other 179 schools so they can be restored later. It refuses
+to run once the survey has responses.
+
+Then confirm with:
+
+```bash
+npm run verify:db
+```
+
+### Checking what deviates
+
+```bash
+npm run verify:survey
+```
+
+prints a **Deployment overlay** section listing every deviation and its reason,
+so nothing here is silent. The source file is still verified in full by the same
+run, and its fingerprint is unchanged.
+
+### Going back to the official form
+
+1. Clear the entries under `"overrides"` in `data/deployment.json`
+2. Re-activate the schools:
+   ```sql
+   update public.schools set is_active = true;
+   ```
+3. Re-run `20260101000400_seed_survey_baseline.sql`'s option values, or restore
+   them directly, then `npm run verify:db`
+
+---
+
+
 
 ---
 

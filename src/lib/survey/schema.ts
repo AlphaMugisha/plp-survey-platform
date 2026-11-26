@@ -88,10 +88,18 @@ export type SurveyFormValues = Record<string, string | undefined> & {
   email?: string;
 };
 
-/** Default (empty) form values for every field, so inputs stay controlled. */
+/**
+ * Default form values, so inputs stay controlled.
+ *
+ * A choice question with exactly ONE option is answered in advance: there is no
+ * decision to make, and asking for one is just friction. This happens when a
+ * deployment pins the school list to a single school.
+ */
 export function emptyFormValues(): SurveyFormValues {
   const values: SurveyFormValues = { [EMAIL_FIELD]: "" };
-  for (const q of allQuestions) values[q.fieldKey] = "";
+  for (const q of allQuestions) {
+    values[q.fieldKey] = q.options?.length === 1 ? q.options[0]! : "";
+  }
   return values;
 }
 

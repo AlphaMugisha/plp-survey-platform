@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RequiredMark, OptionalMark } from "@/components/ui/label";
@@ -121,6 +121,21 @@ export function QuestionField({
               control={control}
               render={({ field }) => {
                 if (question.type === "dropdown") {
+                  // Exactly one option: nothing to choose. Show it as settled
+                  // rather than making the student open a list of one.
+                  if (question.options?.length === 1) {
+                    const only = question.options[0]!;
+                    return (
+                      <div
+                        id={fieldId}
+                        className="flex items-center gap-2.5 rounded-xl border border-plp-200 bg-plp-50 px-4 py-3 text-[0.9375rem] font-medium text-plp-800"
+                      >
+                        <Check className="size-4 shrink-0 text-plp-600" aria-hidden="true" />
+                        {only}
+                      </div>
+                    );
+                  }
+
                   return (
                     <SchoolCombobox
                       id={fieldId}

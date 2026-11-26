@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { buildCsv, csvField, csvFilename, csvRow } from "@/lib/csv";
-import { scaleOptions, schools } from "@/lib/survey/source";
+import { scaleOptions, sourceSchools as schools } from "@/lib/survey/source";
 
 describe("csvField", () => {
   it("quotes every value", () => {

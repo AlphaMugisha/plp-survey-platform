@@ -9,6 +9,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   allQuestions,
+  sourceQuestions,
+  sourceSchools,
+  sourceYearLevels,
   headerParagraphs,
   nameQuestion,
   participantQuestions,
@@ -67,8 +70,8 @@ describe("source JSON parsing", () => {
     expect(surveyStats.optionalCount).toBe(1);
   });
 
-  it("has 180 schools and 21 rating questions", () => {
-    expect(surveyStats.schoolCount).toBe(180);
+  it("has 180 schools in the source and 21 rating questions", () => {
+    expect(sourceSchools).toHaveLength(180);
     expect(surveyStats.scaleQuestionCount).toBe(21);
   });
 
@@ -113,22 +116,24 @@ describe("exact content verification", () => {
   });
 
   it("preserves every answer option exactly and in order", () => {
+    // Compared against the PRISTINE questions: a deployment overlay may
+    // legitimately replace the school and year-level options on purpose.
     rawQuestions.forEach((rawQuestion, i) => {
-      expect(allQuestions[i]!.options ?? null).toEqual(rawQuestion.options ?? null);
+      expect(sourceQuestions[i]!.options ?? null).toEqual(rawQuestion.options ?? null);
     });
   });
 
   it("preserves all 180 school names exactly and in original order", () => {
-    expect(schools).toEqual(rawSchools);
+    expect(sourceSchools).toEqual(rawSchools);
   });
 
   it("keeps accents, inconsistent casing and original typos in school names", () => {
     // Values that would be silently "corrected" by well-meaning editing.
-    expect(schools).toContain("Collège de l'Immaculée Conception");
-    expect(schools).toContain("COLLEGE DE LA PAIX");
-    expect(schools).toContain("Ecole Tecnique de Kabgayi");
-    expect(schools).toContain("saint Mary's high school kiruhura");
-    expect(schools).toContain("Groupe Scolaire Mère Du Verbe kibeho");
+    expect(sourceSchools).toContain("Collège de l'Immaculée Conception");
+    expect(sourceSchools).toContain("COLLEGE DE LA PAIX");
+    expect(sourceSchools).toContain("Ecole Tecnique de Kabgayi");
+    expect(sourceSchools).toContain("saint Mary's high school kiruhura");
+    expect(sourceSchools).toContain("Groupe Scolaire Mère Du Verbe kibeho");
   });
 
   it("keeps the rating options as literal strings, never numbers", () => {
@@ -172,8 +177,10 @@ describe("derived structure", () => {
   it("identifies the name, school and year-level questions structurally", () => {
     expect(nameQuestion.type).toBe("short_answer");
     expect(schoolQuestion.type).toBe("dropdown");
-    expect(schoolQuestion.options).toHaveLength(180);
-    expect(yearLevelQuestion.options).toEqual(["S1", "S2", "S3", "S4", "S5", "S6"]);
+    // Effective options follow the deployment overlay; the official lists are
+    // asserted separately above.
+    expect(schoolQuestion.options!.length).toBeGreaterThan(0);
+    expect(sourceYearLevels).toEqual(["S1", "S2", "S3", "S4", "S5", "S6"]);
   });
 
   it("excludes Year Level from the rating questions", () => {

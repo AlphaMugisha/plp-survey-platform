@@ -29,7 +29,7 @@ export default function SurveyPage() {
         </div>
       </div>
 
-      <main id="main" className="container max-w-3xl pb-24 pt-8">
+      <main id="main" className="container max-w-6xl pb-24 pt-8">
         <SetupNotice context="submit" />
 
         {/* The exact form title, carried through from the source */}

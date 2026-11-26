@@ -353,6 +353,11 @@ export function SurveyForm() {
           exit={{ opacity: 0, x: reduce ? 0 : -18 }}
           transition={{ duration: reduce ? 0.15 : 0.35, ease: [0.22, 1, 0.36, 1] }}
         >
+          {/* Two columns on wide screens: the section's framing stays put on
+              the left while the questions scroll on the right, so a big
+              display is used instead of a narrow ribbon of content. */}
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] xl:gap-12">
+            <div className="xl:sticky xl:top-40 xl:self-start">
           {/* Step heading */}
           <header className="mb-7">
             <div className="flex flex-wrap items-center gap-2.5">
@@ -386,6 +391,9 @@ export function SurveyForm() {
               <ScaleKey legend={legend} id={SCALE_LEGEND_ID} className="mt-5 max-w-2xl" />
             )}
           </header>
+            </div>
+
+            <div className="min-w-0">
 
           {/* ---- Details step: the built-in email field, then the first three questions ---- */}
           {step.kind === "details" && (
@@ -469,6 +477,8 @@ export function SurveyForm() {
               missingFields={missingFields}
             />
           )}
+            </div>
+          </div>
         </motion.div>
       </AnimatePresence>
 

@@ -22,6 +22,12 @@ import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  allQuestions as effectiveQuestions,
+  schools as effectiveSchools,
+  deployment,
+  hasDeploymentOverrides,
+} from "../src/lib/survey/source";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
@@ -142,6 +148,11 @@ const RESET = c("0");
 let failures = 0;
 const lines: string[] = [];
 
+/** Keep failure detail readable — a 180-item list helps nobody. */
+function brief(value: string, max = 150): string {
+  return value.length <= max ? value : `${value.slice(0, max)}… (+${value.length - max} chars)`;
+}
+
 function check(ok: boolean, name: string, detail?: string) {
   if (!ok) failures += 1;
   lines.push(`  [${ok ? `${GREEN}PASS${RESET}` : `${RED}FAIL${RESET}`}] ${name}`);
@@ -161,6 +172,9 @@ async function main() {
   lines.push("");
   lines.push(`${BOLD}PLP live database verification${RESET}`);
   lines.push(`${DIM}project: ${URL_}${RESET}`);
+  if (hasDeploymentOverrides) {
+    lines.push(`${DIM}overlay: ${deployment.name}${RESET}`);
+  }
 
   /* ---------------- 1. Survey ---------------- */
   section("Survey");
@@ -252,10 +266,17 @@ async function main() {
     if (row.is_required !== src.required) qMismatch ??= `Q${i + 1} required flag`;
     if (row.order_index !== src.index) qMismatch ??= `Q${i + 1} order`;
 
-    const srcOpts = src.options ?? null;
+    // Options are compared against the EFFECTIVE question — the source list
+    // with any deployment overlay applied — because that is what the app
+    // offers and what the database must accept.
+    const effective = effectiveQuestions.find((q) => q.entry_id === src.entry_id);
+    const srcOpts = effective?.options ?? src.options ?? null;
     const dbOpts = (row.options as string[] | null) ?? null;
     if (JSON.stringify(srcOpts) !== JSON.stringify(dbOpts)) {
-      qMismatch ??= `Q${i + 1} options differ`;
+      qMismatch ??= `Q${i + 1} "${src.title}" options differ — expected ${brief(
+        JSON.stringify(srcOpts),
+        90,
+      )}, database has ${brief(JSON.stringify(dbOpts), 90)}`;
     }
   });
   check(qMismatch === null, "Wording, entry ids, order, flags and options match source exactly", qMismatch ?? undefined);
@@ -273,21 +294,27 @@ async function main() {
   /* ---------------- 4. Schools ---------------- */
   section("Schools");
 
-  const { data: schools } = await admin
+  const { data: allSchoolRows } = await admin
     .from("schools")
-    .select("name, display_order")
+    .select("name, display_order, is_active")
     .order("display_order");
 
-  const sch = schools ?? [];
-  check(sch.length === srcSchools.length, `${srcSchools.length} schools seeded`, `found ${sch.length}`);
+  const sch = (allSchoolRows ?? []) as Array<{
+    name: string;
+    display_order: number;
+    is_active: boolean;
+  }>;
+  const activeNames = sch.filter((s) => s.is_active).map((s) => s.name);
 
-  const schoolMismatch = srcSchools.findIndex((name, i) => sch[i]?.name !== name);
+  // Every official school must still be present as a row, whether or not this
+  // deployment offers it — deactivating is not deleting.
+  const missingFromDb = srcSchools.filter((name) => !sch.some((row) => row.name === name));
   check(
-    schoolMismatch === -1,
-    "All school names match source exactly, in original order",
-    schoolMismatch === -1
+    missingFromDb.length === 0,
+    `All ${srcSchools.length} official schools still present as rows`,
+    missingFromDb.length === 0
       ? undefined
-      : `#${schoolMismatch + 1}: expected "${srcSchools[schoolMismatch]}", found "${sch[schoolMismatch]?.name}"`,
+      : `${missingFromDb.length} missing, first: "${missingFromDb[0]}"`,
   );
 
   const accented = sch.find((s) => s.name.includes("Immacul"));
@@ -295,6 +322,20 @@ async function main() {
     accented?.name === "Collège de l'Immaculée Conception",
     "Accents survived the round trip",
     `found "${accented?.name}"`,
+  );
+
+  // The ACTIVE set must match what the app offers.
+  const activeSorted = [...activeNames].sort();
+  const expectedSorted = [...effectiveSchools].sort();
+  check(
+    JSON.stringify(activeSorted) === JSON.stringify(expectedSorted),
+    `Active schools match the app (${effectiveSchools.length})`,
+    JSON.stringify(activeSorted) === JSON.stringify(expectedSorted)
+      ? undefined
+      : `database has ${activeSorted.length} active (${brief(
+          activeSorted.join(", ") || "none",
+          80,
+        )}); app offers ${expectedSorted.length} (${expectedSorted.join(", ")})`,
   );
 
   /* ---------------- 5. RLS (the real runtime test) ---------------- */
@@ -387,6 +428,18 @@ async function main() {
 
 function report() {
   lines.push("");
+  if (failures > 0 && hasDeploymentOverrides) {
+    lines.push(
+      `${DIM}If the mismatches above are the school list or year levels, the${RESET}`,
+    );
+    lines.push(
+      `${DIM}deployment overlay has not been applied to this database yet. Run${RESET}`,
+    );
+    lines.push(
+      `${DIM}supabase/migrations/20260101000800_deployment_overrides.sql.${RESET}`,
+    );
+    lines.push("");
+  }
   if (failures === 0) {
     lines.push(`${GREEN}${BOLD}All checks passed.${RESET}`);
     lines.push(

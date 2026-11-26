@@ -39,6 +39,9 @@ import { fileURLToPath } from "node:url";
 
 import {
   allQuestions,
+  sourceQuestions,
+  deployment,
+  hasDeploymentOverrides,
   schools,
   scaleOptions,
   scaleQuestions,
@@ -100,6 +103,9 @@ const rawSections = raw.items.filter((i) => i.type === "section_header");
 const rawQuestions = raw.items.filter((i) => i.type !== "section_header");
 const rawSchools = raw.items.find((i) => i.type === "dropdown")?.options ?? [];
 
+/** The school list exactly as the source defines it, before any overlay. */
+const sourceSchoolList = sourceQuestions.find((q) => q.type === "dropdown")?.options ?? [];
+
 /* ================================================================== *
  * LAYER 1 — source file vs application model
  * ================================================================== */
@@ -129,18 +135,18 @@ eq(
 
 // ---- Counts ----
 eq("Section count", surveySections.length, rawSections.length, `${rawSections.length} sections`);
-eq("Question count", allQuestions.length, rawQuestions.length, `${rawQuestions.length} questions`);
+eq("Question count", sourceQuestions.length, rawQuestions.length, `${rawQuestions.length} questions`);
 eq(
   "Required question count",
-  allQuestions.filter((q) => q.required).length,
+  sourceQuestions.filter((q) => q.required).length,
   rawQuestions.filter((q) => q.required).length,
 );
 eq(
   "Optional question count",
-  allQuestions.filter((q) => !q.required).length,
+  sourceQuestions.filter((q) => !q.required).length,
   rawQuestions.filter((q) => !q.required).length,
 );
-eq("School count", schools.length, rawSchools.length, `${rawSchools.length} schools`);
+eq("School count", sourceSchoolList.length, rawSchools.length, `${rawSchools.length} schools`);
 
 // ---- Section titles and descriptions, exactly ----
 rawSections.forEach((rawSection, i) => {
@@ -155,7 +161,7 @@ rawSections.forEach((rawSection, i) => {
 
 // ---- Question wording, ids, type, ordering, options, required flag ----
 rawQuestions.forEach((rawQuestion, i) => {
-  const appQuestion = allQuestions[i];
+  const appQuestion = sourceQuestions[i];
   const label = `Q${i + 1} (entry ${rawQuestion.entry_id})`;
 
   if (!appQuestion) {
@@ -193,13 +199,13 @@ rawQuestions.forEach((rawQuestion, i) => {
 
 // ---- School names, exactly and in order ----
 {
-  const mismatch = rawSchools.findIndex((name, i) => schools[i] !== name);
+  const mismatch = rawSchools.findIndex((name, i) => sourceSchoolList[i] !== name);
   check(
     "All school names exact & in original order",
     mismatch === -1,
     mismatch === -1
       ? undefined
-      : `school ${mismatch + 1}: expected "${rawSchools[mismatch]}", found "${schools[mismatch]}"`,
+      : `school ${mismatch + 1}: expected "${rawSchools[mismatch]}", found "${sourceSchoolList[mismatch]}"`,
     `${rawSchools.length} names compared`,
   );
 }
@@ -458,6 +464,40 @@ for (const c of checks) {
 }
 
 lines.push("");
+lines.push(`${BOLD}Deployment overlay${RESET}`);
+if (!hasDeploymentOverrides) {
+  lines.push(`  ${DIM}None — this deployment matches the original form exactly.${RESET}`);
+} else {
+  lines.push(`  ${BOLD}${deployment.name}${RESET}`);
+  lines.push(`  ${DIM}The source file is UNCHANGED and verified above. These deviations${RESET}`);
+  lines.push(`  ${DIM}are deliberate and apply to this deployment only:${RESET}`);
+  lines.push("");
+
+  const schoolOverride = deployment.overrides.schools;
+  const yearOverride = deployment.overrides.yearLevels;
+
+  if (schoolOverride) {
+    lines.push(
+      `  · School list   ${sourceSchoolList.length} source options -> ${schoolOverride.options.length}`,
+    );
+    lines.push(`      ${DIM}${schoolOverride.options.join(", ")}${RESET}`);
+    lines.push(`      ${DIM}${schoolOverride.reason}${RESET}`);
+  }
+  if (yearOverride) {
+    const firstSection = raw.items.find((i) => i.type === "section_header")?.index ?? 0;
+    const sourceYears =
+      rawQuestions.find((q) => q.type === "multiple_choice" && q.index < firstSection)?.options ??
+      [];
+    lines.push(`  · Year levels   ${sourceYears.join(", ")}`);
+    lines.push(`                  -> ${yearOverride.options.join(", ")}`);
+    lines.push(`      ${DIM}${yearOverride.reason}${RESET}`);
+  }
+
+  lines.push("");
+  lines.push(`  ${DIM}Clear "overrides" in data/deployment.json to return to the official form.${RESET}`);
+}
+
+lines.push("");
 lines.push(`${BOLD}Content inventory${RESET}`);
 lines.push(`  Sections ................ ${surveyStats.sectionCount}`);
 lines.push(`  Questions ............... ${surveyStats.questionCount}`);
@@ -466,7 +506,12 @@ lines.push(
 );
 lines.push(`  Rating questions ........ ${surveyStats.scaleQuestionCount}`);
 lines.push(`  Scale points ............ ${scaleOptions.length}`);
-lines.push(`  Schools ................. ${surveyStats.schoolCount}`);
+lines.push(
+  `  Schools ................. ${sourceSchoolList.length} in source` +
+    (hasDeploymentOverrides && schools.length !== sourceSchoolList.length
+      ? `, ${schools.length} active here`
+      : ""),
+);
 lines.push(
   `  Email collection ........ ${surveySource.collects_email.enabled ? "enabled" : "disabled"}${
     surveySource.collects_email.required ? ", required" : ""

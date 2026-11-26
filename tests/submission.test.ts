@@ -236,8 +236,8 @@ describe("accepting a valid submission", () => {
   it("derives the denormalised columns from the validated answers", async () => {
     const answers = validAnswers();
     answers[String(nameQuestion.entry_id)] = "Alice Uwase";
-    answers[String(schoolQuestion.entry_id)] = schoolQuestion.options![17]!;
-    answers[String(yearLevelQuestion.entry_id)] = "S4";
+    answers[String(schoolQuestion.entry_id)] = schoolQuestion.options![0]!;
+    answers[String(yearLevelQuestion.entry_id)] = yearLevelQuestion.options![0]!;
 
     await POST(
       request({
@@ -252,8 +252,8 @@ describe("accepting a valid submission", () => {
     )!.payload as Record<string, unknown>;
 
     expect(payload.full_name).toBe("Alice Uwase");
-    expect(payload.school_name).toBe("Collège de l'Immaculée Conception");
-    expect(payload.year_level).toBe("S4");
+    expect(payload.school_name).toBe(schoolQuestion.options![0]);
+    expect(payload.year_level).toBe(yearLevelQuestion.options![0]);
     expect(payload.school_id).toBe(SCHOOL_ID);
     expect(payload.survey_id).toBe(SURVEY_ID);
   });

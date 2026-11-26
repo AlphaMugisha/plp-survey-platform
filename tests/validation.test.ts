@@ -16,6 +16,7 @@ import {
   nameQuestion,
   scaleOptions,
   schoolQuestion,
+  sourceSchools,
   schools,
   yearLevelQuestion,
 } from "@/lib/survey/source";
@@ -126,12 +127,15 @@ describe("choice answers must be original option strings", () => {
   it("rejects a school that is not on the original list", () => {
     const schema = schemaForQuestion(schoolQuestion);
     expect(schema.safeParse("Some Other School").success).toBe(false);
-    expect(schema.safeParse(schools[0]!).success).toBe(true);
-    expect(schema.safeParse(schools.at(-1)!).success).toBe(true);
+    for (const name of schoolQuestion.options!) {
+      expect(schema.safeParse(name).success).toBe(true);
+    }
   });
 
   it("rejects a school name whose accents or casing were 'corrected'", () => {
-    const schema = schemaForQuestion(schoolQuestion);
+    // Exactness, not availability: run this against the full official list so
+    // it keeps testing what it is named for regardless of deployment overlay.
+    const schema = schemaForQuestion({ ...schoolQuestion, options: sourceSchools });
     expect(schema.safeParse("College de l'Immaculee Conception").success).toBe(false);
     expect(schema.safeParse("Collège de l'Immaculée Conception").success).toBe(true);
     expect(schema.safeParse("College de la Paix").success).toBe(false);
@@ -140,9 +144,13 @@ describe("choice answers must be original option strings", () => {
 
   it("rejects an invalid year level", () => {
     const schema = schemaForQuestion(yearLevelQuestion);
-    expect(schema.safeParse("S7").success).toBe(false);
-    expect(schema.safeParse("s1").success).toBe(false);
-    expect(schema.safeParse("S1").success).toBe(true);
+    const valid = yearLevelQuestion.options!;
+    expect(schema.safeParse("Year 42").success).toBe(false);
+    // Case matters: the stored value must match the option byte for byte.
+    expect(schema.safeParse(valid[0]!.toLowerCase()).success).toBe(false);
+    for (const level of valid) {
+      expect(schema.safeParse(level).success).toBe(true);
+    }
   });
 });
 

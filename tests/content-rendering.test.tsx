@@ -16,7 +16,7 @@ import { ReviewPanel } from "@/components/survey/review-panel";
 import {
   allQuestions,
   isScaleLegend,
-  schools,
+  sourceSchools as schools,
   scaleOptions,
   surveySections,
   type Question,
@@ -94,7 +94,8 @@ describe("rendered question content", () => {
   it("renders the Year Level options exactly", () => {
     const yearLevel = allQuestions.find((q) => q.title === "Year Level")!;
     render(<QuestionHarness question={yearLevel} />);
-    for (const option of ["S1", "S2", "S3", "S4", "S5", "S6"]) {
+    // Whatever year levels this deployment offers must all be rendered.
+    for (const option of yearLevel.options!) {
       expect(screen.getByRole("radio", { name: option })).toBeInTheDocument();
     }
   });
