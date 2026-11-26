@@ -210,6 +210,42 @@ describe("answer integrity is enforced in the database", () => {
   it("stores options as a JSON array of strings, never numbers", () => {
     expect(schemaFlat).toContain("constraint questions_options_shape check");
     expect(schemaFlat).toContain("where jsonb_typeof(e) <> 'string'");
+    // The test lives in an IMMUTABLE function the constraint calls.
+    expect(schemaFlat).toContain(
+      "create or replace function public.jsonb_is_string_array(v jsonb)",
+    );
+    expect(schemaFlat).toContain(
+      "constraint questions_options_shape check (public.jsonb_is_string_array(options))",
+    );
+  });
+
+  it("uses no subquery inside a CHECK constraint", () => {
+    // Postgres rejects these outright: "cannot use subquery in check constraint".
+    // Scan every CHECK body by balancing parentheses.
+    const offenders: string[] = [];
+
+    for (const match of schemaSql.matchAll(/check\s*\(/giu)) {
+      const start = match.index! + match[0].length - 1;
+      let depth = 0;
+      let end = start;
+      for (let i = start; i < schemaSql.length; i += 1) {
+        if (schemaSql[i] === "(") depth += 1;
+        else if (schemaSql[i] === ")") {
+          depth -= 1;
+          if (depth === 0) {
+            end = i;
+            break;
+          }
+        }
+      }
+      const body = schemaSql.slice(start, end + 1);
+      if (/\bselect\b/iu.test(body)) {
+        offenders.push(body.replace(/\s+/gu, " ").slice(0, 120));
+      }
+    }
+
+    expect(offenders, `CHECK constraints containing a subquery:\n${offenders.join("\n")}`)
+      .toEqual([]);
   });
 });
 

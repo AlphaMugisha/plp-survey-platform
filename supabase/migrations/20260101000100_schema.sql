@@ -88,6 +88,33 @@ create index if not exists schools_display_order_idx
 -- 2. surveys — one row per survey instrument (baseline, term 1 end, ...)
 -- =============================================================================
 
+-- -----------------------------------------------------------------------------
+-- JSON shape helper
+-- -----------------------------------------------------------------------------
+-- Postgres forbids a subquery inside a CHECK constraint, so the "is this a
+-- non-empty array of strings?" test lives in an IMMUTABLE function instead.
+
+create or replace function public.jsonb_is_string_array(v jsonb)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select v is null
+      or (
+        jsonb_typeof(v) = 'array'
+        and jsonb_array_length(v) > 0
+        and not exists (
+          select 1
+          from jsonb_array_elements(v) as e
+          where jsonb_typeof(e) <> 'string'
+        )
+      );
+$$;
+
+comment on function public.jsonb_is_string_array(jsonb) is
+  'True when the value is null, or a non-empty JSON array whose every element is a string. Used by questions.options so answer options can never be stored as numbers.';
+
 create table if not exists public.surveys (
   id                   uuid primary key default gen_random_uuid(),
   slug                 text not null,
@@ -175,18 +202,10 @@ create table if not exists public.questions (
   constraint questions_order_unique unique (survey_id, order_index),
   constraint questions_not_section_header check (type <> 'section_header'),
   constraint questions_title_not_blank check (length(btrim(title)) > 0),
-  -- options must be a non-empty JSON array of strings when present
-  constraint questions_options_shape check (
-    options is null
-    or (
-      jsonb_typeof(options) = 'array'
-      and jsonb_array_length(options) > 0
-      and not exists (
-        select 1 from jsonb_array_elements(options) e
-        where jsonb_typeof(e) <> 'string'
-      )
-    )
-  ),
+  -- Options must be a non-empty JSON array of strings when present, so an
+  -- answer option can never be stored as a number. Delegated to an IMMUTABLE
+  -- function because Postgres rejects a subquery inside a CHECK constraint.
+  constraint questions_options_shape check (public.jsonb_is_string_array(options)),
   -- choice questions must carry options; free-text questions must not
   constraint questions_options_match_type check (
     (type in ('multiple_choice', 'dropdown') and options is not null)
