@@ -1,0 +1,18 @@
+# Keep LF endings in files whose bytes matter.
+#
+# The seed migrations and the survey source carry exact survey content. A CRLF
+# rewrite on checkout once put carriage returns inside multi-line SQL string
+# literals, which were then stored in the database — see migration 0007.
+# The generator now escapes newlines as \n, and these rules are the second line
+# of defence.
+
+*.sql   text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.css   text eol=lf
+*.mjs   text eol=lf
+
+# Treat the verified survey source as sensitive to any byte change.
+data/survey-source.json text eol=lf

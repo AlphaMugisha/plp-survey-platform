@@ -42,9 +42,24 @@ const SURVEY_SLUG = "plp-survey-1-baseline-term-1";
 
 /* ---------------- SQL literal helpers ---------------- */
 
-/** Single-quoted SQL text literal with quotes doubled. Handles newlines/accents. */
+/**
+ * SQL text literal, written as an E'' escape string.
+ *
+ * Newlines are emitted as the escape sequence \n rather than as literal line
+ * breaks inside the quotes. A literal line break would be rewritten to \r\n the
+ * moment the .sql file is checked out or opened on Windows, and that \r would
+ * then be stored in the database — silently corrupting the two multi-line
+ * section descriptions and the survey intro. Escaping makes the generated SQL
+ * immune to line-ending translation.
+ */
 function sql(value: string): string {
-  return `'${value.replace(/'/gu, "''")}'`;
+  const escaped = value
+    .replace(/\\/gu, "\\\\") // must come first: E'' processes backslashes
+    .replace(/'/gu, "''")
+    .replace(/\r\n/gu, "\\n")
+    .replace(/\n/gu, "\\n")
+    .replace(/\r/gu, "\\n");
+  return `E'${escaped}'`;
 }
 
 function sqlNullable(value: string | null | undefined): string {

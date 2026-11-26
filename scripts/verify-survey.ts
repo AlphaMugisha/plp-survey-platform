@@ -278,10 +278,23 @@ if (!existsSync(schoolsSqlPath) || !existsSync(surveySqlPath)) {
   const schoolsSql = readFileSync(schoolsSqlPath, "utf8");
   const surveySql = readFileSync(surveySqlPath, "utf8");
 
-  /** SQL-escaped form of a literal, as the generator writes it. */
-  const sqlLit = (value: string) => value.replace(/'/gu, "''");
+  /**
+   * SQL-escaped form of a literal, mirroring the generator exactly.
+   *
+   * The generator emits E'' escape strings in which a newline is written as
+   * the two characters backslash-n, never as a literal line break. A literal
+   * break would be rewritten to CRLF by a Windows checkout, and that carriage
+   * return would then be stored in the database.
+   */
+  const sqlLit = (value: string) =>
+    value
+      .replace(/\\/gu, "\\\\")
+      .replace(/'/gu, "''")
+      .replace(/\r\n/gu, "\\n")
+      .replace(/\n/gu, "\\n")
+      .replace(/\r/gu, "\\n");
 
-  const missingSchools = rawSchools.filter((name) => !schoolsSql.includes(`('${sqlLit(name)}',`));
+  const missingSchools = rawSchools.filter((name) => !schoolsSql.includes(`(E'${sqlLit(name)}',`));
   check(
     "Every school is present in 20260101000300_seed_schools.sql",
     missingSchools.length === 0,
@@ -291,7 +304,7 @@ if (!existsSync(schoolsSqlPath) || !existsSync(surveySqlPath)) {
     `${rawSchools.length} checked`,
   );
 
-  const missingSections = rawSections.filter((s) => !surveySql.includes(`'${sqlLit(s.title)}'`));
+  const missingSections = rawSections.filter((s) => !surveySql.includes(`E'${sqlLit(s.title)}'`));
   check(
     "Every section title is present in the survey seed",
     missingSections.length === 0,
@@ -300,7 +313,7 @@ if (!existsSync(schoolsSqlPath) || !existsSync(surveySqlPath)) {
       : `missing: ${missingSections.map((s) => s.title).join("; ")}`,
   );
 
-  const missingQuestions = rawQuestions.filter((q) => !surveySql.includes(`'${sqlLit(q.title)}'`));
+  const missingQuestions = rawQuestions.filter((q) => !surveySql.includes(`E'${sqlLit(q.title)}'`));
   check(
     "Every question wording is present in the survey seed",
     missingQuestions.length === 0,

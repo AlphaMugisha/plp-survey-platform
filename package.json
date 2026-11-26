@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:survey": "tsx scripts/verify-survey.ts",
+    "verify:db": "tsx scripts/verify-db.ts",
     "generate:migrations": "tsx scripts/generate-migrations.ts"
   },
   "dependencies": {

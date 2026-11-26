@@ -862,186 +862,186 @@ grant select on public.admin_response_overview to authenticated;
 -- =============================================================================
 
 insert into public.schools (name, display_order) values
-  ('ACEJ Karama', 0),
-  ('Acodes Mushishiro', 1),
-  ('Agahozo Shalom Youth Village', 2),
-  ('Akagera International School', 3),
-  ('Apaer Institute', 4),
-  ('APEFOC Gisenyi', 5),
-  ('Apeki Tumba', 6),
-  ('Apeki Tumba TSS', 7),
-  ('Bigogwe TSS', 8),
-  ('Blue lakes International School', 9),
-  ('Centre de jeunes Muert', 10),
-  ('Church Of God High School (St Patrick)', 11),
-  ('College Adec Ruhanga', 12),
-  ('College Apapec Remera Rukoma', 13),
-  ('College APPEKA Kabarondo TSS', 14),
-  ('College Baptist St Sylvestre de Kinigi', 15),
-  ('COLLEGE DE GISENYI INYEMERAMIHIGO', 16),
-  ('Collège de l''Immaculée Conception', 17),
-  ('COLLEGE DE LA PAIX', 18),
-  ('Collège de Rwankeri', 19),
-  ('College du Christ Roi de Nyanza', 20),
-  ('College Saint Andre', 21),
-  ('Collège Saint Ignace Mugina', 22),
-  ('College Sainte Marie Reine Kabgayi', 23),
-  ('College St Ignace Kamonyi', 24),
-  ('E.S Kabare / GS Kabare', 25),
-  ('E.S Kabarondo', 26),
-  ('E.S NYANGE', 27),
-  ('E.S st Alphonse Marie de liguori Mubuga', 28),
-  ('EAV Kivumu', 29),
-  ('Ecole de Lettres Gatovu', 30),
-  ('Ecole de science de Kidaho', 31),
-  ('Ecole de Science de Musanze', 32),
-  ('Ecole des science de Gisenyi (ESG)', 33),
-  ('Ecole des sciences Byimana', 34),
-  ('Ecole Secondaire Sancta Maria Karambo', 35),
-  ('Ecole secondaire elena guerra', 36),
-  ('Ecole secondaire Gafunzo', 37),
-  ('Ecole Secondaire Islamique de Ruhengeri', 38),
-  ('Ecole Secondaire Marie Adelaide', 39),
-  ('Ecole Secondaire Nyarugunga', 40),
-  ('Ecole Secondaire St Joseph Le travailleur', 41),
-  ('Ecole Secondaire St Vincent', 42),
-  ('Ecole Secondaire Stella Matutina', 43),
-  ('Ecole Secondary de Mushubi', 44),
-  ('Ecole Secondary RUKOMA SOPEM', 45),
-  ('Ecole Technique St Kizito', 46),
-  ('Ecole Tecnique de Kabgayi', 47),
-  ('EFOTEC', 48),
-  ('ENDP karubanda', 49),
-  ('ES BISESERO', 50),
-  ('ES GISHOMA', 51),
-  ('ES Kayonza Modern', 52),
-  ('Es Kigoma', 53),
-  ('ES KIRINDA', 54),
-  ('ES Marie Reine de la Paix', 55),
-  ('ES MUBUGA', 56),
-  ('ES MUHORORO', 57),
-  ('ES MUNZANGA SCHOOL', 58),
-  ('ES MURUNDA', 59),
-  ('ES RUGABANO', 60),
-  ('ES RUGANDA', 61),
-  ('ES Shangi', 62),
-  ('ES St Jean Bosco de Simbi', 63),
-  ('ESA Gisenyi', 64),
-  ('Eteka Muhanga', 65),
-  ('Eto Nyamata', 66),
-  ('EXCELLA', 67),
-  ('Fawe gahini', 68),
-  ('Fawe Gisozi', 69),
-  ('Forever TVET', 70),
-  ('G.S APAPEC Murambi', 71),
-  ('G.S APE Rugunga', 72),
-  ('G.S APRED Ndera', 73),
-  ('G.S BIHE / TSS', 74),
-  ('G.S BURINGO', 75),
-  ('G.S MUKONDO', 76),
-  ('G.S MWEGERA', 77),
-  ('G.S NDA NYUNDO', 78),
-  ('G.S RAMBURA (F)', 79),
-  ('G.S RAMBURA (G)', 80),
-  ('G.S RYABIZIGE TSS', 81),
-  ('G.S SANZARE SAINT ALOYS', 82),
-  ('G.S St Philippe Neri Gisagara', 83),
-  ('G.S ST.RAPHAEL RAMBURA', 84),
-  ('Gahogo Adventist Academy', 85),
-  ('Gashora Girls Academy', 86),
-  ('Gatsibo Tss', 87),
-  ('GIKONKO TSS', 88),
-  ('Glory academy', 89),
-  ('Green Hills Academy', 90),
-  ('Group scolaire Rilima', 91),
-  ('Groupe officielle de Butare', 92),
-  ('Groupe Scolaire Mater Dei', 93),
-  ('Groupe Scolaire Mère Du Verbe kibeho', 94),
-  ('Groupe Scolaire Saint Joseph Kabgayi', 95),
-  ('Groupe Scolaire Sainte Bernadette Save', 96),
-  ('GS BISUSA', 97),
-  ('GS BUNGWE', 98),
-  ('GS BUSIGARI', 99),
-  ('GS BWEYEYE', 100),
-  ('GS DIHIRO', 101),
-  ('GS GAHENGERI', 102),
-  ('GS GASUMO', 103),
-  ('GS GIHUNDWE', 104),
-  ('GS Gisozi', 105),
-  ('GS HANIKA', 106),
-  ('GS KABAYA', 107),
-  ('GS KAGOMBYI', 108),
-  ('GS KAMEMBE PRESBYTERIEN', 109),
-  ('Gs marie merci', 110),
-  ('GS MURIRA', 111),
-  ('GS Muzizi', 112),
-  ('GS Notre Dame du Bon Conseil Byumba', 113),
-  ('GS NYABIKERI', 114),
-  ('GS SAINT JOSEPH BIRAMBO', 115),
-  ('GS SAINT MATHIEU DE BUSASAMANA', 116),
-  ('GS SAINT PIERRE NKOMBO', 117),
-  ('GSCIM RWANKUBA', 118),
-  ('GSNDL Byimana', 119),
-  ('Hope Haven Secondary school', 120),
-  ('IFAK Don Bosco', 121),
-  ('Igihozo Saint Peter Secondary School', 122),
-  ('Inyange Girls School', 123),
-  ('IPRC Kigali Tss', 124),
-  ('Kabutare technical secondary school', 125),
-  ('Kagarama secondary school', 126),
-  ('Karenge Adventist Secondary School', 127),
-  ('Kibeho TSS', 128),
-  ('Kigali Excellent in Tourism and Hospitality Academy (KETHA)', 129),
-  ('King David Academy', 130),
-  ('Kivumu Tss', 131),
-  ('Kiziguro Secondary School', 132),
-  ('Lycee de Kicukiro Apade', 133),
-  ('Lycee de Kigali', 134),
-  ('Lycee de Nyanza', 135),
-  ('Lycée du Lac de Muhazi (ASPEJ)', 136),
-  ('Lycee Notre Dame de Citeaux', 137),
-  ('Lycee Notre Dame de la visitation rulindo', 138),
-  ('Maranyundo Girls School', 139),
-  ('Maryhill Girls Secondary School', 140),
-  ('Monseigneur Mubiligi Catholic TSS', 141),
-  ('Mother Mary School Complex', 142),
-  ('MTC Muhanga', 143),
-  ('Muhabura Integrated Polytechnic College', 144),
-  ('Muhanga Tss', 145),
-  ('NEGA gashora', 146),
-  ('Nelson Mandela TVET School', 147),
-  ('New Life Christian Academy', 148),
-  ('Ngoma Adventist College of Health Sciences', 149),
-  ('Nyagatare secondary school', 150),
-  ('Nyamata Highschool', 151),
-  ('Nyamugali Secondary School', 152),
-  ('Nyange Secondary School', 153),
-  ('Nyanza Tss', 154),
-  ('Nyundo School of Arts', 155),
-  ('Nyundo School of Music', 156),
-  ('PETIT SEMINAIRE SAINT PIE X DE NYUNDO', 157),
-  ('Pt Seminaire St Leo Kabgayi', 158),
-  ('Riviera High School', 159),
-  ('Runda TSS', 160),
-  ('Rwabuye TSS', 161),
-  ('Rwanda Coding Academy', 162),
-  ('Saint Bernadette Kamonyi', 163),
-  ('Saint Bernard Kansi', 164),
-  ('Saint Ignace TSS', 165),
-  ('Saint Ignatius High School Kibagabaga', 166),
-  ('Saint Kiziti Rwamagana', 167),
-  ('Saint Mary High School', 168),
-  ('saint Mary''s high school kiruhura', 169),
-  ('Saint Sylvan Muranga', 170),
-  ('SOS THS', 171),
-  ('St Aloys', 172),
-  ('St Jean Murundi Secondary School', 173),
-  ('St Jean Nyarusange', 174),
-  ('St Peter School of Shyogwe', 175),
-  ('TTC DE LA SALLE BYUMBA', 176),
-  ('TTC Kabarore', 177),
-  ('TTC Nyamata', 178),
-  ('WORLD MISSION HIGH SCHOOL', 179)
+  (E'ACEJ Karama', 0),
+  (E'Acodes Mushishiro', 1),
+  (E'Agahozo Shalom Youth Village', 2),
+  (E'Akagera International School', 3),
+  (E'Apaer Institute', 4),
+  (E'APEFOC Gisenyi', 5),
+  (E'Apeki Tumba', 6),
+  (E'Apeki Tumba TSS', 7),
+  (E'Bigogwe TSS', 8),
+  (E'Blue lakes International School', 9),
+  (E'Centre de jeunes Muert', 10),
+  (E'Church Of God High School (St Patrick)', 11),
+  (E'College Adec Ruhanga', 12),
+  (E'College Apapec Remera Rukoma', 13),
+  (E'College APPEKA Kabarondo TSS', 14),
+  (E'College Baptist St Sylvestre de Kinigi', 15),
+  (E'COLLEGE DE GISENYI INYEMERAMIHIGO', 16),
+  (E'Collège de l''Immaculée Conception', 17),
+  (E'COLLEGE DE LA PAIX', 18),
+  (E'Collège de Rwankeri', 19),
+  (E'College du Christ Roi de Nyanza', 20),
+  (E'College Saint Andre', 21),
+  (E'Collège Saint Ignace Mugina', 22),
+  (E'College Sainte Marie Reine Kabgayi', 23),
+  (E'College St Ignace Kamonyi', 24),
+  (E'E.S Kabare / GS Kabare', 25),
+  (E'E.S Kabarondo', 26),
+  (E'E.S NYANGE', 27),
+  (E'E.S st Alphonse Marie de liguori Mubuga', 28),
+  (E'EAV Kivumu', 29),
+  (E'Ecole de Lettres Gatovu', 30),
+  (E'Ecole de science de Kidaho', 31),
+  (E'Ecole de Science de Musanze', 32),
+  (E'Ecole des science de Gisenyi (ESG)', 33),
+  (E'Ecole des sciences Byimana', 34),
+  (E'Ecole Secondaire Sancta Maria Karambo', 35),
+  (E'Ecole secondaire elena guerra', 36),
+  (E'Ecole secondaire Gafunzo', 37),
+  (E'Ecole Secondaire Islamique de Ruhengeri', 38),
+  (E'Ecole Secondaire Marie Adelaide', 39),
+  (E'Ecole Secondaire Nyarugunga', 40),
+  (E'Ecole Secondaire St Joseph Le travailleur', 41),
+  (E'Ecole Secondaire St Vincent', 42),
+  (E'Ecole Secondaire Stella Matutina', 43),
+  (E'Ecole Secondary de Mushubi', 44),
+  (E'Ecole Secondary RUKOMA SOPEM', 45),
+  (E'Ecole Technique St Kizito', 46),
+  (E'Ecole Tecnique de Kabgayi', 47),
+  (E'EFOTEC', 48),
+  (E'ENDP karubanda', 49),
+  (E'ES BISESERO', 50),
+  (E'ES GISHOMA', 51),
+  (E'ES Kayonza Modern', 52),
+  (E'Es Kigoma', 53),
+  (E'ES KIRINDA', 54),
+  (E'ES Marie Reine de la Paix', 55),
+  (E'ES MUBUGA', 56),
+  (E'ES MUHORORO', 57),
+  (E'ES MUNZANGA SCHOOL', 58),
+  (E'ES MURUNDA', 59),
+  (E'ES RUGABANO', 60),
+  (E'ES RUGANDA', 61),
+  (E'ES Shangi', 62),
+  (E'ES St Jean Bosco de Simbi', 63),
+  (E'ESA Gisenyi', 64),
+  (E'Eteka Muhanga', 65),
+  (E'Eto Nyamata', 66),
+  (E'EXCELLA', 67),
+  (E'Fawe gahini', 68),
+  (E'Fawe Gisozi', 69),
+  (E'Forever TVET', 70),
+  (E'G.S APAPEC Murambi', 71),
+  (E'G.S APE Rugunga', 72),
+  (E'G.S APRED Ndera', 73),
+  (E'G.S BIHE / TSS', 74),
+  (E'G.S BURINGO', 75),
+  (E'G.S MUKONDO', 76),
+  (E'G.S MWEGERA', 77),
+  (E'G.S NDA NYUNDO', 78),
+  (E'G.S RAMBURA (F)', 79),
+  (E'G.S RAMBURA (G)', 80),
+  (E'G.S RYABIZIGE TSS', 81),
+  (E'G.S SANZARE SAINT ALOYS', 82),
+  (E'G.S St Philippe Neri Gisagara', 83),
+  (E'G.S ST.RAPHAEL RAMBURA', 84),
+  (E'Gahogo Adventist Academy', 85),
+  (E'Gashora Girls Academy', 86),
+  (E'Gatsibo Tss', 87),
+  (E'GIKONKO TSS', 88),
+  (E'Glory academy', 89),
+  (E'Green Hills Academy', 90),
+  (E'Group scolaire Rilima', 91),
+  (E'Groupe officielle de Butare', 92),
+  (E'Groupe Scolaire Mater Dei', 93),
+  (E'Groupe Scolaire Mère Du Verbe kibeho', 94),
+  (E'Groupe Scolaire Saint Joseph Kabgayi', 95),
+  (E'Groupe Scolaire Sainte Bernadette Save', 96),
+  (E'GS BISUSA', 97),
+  (E'GS BUNGWE', 98),
+  (E'GS BUSIGARI', 99),
+  (E'GS BWEYEYE', 100),
+  (E'GS DIHIRO', 101),
+  (E'GS GAHENGERI', 102),
+  (E'GS GASUMO', 103),
+  (E'GS GIHUNDWE', 104),
+  (E'GS Gisozi', 105),
+  (E'GS HANIKA', 106),
+  (E'GS KABAYA', 107),
+  (E'GS KAGOMBYI', 108),
+  (E'GS KAMEMBE PRESBYTERIEN', 109),
+  (E'Gs marie merci', 110),
+  (E'GS MURIRA', 111),
+  (E'GS Muzizi', 112),
+  (E'GS Notre Dame du Bon Conseil Byumba', 113),
+  (E'GS NYABIKERI', 114),
+  (E'GS SAINT JOSEPH BIRAMBO', 115),
+  (E'GS SAINT MATHIEU DE BUSASAMANA', 116),
+  (E'GS SAINT PIERRE NKOMBO', 117),
+  (E'GSCIM RWANKUBA', 118),
+  (E'GSNDL Byimana', 119),
+  (E'Hope Haven Secondary school', 120),
+  (E'IFAK Don Bosco', 121),
+  (E'Igihozo Saint Peter Secondary School', 122),
+  (E'Inyange Girls School', 123),
+  (E'IPRC Kigali Tss', 124),
+  (E'Kabutare technical secondary school', 125),
+  (E'Kagarama secondary school', 126),
+  (E'Karenge Adventist Secondary School', 127),
+  (E'Kibeho TSS', 128),
+  (E'Kigali Excellent in Tourism and Hospitality Academy (KETHA)', 129),
+  (E'King David Academy', 130),
+  (E'Kivumu Tss', 131),
+  (E'Kiziguro Secondary School', 132),
+  (E'Lycee de Kicukiro Apade', 133),
+  (E'Lycee de Kigali', 134),
+  (E'Lycee de Nyanza', 135),
+  (E'Lycée du Lac de Muhazi (ASPEJ)', 136),
+  (E'Lycee Notre Dame de Citeaux', 137),
+  (E'Lycee Notre Dame de la visitation rulindo', 138),
+  (E'Maranyundo Girls School', 139),
+  (E'Maryhill Girls Secondary School', 140),
+  (E'Monseigneur Mubiligi Catholic TSS', 141),
+  (E'Mother Mary School Complex', 142),
+  (E'MTC Muhanga', 143),
+  (E'Muhabura Integrated Polytechnic College', 144),
+  (E'Muhanga Tss', 145),
+  (E'NEGA gashora', 146),
+  (E'Nelson Mandela TVET School', 147),
+  (E'New Life Christian Academy', 148),
+  (E'Ngoma Adventist College of Health Sciences', 149),
+  (E'Nyagatare secondary school', 150),
+  (E'Nyamata Highschool', 151),
+  (E'Nyamugali Secondary School', 152),
+  (E'Nyange Secondary School', 153),
+  (E'Nyanza Tss', 154),
+  (E'Nyundo School of Arts', 155),
+  (E'Nyundo School of Music', 156),
+  (E'PETIT SEMINAIRE SAINT PIE X DE NYUNDO', 157),
+  (E'Pt Seminaire St Leo Kabgayi', 158),
+  (E'Riviera High School', 159),
+  (E'Runda TSS', 160),
+  (E'Rwabuye TSS', 161),
+  (E'Rwanda Coding Academy', 162),
+  (E'Saint Bernadette Kamonyi', 163),
+  (E'Saint Bernard Kansi', 164),
+  (E'Saint Ignace TSS', 165),
+  (E'Saint Ignatius High School Kibagabaga', 166),
+  (E'Saint Kiziti Rwamagana', 167),
+  (E'Saint Mary High School', 168),
+  (E'saint Mary''s high school kiruhura', 169),
+  (E'Saint Sylvan Muranga', 170),
+  (E'SOS THS', 171),
+  (E'St Aloys', 172),
+  (E'St Jean Murundi Secondary School', 173),
+  (E'St Jean Nyarusange', 174),
+  (E'St Peter School of Shyogwe', 175),
+  (E'TTC DE LA SALLE BYUMBA', 176),
+  (E'TTC Kabarore', 177),
+  (E'TTC Nyamata', 178),
+  (E'WORLD MISSION HIGH SCHOOL', 179)
 on conflict (name) do nothing;
 
 -- Sanity check: fail the migration loudly if the count drifts.
@@ -1091,15 +1091,11 @@ begin
     (slug, title, description, confirmation_message, source_url,
      collects_email, email_required, status, version, published_at)
   values
-    ('plp-survey-1-baseline-term-1',
-     'PLP Survey 1 — Baseline (Beginning of Term 1)',
-     'Peace and Love Proclaimers | PLP School Curriculum
-
-This survey is filled in BEFORE the PLP program begins. It captures who you are right now — your confidence, your skills, your values. There are no right or wrong answers. Be completely honest. You will fill in a similar survey at the end of each term and at the end of the year so we can see how you have grown.
-
-🔒 Your answers are anonymous beyond your name and school. They will only be used to improve the PLP program.',
-     'Thank you! Your baseline survey has been submitted. Welcome to PLP. Lead with peace. Create with purpose. Thrive with opportunity.',
-     'https://docs.google.com/forms/d/e/1FAIpQLSdOB12gVLmmamsogept8XAnw0sM5vCiJzghxnAHJSx8UamcOg/viewform',
+    (E'plp-survey-1-baseline-term-1',
+     E'PLP Survey 1 — Baseline (Beginning of Term 1)',
+     E'Peace and Love Proclaimers | PLP School Curriculum\n\nThis survey is filled in BEFORE the PLP program begins. It captures who you are right now — your confidence, your skills, your values. There are no right or wrong answers. Be completely honest. You will fill in a similar survey at the end of each term and at the end of the year so we can see how you have grown.\n\n🔒 Your answers are anonymous beyond your name and school. They will only be used to improve the PLP program.',
+     E'Thank you! Your baseline survey has been submitted. Welcome to PLP. Lead with peace. Create with purpose. Thrive with opportunity.',
+     E'https://docs.google.com/forms/d/e/1FAIpQLSdOB12gVLmmamsogept8XAnw0sM5vCiJzghxnAHJSx8UamcOg/viewform',
      true,
      true,
      'active',
@@ -1107,7 +1103,7 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      now())
   on conflict (slug) do nothing;
 
-  select id into v_survey from public.surveys where slug = 'plp-survey-1-baseline-term-1';
+  select id into v_survey from public.surveys where slug = E'plp-survey-1-baseline-term-1';
 
   if v_survey is null then
     raise exception 'Failed to create or locate survey plp-survey-1-baseline-term-1';
@@ -1115,7 +1111,7 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
 
   -- Only seed content once. Re-running is a no-op.
   if exists (select 1 from public.questions where survey_id = v_survey) then
-    raise notice 'Survey % already has questions — skipping content seed.', 'plp-survey-1-baseline-term-1';
+    raise notice 'Survey % already has questions — skipping content seed.', E'plp-survey-1-baseline-term-1';
     return;
   end if;
 
@@ -1126,35 +1122,31 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
   insert into public.survey_sections
     (survey_id, order_index, title, description, short_label, plain_title)
   values
-    (v_survey, 1, 'SECTION A1 — Leadership Identity & Confidence', 'Answer honestly based on who you are RIGHT NOW, before the program begins.
-
-1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always', 'A1', 'Leadership Identity & Confidence')
+    (v_survey, 1, E'SECTION A1 — Leadership Identity & Confidence', E'Answer honestly based on who you are RIGHT NOW, before the program begins.\n\n1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always', E'A1', E'Leadership Identity & Confidence')
   on conflict (survey_id, order_index) do nothing;
 
   insert into public.survey_sections
     (survey_id, order_index, title, description, short_label, plain_title)
   values
-    (v_survey, 2, 'SECTION A2 — Skills & Knowledge', '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always', 'A2', 'Skills & Knowledge')
+    (v_survey, 2, E'SECTION A2 — Skills & Knowledge', E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always', E'A2', E'Skills & Knowledge')
   on conflict (survey_id, order_index) do nothing;
 
   insert into public.survey_sections
     (survey_id, order_index, title, description, short_label, plain_title)
   values
-    (v_survey, 3, 'SECTION A3 — Peace Values & Civic Responsibility', '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always', 'A3', 'Peace Values & Civic Responsibility')
+    (v_survey, 3, E'SECTION A3 — Peace Values & Civic Responsibility', E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always', E'A3', E'Peace Values & Civic Responsibility')
   on conflict (survey_id, order_index) do nothing;
 
   insert into public.survey_sections
     (survey_id, order_index, title, description, short_label, plain_title)
   values
-    (v_survey, 4, 'SECTION B — Starting Confidence', 'These questions are about how confident you feel RIGHT NOW. Some of these skills may be covered later in the PLP curriculum. There are no right or wrong answers.
-
-1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always', 'B', 'Starting Confidence')
+    (v_survey, 4, E'SECTION B — Starting Confidence', E'These questions are about how confident you feel RIGHT NOW. Some of these skills may be covered later in the PLP curriculum. There are no right or wrong answers.\n\n1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always', E'B', E'Starting Confidence')
   on conflict (survey_id, order_index) do nothing;
 
   insert into public.survey_sections
     (survey_id, order_index, title, description, short_label, plain_title)
   values
-    (v_survey, 5, 'SECTION C — About You', 'A few open questions to help us understand your starting point. Take your time.', 'C', 'About You')
+    (v_survey, 5, E'SECTION C — About You', E'A few open questions to help us understand your starting point. Take your time.', E'C', E'About You')
   on conflict (survey_id, order_index) do nothing;
 
   -- ------------------------------------------------------------------
@@ -1168,7 +1160,7 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      null,
      1363545445,
      0,
-     'Full Name',
+     E'Full Name',
      null,
      'short_answer',
      null,
@@ -1182,10 +1174,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      null,
      392476008,
      1,
-     'School Name',
-     'Please select your school from the list.',
+     E'School Name',
+     E'Please select your school from the list.',
      'dropdown',
-     '["ACEJ Karama","Acodes Mushishiro","Agahozo Shalom Youth Village","Akagera International School","Apaer Institute","APEFOC Gisenyi","Apeki Tumba","Apeki Tumba TSS","Bigogwe TSS","Blue lakes International School","Centre de jeunes Muert","Church Of God High School (St Patrick)","College Adec Ruhanga","College Apapec Remera Rukoma","College APPEKA Kabarondo TSS","College Baptist St Sylvestre de Kinigi","COLLEGE DE GISENYI INYEMERAMIHIGO","Collège de l''Immaculée Conception","COLLEGE DE LA PAIX","Collège de Rwankeri","College du Christ Roi de Nyanza","College Saint Andre","Collège Saint Ignace Mugina","College Sainte Marie Reine Kabgayi","College St Ignace Kamonyi","E.S Kabare / GS Kabare","E.S Kabarondo","E.S NYANGE","E.S st Alphonse Marie de liguori Mubuga","EAV Kivumu","Ecole de Lettres Gatovu","Ecole de science de Kidaho","Ecole de Science de Musanze","Ecole des science de Gisenyi (ESG)","Ecole des sciences Byimana","Ecole Secondaire Sancta Maria Karambo","Ecole secondaire elena guerra","Ecole secondaire Gafunzo","Ecole Secondaire Islamique de Ruhengeri","Ecole Secondaire Marie Adelaide","Ecole Secondaire Nyarugunga","Ecole Secondaire St Joseph Le travailleur","Ecole Secondaire St Vincent","Ecole Secondaire Stella Matutina","Ecole Secondary de Mushubi","Ecole Secondary RUKOMA SOPEM","Ecole Technique St Kizito","Ecole Tecnique de Kabgayi","EFOTEC","ENDP karubanda","ES BISESERO","ES GISHOMA","ES Kayonza Modern","Es Kigoma","ES KIRINDA","ES Marie Reine de la Paix","ES MUBUGA","ES MUHORORO","ES MUNZANGA SCHOOL","ES MURUNDA","ES RUGABANO","ES RUGANDA","ES Shangi","ES St Jean Bosco de Simbi","ESA Gisenyi","Eteka Muhanga","Eto Nyamata","EXCELLA","Fawe gahini","Fawe Gisozi","Forever TVET","G.S APAPEC Murambi","G.S APE Rugunga","G.S APRED Ndera","G.S BIHE / TSS","G.S BURINGO","G.S MUKONDO","G.S MWEGERA","G.S NDA NYUNDO","G.S RAMBURA (F)","G.S RAMBURA (G)","G.S RYABIZIGE TSS","G.S SANZARE SAINT ALOYS","G.S St Philippe Neri Gisagara","G.S ST.RAPHAEL RAMBURA","Gahogo Adventist Academy","Gashora Girls Academy","Gatsibo Tss","GIKONKO TSS","Glory academy","Green Hills Academy","Group scolaire Rilima","Groupe officielle de Butare","Groupe Scolaire Mater Dei","Groupe Scolaire Mère Du Verbe kibeho","Groupe Scolaire Saint Joseph Kabgayi","Groupe Scolaire Sainte Bernadette Save","GS BISUSA","GS BUNGWE","GS BUSIGARI","GS BWEYEYE","GS DIHIRO","GS GAHENGERI","GS GASUMO","GS GIHUNDWE","GS Gisozi","GS HANIKA","GS KABAYA","GS KAGOMBYI","GS KAMEMBE PRESBYTERIEN","Gs marie merci","GS MURIRA","GS Muzizi","GS Notre Dame du Bon Conseil Byumba","GS NYABIKERI","GS SAINT JOSEPH BIRAMBO","GS SAINT MATHIEU DE BUSASAMANA","GS SAINT PIERRE NKOMBO","GSCIM RWANKUBA","GSNDL Byimana","Hope Haven Secondary school","IFAK Don Bosco","Igihozo Saint Peter Secondary School","Inyange Girls School","IPRC Kigali Tss","Kabutare technical secondary school","Kagarama secondary school","Karenge Adventist Secondary School","Kibeho TSS","Kigali Excellent in Tourism and Hospitality Academy (KETHA)","King David Academy","Kivumu Tss","Kiziguro Secondary School","Lycee de Kicukiro Apade","Lycee de Kigali","Lycee de Nyanza","Lycée du Lac de Muhazi (ASPEJ)","Lycee Notre Dame de Citeaux","Lycee Notre Dame de la visitation rulindo","Maranyundo Girls School","Maryhill Girls Secondary School","Monseigneur Mubiligi Catholic TSS","Mother Mary School Complex","MTC Muhanga","Muhabura Integrated Polytechnic College","Muhanga Tss","NEGA gashora","Nelson Mandela TVET School","New Life Christian Academy","Ngoma Adventist College of Health Sciences","Nyagatare secondary school","Nyamata Highschool","Nyamugali Secondary School","Nyange Secondary School","Nyanza Tss","Nyundo School of Arts","Nyundo School of Music","PETIT SEMINAIRE SAINT PIE X DE NYUNDO","Pt Seminaire St Leo Kabgayi","Riviera High School","Runda TSS","Rwabuye TSS","Rwanda Coding Academy","Saint Bernadette Kamonyi","Saint Bernard Kansi","Saint Ignace TSS","Saint Ignatius High School Kibagabaga","Saint Kiziti Rwamagana","Saint Mary High School","saint Mary''s high school kiruhura","Saint Sylvan Muranga","SOS THS","St Aloys","St Jean Murundi Secondary School","St Jean Nyarusange","St Peter School of Shyogwe","TTC DE LA SALLE BYUMBA","TTC Kabarore","TTC Nyamata","WORLD MISSION HIGH SCHOOL"]'::jsonb,
+     E'["ACEJ Karama","Acodes Mushishiro","Agahozo Shalom Youth Village","Akagera International School","Apaer Institute","APEFOC Gisenyi","Apeki Tumba","Apeki Tumba TSS","Bigogwe TSS","Blue lakes International School","Centre de jeunes Muert","Church Of God High School (St Patrick)","College Adec Ruhanga","College Apapec Remera Rukoma","College APPEKA Kabarondo TSS","College Baptist St Sylvestre de Kinigi","COLLEGE DE GISENYI INYEMERAMIHIGO","Collège de l''Immaculée Conception","COLLEGE DE LA PAIX","Collège de Rwankeri","College du Christ Roi de Nyanza","College Saint Andre","Collège Saint Ignace Mugina","College Sainte Marie Reine Kabgayi","College St Ignace Kamonyi","E.S Kabare / GS Kabare","E.S Kabarondo","E.S NYANGE","E.S st Alphonse Marie de liguori Mubuga","EAV Kivumu","Ecole de Lettres Gatovu","Ecole de science de Kidaho","Ecole de Science de Musanze","Ecole des science de Gisenyi (ESG)","Ecole des sciences Byimana","Ecole Secondaire Sancta Maria Karambo","Ecole secondaire elena guerra","Ecole secondaire Gafunzo","Ecole Secondaire Islamique de Ruhengeri","Ecole Secondaire Marie Adelaide","Ecole Secondaire Nyarugunga","Ecole Secondaire St Joseph Le travailleur","Ecole Secondaire St Vincent","Ecole Secondaire Stella Matutina","Ecole Secondary de Mushubi","Ecole Secondary RUKOMA SOPEM","Ecole Technique St Kizito","Ecole Tecnique de Kabgayi","EFOTEC","ENDP karubanda","ES BISESERO","ES GISHOMA","ES Kayonza Modern","Es Kigoma","ES KIRINDA","ES Marie Reine de la Paix","ES MUBUGA","ES MUHORORO","ES MUNZANGA SCHOOL","ES MURUNDA","ES RUGABANO","ES RUGANDA","ES Shangi","ES St Jean Bosco de Simbi","ESA Gisenyi","Eteka Muhanga","Eto Nyamata","EXCELLA","Fawe gahini","Fawe Gisozi","Forever TVET","G.S APAPEC Murambi","G.S APE Rugunga","G.S APRED Ndera","G.S BIHE / TSS","G.S BURINGO","G.S MUKONDO","G.S MWEGERA","G.S NDA NYUNDO","G.S RAMBURA (F)","G.S RAMBURA (G)","G.S RYABIZIGE TSS","G.S SANZARE SAINT ALOYS","G.S St Philippe Neri Gisagara","G.S ST.RAPHAEL RAMBURA","Gahogo Adventist Academy","Gashora Girls Academy","Gatsibo Tss","GIKONKO TSS","Glory academy","Green Hills Academy","Group scolaire Rilima","Groupe officielle de Butare","Groupe Scolaire Mater Dei","Groupe Scolaire Mère Du Verbe kibeho","Groupe Scolaire Saint Joseph Kabgayi","Groupe Scolaire Sainte Bernadette Save","GS BISUSA","GS BUNGWE","GS BUSIGARI","GS BWEYEYE","GS DIHIRO","GS GAHENGERI","GS GASUMO","GS GIHUNDWE","GS Gisozi","GS HANIKA","GS KABAYA","GS KAGOMBYI","GS KAMEMBE PRESBYTERIEN","Gs marie merci","GS MURIRA","GS Muzizi","GS Notre Dame du Bon Conseil Byumba","GS NYABIKERI","GS SAINT JOSEPH BIRAMBO","GS SAINT MATHIEU DE BUSASAMANA","GS SAINT PIERRE NKOMBO","GSCIM RWANKUBA","GSNDL Byimana","Hope Haven Secondary school","IFAK Don Bosco","Igihozo Saint Peter Secondary School","Inyange Girls School","IPRC Kigali Tss","Kabutare technical secondary school","Kagarama secondary school","Karenge Adventist Secondary School","Kibeho TSS","Kigali Excellent in Tourism and Hospitality Academy (KETHA)","King David Academy","Kivumu Tss","Kiziguro Secondary School","Lycee de Kicukiro Apade","Lycee de Kigali","Lycee de Nyanza","Lycée du Lac de Muhazi (ASPEJ)","Lycee Notre Dame de Citeaux","Lycee Notre Dame de la visitation rulindo","Maranyundo Girls School","Maryhill Girls Secondary School","Monseigneur Mubiligi Catholic TSS","Mother Mary School Complex","MTC Muhanga","Muhabura Integrated Polytechnic College","Muhanga Tss","NEGA gashora","Nelson Mandela TVET School","New Life Christian Academy","Ngoma Adventist College of Health Sciences","Nyagatare secondary school","Nyamata Highschool","Nyamugali Secondary School","Nyange Secondary School","Nyanza Tss","Nyundo School of Arts","Nyundo School of Music","PETIT SEMINAIRE SAINT PIE X DE NYUNDO","Pt Seminaire St Leo Kabgayi","Riviera High School","Runda TSS","Rwabuye TSS","Rwanda Coding Academy","Saint Bernadette Kamonyi","Saint Bernard Kansi","Saint Ignace TSS","Saint Ignatius High School Kibagabaga","Saint Kiziti Rwamagana","Saint Mary High School","saint Mary''s high school kiruhura","Saint Sylvan Muranga","SOS THS","St Aloys","St Jean Murundi Secondary School","St Jean Nyarusange","St Peter School of Shyogwe","TTC DE LA SALLE BYUMBA","TTC Kabarore","TTC Nyamata","WORLD MISSION HIGH SCHOOL"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1196,10 +1188,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      null,
      672559437,
      2,
-     'Year Level',
+     E'Year Level',
      null,
      'multiple_choice',
-     '["S1","S2","S3","S4","S5","S6"]'::jsonb,
+     E'["S1","S2","S3","S4","S5","S6"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1210,10 +1202,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 1),
      1250388049,
      4,
-     'I see myself as a leader.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I see myself as a leader.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1224,10 +1216,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 1),
      622497614,
      5,
-     'I believe my voice and opinions matter.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I believe my voice and opinions matter.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1238,10 +1230,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 1),
      1557927388,
      6,
-     'I am confident speaking in front of a group.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I am confident speaking in front of a group.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1252,10 +1244,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 1),
      2045282778,
      7,
-     'I set goals for myself and work toward them.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I set goals for myself and work toward them.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1266,10 +1258,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 1),
      1923734074,
      8,
-     'I take initiative without waiting to be asked.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I take initiative without waiting to be asked.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1280,10 +1272,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 1),
      862335306,
      9,
-     'I can lead others even when it is difficult.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I can lead others even when it is difficult.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1294,10 +1286,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 2),
      2050294250,
      11,
-     'I can communicate my ideas clearly to others.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I can communicate my ideas clearly to others.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1308,10 +1300,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 2),
      1754423846,
      12,
-     'I know how to research a topic and evaluate whether information is reliable.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I know how to research a topic and evaluate whether information is reliable.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1322,10 +1314,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 2),
      1967499013,
      13,
-     'I understand how to manage money and make a basic budget.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I understand how to manage money and make a basic budget.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1336,10 +1328,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 2),
      946747526,
      14,
-     'I can identify a problem in my community and think of solutions.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I can identify a problem in my community and think of solutions.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1350,10 +1342,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 2),
      848090481,
      15,
-     'I know how to write a project proposal.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I know how to write a project proposal.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1364,10 +1356,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 3),
      21824051,
      17,
-     'I believe peace in my community is something I can contribute to.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I believe peace in my community is something I can contribute to.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1378,10 +1370,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 3),
      1276040987,
      18,
-     'I understand why Rwanda''s history matters to my generation.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I understand why Rwanda''s history matters to my generation.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1392,10 +1384,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 3),
      2042551412,
      19,
-     'I treat people from different backgrounds with respect and empathy.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I treat people from different backgrounds with respect and empathy.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1406,10 +1398,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 3),
      1881648513,
      20,
-     'I speak up when I see unfair or divisive behavior.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I speak up when I see unfair or divisive behavior.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1420,10 +1412,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 3),
      978166343,
      21,
-     'I feel responsible for the wellbeing of my community.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I feel responsible for the wellbeing of my community.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1434,10 +1426,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 4),
      610283415,
      23,
-     'I feel confident finding reliable information when I need it.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I feel confident finding reliable information when I need it.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1448,10 +1440,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 4),
      749611187,
      24,
-     'I feel confident managing my money and making a basic budget.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I feel confident managing my money and making a basic budget.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1462,10 +1454,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 4),
      584554120,
      25,
-     'I feel confident identifying a problem and thinking of a practical solution.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I feel confident identifying a problem and thinking of a practical solution.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1476,10 +1468,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 4),
      325256702,
      26,
-     'I feel confident developing an idea into a simple project proposal.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I feel confident developing an idea into a simple project proposal.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1490,10 +1482,10 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 4),
      324323319,
      27,
-     'I feel confident handling disagreement or conflict in a constructive way.',
-     '1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
+     E'I feel confident handling disagreement or conflict in a constructive way.',
+     E'1 = Strongly Disagree / Not at all  |  2 = Disagree / A little  |  3 = Neutral / Sometimes  |  4 = Agree / Often  |  5 = Strongly Agree / Always',
      'multiple_choice',
-     '["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
+     E'["1 — Strongly Disagree / Not at all","2 — Disagree / A little","3 — Neutral / Sometimes","4 — Agree / Often","5 — Strongly Agree / Always"]'::jsonb,
      true)
   on conflict (survey_id, entry_id) do nothing;
 
@@ -1504,7 +1496,7 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 5),
      2090256807,
      29,
-     'In your own words, what does it mean to be a leader?',
+     E'In your own words, what does it mean to be a leader?',
      null,
      'paragraph',
      null,
@@ -1518,7 +1510,7 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 5),
      1283952506,
      30,
-     'What is one thing you hope PLP gives you this year?',
+     E'What is one thing you hope PLP gives you this year?',
      null,
      'paragraph',
      null,
@@ -1532,7 +1524,7 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 5),
      852041322,
      31,
-     'What is your biggest personal goal for the next 12 months?',
+     E'What is your biggest personal goal for the next 12 months?',
      null,
      'paragraph',
      null,
@@ -1546,7 +1538,7 @@ This survey is filled in BEFORE the PLP program begins. It captures who you are 
      (select id from public.survey_sections where survey_id = v_survey and order_index = 5),
      1661896947,
      32,
-     'Is there anything you are worried or unsure about as you start this program? (Optional)',
+     E'Is there anything you are worried or unsure about as you start this program? (Optional)',
      null,
      'paragraph',
      null,
@@ -1569,7 +1561,7 @@ declare
   n_questions integer;
   n_required  integer;
 begin
-  select id into v_survey from public.surveys where slug = 'plp-survey-1-baseline-term-1';
+  select id into v_survey from public.surveys where slug = E'plp-survey-1-baseline-term-1';
 
   select count(*) into n_sections  from public.survey_sections where survey_id = v_survey;
   select count(*) into n_questions from public.questions       where survey_id = v_survey;
@@ -1788,3 +1780,285 @@ grant execute on function public.grant_admin(text, public.admin_role) to authent
 grant execute on function public.set_admin_active(text, boolean) to authenticated;
 
 -- END 20260101000500_admin_setup.sql
+
+
+-- ===========================================================================
+-- BEGIN 20260101000600_privileges.sql
+-- ===========================================================================
+
+-- =============================================================================
+-- PLP Survey Platform — explicit table privileges
+-- Migration 0006
+-- =============================================================================
+--
+-- WHY THIS EXISTS
+-- ---------------
+-- Postgres access control here has TWO independent layers, and both must allow
+-- an operation:
+--
+--   1. GRANT  — may this role touch this table at all?
+--   2. RLS    — which ROWS of it may this role see or change?
+--
+-- Older Supabase projects shipped an ALTER DEFAULT PRIVILEGES rule that granted
+-- anon / authenticated / service_role access to every new table in `public`
+-- automatically, so migrations could rely on layer 1 being handled. Newer
+-- projects do not. Without this file you get:
+--
+--   42501: permission denied for table surveys
+--
+-- even with a correct set of RLS policies, and even for the service role.
+--
+-- This migration states the intended end state explicitly, so the schema no
+-- longer depends on a project-level default that may or may not be present.
+-- It is idempotent and safe to re-run.
+--
+-- The access model is unchanged from 0002_rls.sql — this only makes layer 1
+-- match the policies that layer 2 already expresses.
+-- =============================================================================
+
+grant usage on schema public to anon, authenticated, service_role;
+
+-- -----------------------------------------------------------------------------
+-- service_role — the server-side identity used by /api/survey/submit.
+-- Bypasses RLS by design; the key never reaches the browser.
+-- -----------------------------------------------------------------------------
+
+grant all privileges on all tables    in schema public to service_role;
+grant all privileges on all sequences in schema public to service_role;
+grant execute        on all functions in schema public to service_role;
+
+-- -----------------------------------------------------------------------------
+-- Public survey content — anon must read this to render the form at all.
+-- RLS still restricts rows to the ACTIVE survey.
+-- -----------------------------------------------------------------------------
+
+grant select on public.schools         to anon, authenticated;
+grant select on public.surveys         to anon, authenticated;
+grant select on public.survey_sections to anon, authenticated;
+grant select on public.questions       to anon, authenticated;
+
+-- Content management. RLS narrows these to owner/admin profiles.
+grant insert, update, delete on public.schools         to authenticated;
+grant insert, update, delete on public.surveys         to authenticated;
+grant insert, update, delete on public.survey_sections to authenticated;
+grant insert, update, delete on public.questions       to authenticated;
+
+-- -----------------------------------------------------------------------------
+-- Response data — readable only by signed-in users, and RLS narrows that
+-- further to ACTIVE administrators. A signed-in non-admin sees nothing.
+-- -----------------------------------------------------------------------------
+
+grant select on public.survey_responses to authenticated;
+grant delete on public.survey_responses to authenticated;  -- RLS: owner/admin only
+grant select on public.answers          to authenticated;
+
+grant select, insert, update, delete on public.admin_profiles to authenticated;
+grant select on public.admin_response_overview to authenticated;
+
+-- -----------------------------------------------------------------------------
+-- Defence in depth — withdraw everything anon must never have, and the writes
+-- that must only ever happen through the server-side route.
+-- These REVOKEs run last so they win over the broad grants above.
+-- -----------------------------------------------------------------------------
+
+revoke all on public.survey_responses        from anon;
+revoke all on public.answers                 from anon;
+revoke all on public.admin_profiles          from anon;
+revoke all on public.admin_response_overview from anon;
+
+revoke insert, update         on public.survey_responses from authenticated;
+revoke insert, update, delete on public.answers          from authenticated;
+
+-- -----------------------------------------------------------------------------
+-- Any table added later inherits the same baseline.
+-- -----------------------------------------------------------------------------
+
+alter default privileges in schema public
+  grant all on tables to service_role;
+alter default privileges in schema public
+  grant all on sequences to service_role;
+alter default privileges in schema public
+  grant execute on functions to service_role;
+
+-- =============================================================================
+-- Post-grant verification — fails loudly if a required privilege is missing
+-- =============================================================================
+
+do $check$
+declare
+  missing text := '';
+begin
+  -- service_role must be able to read every table the API route touches.
+  if not has_table_privilege('service_role', 'public.surveys', 'SELECT') then
+    missing := missing || ' service_role:surveys';
+  end if;
+  if not has_table_privilege('service_role', 'public.survey_responses', 'INSERT') then
+    missing := missing || ' service_role:survey_responses(insert)';
+  end if;
+  if not has_table_privilege('service_role', 'public.answers', 'INSERT') then
+    missing := missing || ' service_role:answers(insert)';
+  end if;
+
+  -- anon must be able to read public survey content.
+  if not has_table_privilege('anon', 'public.schools', 'SELECT') then
+    missing := missing || ' anon:schools';
+  end if;
+  if not has_table_privilege('anon', 'public.questions', 'SELECT') then
+    missing := missing || ' anon:questions';
+  end if;
+
+  -- anon must NOT be able to read response data.
+  if has_table_privilege('anon', 'public.survey_responses', 'SELECT') then
+    missing := missing || ' UNEXPECTED:anon-can-select-responses';
+  end if;
+  if has_table_privilege('anon', 'public.answers', 'SELECT') then
+    missing := missing || ' UNEXPECTED:anon-can-select-answers';
+  end if;
+
+  if length(missing) > 0 then
+    raise exception 'Privilege check failed:%', missing;
+  end if;
+
+  raise notice 'Privileges verified: service_role has full access, anon can read survey content only.';
+end
+$check$;
+
+-- END 20260101000600_privileges.sql
+
+
+-- ===========================================================================
+-- BEGIN 20260101000700_normalise_line_endings.sql
+-- ===========================================================================
+
+-- =============================================================================
+-- PLP Survey Platform — normalise line endings in seeded content
+-- Migration 0007
+-- =============================================================================
+--
+-- WHY THIS EXISTS
+-- ---------------
+-- The original seed wrote multi-line text (the survey intro and two section
+-- descriptions) as literal line breaks inside a single-quoted SQL string. On a
+-- Windows checkout those breaks become CRLF, so the carriage returns were
+-- stored in the database: the text read "...begins.\r\n\r\n1 = Strongly..."
+-- where the original Google Form has "...begins.\n\n1 = Strongly...".
+--
+-- Two characters, invisible on screen — but the content must match the source
+-- byte for byte, and `npm run verify:db` correctly flagged it.
+--
+-- The generator now emits E'' escape strings with \n, so newly generated SQL
+-- cannot be affected. This migration repairs rows seeded before that change.
+--
+-- Idempotent: replacing CRLF with LF on text that already uses LF is a no-op.
+-- =============================================================================
+
+do $fix$
+declare
+  v_survey   uuid;
+  v_locked   boolean;
+  v_responses integer;
+  v_fixed    integer := 0;
+  n          integer;
+begin
+  select id, is_locked into v_survey, v_locked
+  from public.surveys
+  where slug = 'plp-survey-1-baseline-term-1';
+
+  if v_survey is null then
+    raise notice 'Baseline survey not found — nothing to normalise.';
+    return;
+  end if;
+
+  select count(*) into v_responses
+  from public.survey_responses
+  where survey_id = v_survey;
+
+  if v_responses > 0 then
+    -- Content is immutable once answered. Any deployment seeded after the
+    -- generator fix is already correct, so this is informational, not an error.
+    raise notice
+      'Survey already has % response(s); content is immutable and will not be modified.',
+      v_responses;
+    return;
+  end if;
+
+  -- Unlock so the content triggers allow the repair. is_locked is not a content
+  -- column, so toggling it is permitted even while locked.
+  update public.surveys set is_locked = false where id = v_survey;
+
+  -- ---- survey intro and confirmation message ----
+  update public.surveys
+     set description          = replace(description, chr(13) || chr(10), chr(10)),
+         confirmation_message = replace(confirmation_message, chr(13) || chr(10), chr(10))
+   where id = v_survey
+     and (description like '%' || chr(13) || '%'
+       or confirmation_message like '%' || chr(13) || '%');
+  get diagnostics n = row_count;
+  v_fixed := v_fixed + n;
+
+  -- ---- section titles and descriptions ----
+  update public.survey_sections
+     set title       = replace(title, chr(13) || chr(10), chr(10)),
+         description = replace(description, chr(13) || chr(10), chr(10))
+   where survey_id = v_survey
+     and (title like '%' || chr(13) || '%'
+       or description like '%' || chr(13) || '%');
+  get diagnostics n = row_count;
+  v_fixed := v_fixed + n;
+
+  -- ---- question wording and help text ----
+  update public.questions
+     set title       = replace(title, chr(13) || chr(10), chr(10)),
+         description = replace(description, chr(13) || chr(10), chr(10))
+   where survey_id = v_survey
+     and (title like '%' || chr(13) || '%'
+       or description like '%' || chr(13) || '%');
+  get diagnostics n = row_count;
+  v_fixed := v_fixed + n;
+
+  -- ---- school names (defensive; these are single-line) ----
+  update public.schools
+     set name = replace(name, chr(13) || chr(10), chr(10))
+   where name like '%' || chr(13) || '%';
+  get diagnostics n = row_count;
+  v_fixed := v_fixed + n;
+
+  -- Restore the previous lock state.
+  update public.surveys set is_locked = coalesce(v_locked, true) where id = v_survey;
+
+  raise notice 'Line-ending normalisation complete: % row(s) updated.', v_fixed;
+end
+$fix$;
+
+-- =============================================================================
+-- Verification — no carriage returns may remain in seeded content
+-- =============================================================================
+
+do $check$
+declare
+  offenders integer;
+begin
+  select
+    (select count(*) from public.surveys
+      where description like '%' || chr(13) || '%'
+         or confirmation_message like '%' || chr(13) || '%')
+  + (select count(*) from public.survey_sections
+      where title like '%' || chr(13) || '%'
+         or description like '%' || chr(13) || '%')
+  + (select count(*) from public.questions
+      where title like '%' || chr(13) || '%'
+         or description like '%' || chr(13) || '%')
+  + (select count(*) from public.schools
+      where name like '%' || chr(13) || '%')
+  into offenders;
+
+  if offenders > 0 then
+    raise exception
+      '% row(s) still contain a carriage return in seeded content.', offenders;
+  end if;
+
+  raise notice 'Verified: no carriage returns remain in any seeded content.';
+end
+$check$;
+
+-- END 20260101000700_normalise_line_endings.sql

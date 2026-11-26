@@ -20,12 +20,14 @@ const read = (file: string) => readFileSync(join(dir, file), "utf8");
 const schemaSql = read("20260101000100_schema.sql");
 const rlsSql = read("20260101000200_rls.sql");
 const adminSql = read("20260101000500_admin_setup.sql");
+const grantsSql = read("20260101000600_privileges.sql");
 
 /** Collapse whitespace so assertions survive reformatting. */
 const flat = (sql: string) => sql.replace(/\s+/gu, " ");
 const schemaFlat = flat(schemaSql);
 const rlsFlat = flat(rlsSql);
 const adminFlat = flat(adminSql);
+const grantsFlat = flat(grantsSql);
 
 const ALL_TABLES = [
   "schools",
@@ -158,6 +160,52 @@ describe("administrator access is allow-list based", () => {
     // Without security_invoker a view runs as its owner and bypasses RLS.
     expect(rlsFlat).toContain("create or replace view public.admin_response_overview with (security_invoker = true)");
     expect(rlsFlat).toContain("revoke all on public.admin_response_overview from anon");
+  });
+});
+
+describe("table privileges are granted explicitly", () => {
+  // Postgres needs BOTH a GRANT (may this role touch the table?) and an RLS
+  // policy (which rows?). Relying on a project-level ALTER DEFAULT PRIVILEGES
+  // produced "42501: permission denied for table surveys" on a new project
+  // even with correct policies, so the grants are now stated outright.
+
+  it("grants the service role full access for the submission route", () => {
+    expect(grantsFlat).toContain(
+      "grant all privileges on all tables in schema public to service_role",
+    );
+  });
+
+  it("grants anon read access to the public survey content it must render", () => {
+    for (const table of ["schools", "surveys", "survey_sections", "questions"]) {
+      expect(grantsFlat).toContain(`grant select on public.${table} to anon, authenticated`);
+    }
+  });
+
+  it("revokes everything on response data from anon", () => {
+    expect(grantsFlat).toContain("revoke all on public.survey_responses from anon");
+    expect(grantsFlat).toContain("revoke all on public.answers from anon");
+    expect(grantsFlat).toContain("revoke all on public.admin_profiles from anon");
+    expect(grantsFlat).toContain("revoke all on public.admin_response_overview from anon");
+  });
+
+  it("stops even signed-in users writing responses or answers directly", () => {
+    expect(grantsFlat).toContain(
+      "revoke insert, update on public.survey_responses from authenticated",
+    );
+    expect(grantsFlat).toContain(
+      "revoke insert, update, delete on public.answers from authenticated",
+    );
+  });
+
+  it("revokes come after the broad grants so they win", () => {
+    const firstRevoke = grantsSql.indexOf("revoke all on public.survey_responses");
+    const lastBroadGrant = grantsSql.lastIndexOf("grant select on public.answers");
+    expect(firstRevoke).toBeGreaterThan(lastBroadGrant);
+  });
+
+  it("self-checks the resulting privileges and fails loudly", () => {
+    expect(grantsFlat).toContain("raise exception 'Privilege check failed:%'");
+    expect(grantsFlat).toContain("UNEXPECTED:anon-can-select-responses");
   });
 });
 
