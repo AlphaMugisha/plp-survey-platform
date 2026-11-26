@@ -122,6 +122,55 @@ The function refuses to deactivate the last active owner.
 
 > Set passwords through Supabase's own interface or an invite email. Do not
 > share them over chat.
+## 6b. Password resets (required for "Forgot password?")
+
+The staff sign-in page has a **Forgot password?** link. It emails a one-hour,
+single-use link that lands on `/auth/confirm`, which verifies the token and
+forwards to `/auth/reset-password`.
+
+Two things must be configured in Supabase, or the email link will fail.
+
+### Allow the redirect URL
+
+**Authentication -> URL Configuration**
+
+| Field | Development | Production |
+|---|---|---|
+| Site URL | `http://localhost:3000` | your real URL |
+| Redirect URLs | `http://localhost:3000/**` | `https://your-domain/**` |
+
+Supabase refuses to redirect anywhere that is not on this allow-list. If the
+list is wrong, the user lands on a Supabase error page instead of the reset
+form.
+
+### Email delivery
+
+The built-in email service is for development only — a handful of messages per
+hour, and on some plans it delivers only to members of your Supabase
+organisation. **If the email never arrives, this is almost always why.**
+
+Before real staff use it, configure your own SMTP under
+**Project Settings -> Authentication -> SMTP Settings** (Resend, Postmark,
+SendGrid, Amazon SES or your own mail server all work). Without it, resets fail
+silently for most addresses.
+
+### Testing it
+
+1. Go to `/admin/login` and click **Forgot password?**
+2. Enter the email of an existing staff account
+3. Open the link in the email
+4. Set a new password — at least 10 characters, with a letter, a number and a
+   symbol
+
+The page explains itself when a link is expired, already used, or tampered
+with, rather than showing a form that cannot work.
+
+> Resetting a password signs that account out everywhere else, since a reset
+> usually means the old password is no longer trusted.
+
+---
+
+
 
 ---
 
