@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
-import { SetupNotice } from "@/components/site/setup-notice";
 import { getAdminSession } from "@/lib/admin/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -46,8 +45,6 @@ export default async function AdminLoginPage({
           </p>
         </div>
       )}
-
-      {!configured && <SetupNotice context="read" />}
 
       <LoginForm configured={configured} />
     </AuthShell>
