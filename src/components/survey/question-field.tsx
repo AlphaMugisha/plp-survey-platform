@@ -50,7 +50,11 @@ export function QuestionField({
   return (
     <Wrapper
       className={cn(
-        "card-lux scroll-mt-28 p-5 transition-shadow duration-300 ease-premium sm:p-6",
+        "card-lux scroll-mt-28 p-5 sm:p-6",
+        // Quiet lift while the student is working in this question, so the one
+        // they are answering stands slightly forward of the rest.
+        "transition-all duration-300 ease-premium",
+        "hover:border-plp-200 focus-within:border-plp-300 focus-within:shadow-card",
         message && "border-destructive/50",
       )}
       aria-invalid={message ? true : undefined}

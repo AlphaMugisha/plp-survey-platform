@@ -56,7 +56,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "card-lux card-interactive p-5",
+        "card-lux card-quiet group p-5",
         tone === "brand" && "bg-plp-50/60",
         tone === "accent" && "bg-accent-100/40",
       )}
@@ -70,16 +70,17 @@ export function StatCard({
             aria-hidden="true"
             className={cn(
               "inline-flex size-8 shrink-0 items-center justify-center rounded-lg",
+              "transition-colors duration-300 ease-premium",
               tone === "accent"
-                ? "bg-accent-400/20 text-accent-600"
-                : "bg-plp-50 text-plp-600",
+                ? "bg-accent-400/20 text-accent-600 group-hover:bg-accent-400/30"
+                : "bg-plp-50 text-plp-600 group-hover:bg-plp-100",
             )}
           >
             {icon}
           </span>
         )}
       </div>
-      <p className="mt-3 font-display text-[2rem] font-semibold leading-none tracking-tight tabular-nums text-plp-800">
+      <p className="mt-3 font-display text-[2rem] font-bold leading-none tracking-tight tabular-nums text-plp-800 transition-colors duration-300 group-hover:text-plp-600">
         {value}
       </p>
       {sub && <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-muted">{sub}</p>}
@@ -104,7 +105,7 @@ export function Panel({
   bodyClassName?: string;
 }) {
   return (
-    <section className={cn("card-lux overflow-hidden", className)}>
+    <section className={cn("card-lux card-quiet overflow-hidden", className)}>
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border/70 px-5 py-4 sm:px-6">
         <div className="min-w-0">
           <h2 className="font-display text-[1.0625rem] font-semibold leading-snug tracking-tight text-plp-800">

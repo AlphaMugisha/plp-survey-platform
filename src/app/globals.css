@@ -106,11 +106,71 @@
     pointer-events: none;
   }
 
+  /* ---------- Card interaction ----------
+     One shared hover language across the whole product: the card lifts a
+     little, its shadow deepens, its border picks up brand blue, and a thin
+     gradient rule draws itself along the top edge. Everything is transform and
+     opacity, so it stays cheap to animate. */
+
   .card-interactive {
-    @apply transition-all duration-300 ease-premium;
+    position: relative;
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
   }
-  .card-interactive:hover {
-    @apply -translate-y-0.5 shadow-raised;
+
+  /* the rule that draws in along the top edge */
+  .card-interactive::after {
+    content: "";
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    top: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #1d75bd 0%, #83b6e5 100%);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  .card-interactive:hover,
+  .card-interactive:focus-within {
+    transform: translateY(-4px);
+    border-color: #b3d3f0;
+    box-shadow:
+      0 2px 4px rgba(10, 39, 65, 0.06),
+      0 14px 34px -10px rgba(10, 39, 65, 0.16),
+      0 28px 56px -28px rgba(10, 39, 65, 0.14);
+  }
+
+  .card-interactive:hover::after,
+  .card-interactive:focus-within::after {
+    transform: scaleX(1);
+  }
+
+  /* A quieter variant for dense surfaces (stat tiles, admin panels): no lift,
+     just the rule and a border shift, so grids do not jitter on hover. */
+  .card-quiet {
+    position: relative;
+    transition:
+      box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card-quiet:hover {
+    border-color: #b3d3f0;
+    box-shadow: 0 1px 3px rgba(10, 39, 65, 0.08), 0 10px 26px -14px rgba(10, 39, 65, 0.18);
+  }
+
+  /* Reduced motion: keep the feedback, drop the movement. */
+  @media (prefers-reduced-motion: reduce) {
+    .card-interactive:hover,
+    .card-interactive:focus-within {
+      transform: none;
+    }
   }
 
   /* ---------- Glow accents ---------- */

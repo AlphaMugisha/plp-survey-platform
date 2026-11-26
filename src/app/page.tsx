@@ -122,7 +122,7 @@ export default function LandingPage() {
               />
 
               {/* At-a-glance card */}
-              <div className="card-surface p-6 sm:p-7">
+              <div className="card-surface card-quiet p-6 sm:p-7">
               <h2 className="font-display text-[1.0625rem] font-bold text-plp-800">
                 Before you begin
               </h2>
@@ -249,14 +249,14 @@ export default function LandingPage() {
                   body: "Check everything on one screen, then send.",
                 },
               ].map((step) => (
-                <li key={step.n} className="card-surface p-6">
+                <li key={step.n} className="card-surface card-interactive group p-6">
                   <span
                     aria-hidden="true"
-                    className="inline-flex size-9 items-center justify-center rounded-lg bg-plp-600 text-[0.9375rem] font-bold text-white"
+                    className="inline-flex size-10 items-center justify-center rounded-xl bg-plp-600 text-[1rem] font-bold text-white shadow-button transition-all duration-300 ease-premium group-hover:scale-105 group-hover:bg-plp-500 group-hover:shadow-glow-brand"
                   >
                     {step.n}
                   </span>
-                  <h3 className="mt-4 font-display text-[1.0625rem] font-bold text-plp-800">
+                  <h3 className="mt-4 font-display text-[1.0625rem] font-bold text-plp-800 transition-colors duration-300 group-hover:text-plp-600">
                     {step.title}
                   </h3>
                   <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
@@ -299,21 +299,25 @@ export default function LandingPage() {
             <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {surveySections.map((section) => (
                 <li key={section.index}>
-                  <article className="card-surface h-full p-6">
+                  <article className="card-surface card-interactive group h-full p-6">
                     <div className="flex items-center justify-between gap-3">
                       <span
-                        className="inline-flex size-9 items-center justify-center rounded-lg bg-plp-50 text-[0.875rem] font-bold text-plp-700"
+                        className="inline-flex size-10 items-center justify-center rounded-xl bg-plp-50 text-[0.875rem] font-bold text-plp-700 transition-all duration-300 ease-premium group-hover:bg-plp-600 group-hover:text-white group-hover:shadow-glow-brand"
                         aria-hidden="true"
                       >
                         {section.shortLabel}
                       </span>
-                      <Badge variant="neutral" size="sm">
+                      <Badge
+                        variant="neutral"
+                        size="sm"
+                        className="transition-colors duration-300 group-hover:border-plp-200 group-hover:bg-plp-50 group-hover:text-plp-700"
+                      >
                         {section.questions.length}{" "}
                         {section.questions.length === 1 ? "question" : "questions"}
                       </Badge>
                     </div>
 
-                    <h3 className="mt-4 font-display text-[1.0625rem] font-bold leading-snug text-plp-800">
+                    <h3 className="mt-4 font-display text-[1.0625rem] font-bold leading-snug text-plp-800 transition-colors duration-300 group-hover:text-plp-600">
                       {section.plainTitle}
                     </h3>
 
@@ -327,6 +331,29 @@ export default function LandingPage() {
                   </article>
                 </li>
               ))}
+
+              {/* Sixth cell: completes the row, and puts the action where the
+                  reader finishes scanning the list. */}
+              <li>
+                <article className="card-interactive group flex h-full flex-col justify-center rounded-card border border-plp-200 bg-plp-50 p-6 text-center">
+                  <h3 className="font-display text-[1.0625rem] font-bold text-plp-800">
+                    That&apos;s everything
+                  </h3>
+                  <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
+                    You can stop part-way and come back — your answers are saved in this
+                    browser.
+                  </p>
+                  <Button asChild size="md" className="mt-5 w-full">
+                    <Link href="/survey">
+                      Start the survey
+                      <ArrowRight
+                        className="transition-transform duration-300 ease-premium group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  </Button>
+                </article>
+              </li>
             </ul>
           </div>
         </section>
@@ -348,14 +375,17 @@ export default function LandingPage() {
                 {/* The original privacy sentence, verbatim */}
                 <p className="text-[1.0625rem] leading-relaxed text-ink-soft">{privacyNote}</p>
 
-                <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                <ul className="mt-7 grid gap-3 sm:grid-cols-2">
                   {[
                     "Only PLP programme staff can see individual answers.",
                     "Your answers are never shown publicly or to other students.",
                     "Results are reported as school and programme averages.",
                     "Your email is collected so later surveys can be matched to this one.",
                   ].map((item) => (
-                    <li key={item} className="flex gap-2.5 text-[0.9375rem] text-ink-soft">
+                    <li
+                      key={item}
+                      className="card-quiet flex gap-3 rounded-xl border border-border bg-white p-4 text-[0.9375rem] leading-relaxed text-ink-soft"
+                    >
                       <Check
                         className="mt-0.5 size-4 shrink-0 text-plp-600"
                         aria-hidden="true"
@@ -440,10 +470,10 @@ function Row({
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="card-surface p-5">
+    <div className="card-surface card-quiet group p-5">
       <dt className="sr-only">{label}</dt>
       <dd>
-        <span className="block font-display text-[1.875rem] font-bold leading-none tracking-tight text-plp-700">
+        <span className="block font-display text-[1.875rem] font-bold leading-none tracking-tight text-plp-700 transition-colors duration-300 group-hover:text-plp-500">
           {value}
         </span>
         <span className="mt-2 block text-[0.875rem] leading-relaxed text-ink-muted">
