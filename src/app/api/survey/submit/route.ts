@@ -13,6 +13,7 @@ import {
   schoolQuestion,
   yearLevelQuestion,
 } from "@/lib/survey/source";
+import { getApplicationWindowStatus } from "@/lib/survey/application-window";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (survey.status !== "active") {
+  if (survey.status !== "active" || getApplicationWindowStatus() === "closed") {
     return NextResponse.json(
       { error: "This survey is closed and is no longer accepting responses." },
       { status: 409 },

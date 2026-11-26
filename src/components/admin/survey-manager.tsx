@@ -157,8 +157,9 @@ export function SurveyManager({
                     <StatusButton
                       surveyId={survey.id}
                       status="active"
-                      label="Activate"
+                      label={survey.status === "closed" ? "Reopen applications" : "Open applications"}
                       icon={<PlayCircle aria-hidden="true" />}
+                      size="lg"
                       pending={pending}
                       onRun={(fd) => run(actions.setStatus, fd)}
                     />
@@ -337,6 +338,7 @@ function StatusButton({
   label,
   icon,
   variant = "primary",
+  size = "md",
   pending,
   onRun,
 }: {
@@ -345,6 +347,7 @@ function StatusButton({
   label: string;
   icon: React.ReactNode;
   variant?: "primary" | "outline";
+  size?: "md" | "lg" | "xl";
   pending: boolean;
   onRun: (formData: FormData) => void;
 }) {
@@ -352,7 +355,7 @@ function StatusButton({
     <form action={onRun}>
       <input type="hidden" name="surveyId" value={surveyId} />
       <input type="hidden" name="status" value={status} />
-      <Button type="submit" variant={variant} size="md" disabled={pending}>
+      <Button type="submit" variant={variant} size={size} disabled={pending}>
         {icon}
         {label}
       </Button>

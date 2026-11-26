@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { SurveyForm } from "@/components/survey/survey-form";
 import { SetupNotice } from "@/components/site/setup-notice";
 import { ApplicationWindowNotice } from "@/components/site/application-window-notice";
-import { getApplicationWindowStatus } from "@/lib/survey/application-window";
+import { getApplicationAvailability } from "@/lib/survey/application-window-server";
 import { Logo } from "@/components/brand/logo";
 import { surveySource } from "@/lib/survey/source";
 
@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function SurveyPage() {
-  const applicationStatus = getApplicationWindowStatus();
+export default async function SurveyPage() {
+  const applicationStatus = await getApplicationAvailability();
 
   return (
     <div className="min-h-dvh bg-canvas">

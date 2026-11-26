@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
 import { ApplicationWindowNotice } from "@/components/site/application-window-notice";
-import { getApplicationWindowStatus } from "@/lib/survey/application-window";
+import { getApplicationAvailability } from "@/lib/survey/application-window-server";
 import { PhotoSlot } from "@/components/site/photo-slot";
 import { ImigongoBand, ImigongoPanel, ImigongoPattern } from "@/components/brand/imigongo";
 import { Logo } from "@/components/brand/logo";
@@ -53,8 +53,8 @@ const ABOUT_PLP = {
   walkToRemember: 25,
 } as const;
 
-export default function LandingPage() {
-  const applicationStatus = getApplicationWindowStatus();
+export default async function LandingPage() {
+  const applicationStatus = await getApplicationAvailability();
 
   return (
     <div className="min-h-dvh bg-white">

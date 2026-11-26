@@ -5,6 +5,7 @@ import {
   ClipboardList,
   Database,
   GraduationCap,
+  PlayCircle,
   School,
   Timer,
   Users,
@@ -19,11 +20,13 @@ import { getDefaultSurvey, getOverviewStats } from "@/lib/admin/queries";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { surveyStats } from "@/lib/survey/source";
 import { formatDate, formatDateTime } from "@/lib/utils";
+import { getApplicationAvailability } from "@/lib/survey/application-window-server";
+import { setSurveyStatus } from "./surveys/actions";
 
 export const metadata: Metadata = { title: "Overview" };
 
 export default async function AdminOverviewPage() {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   if (!isSupabaseConfigured()) {
     return (
@@ -51,6 +54,7 @@ export default async function AdminOverviewPage() {
     );
   }
 
+  const applicationAvailability = await getApplicationAvailability();
   const stats = await getOverviewStats(survey.id);
   const hasResponses = stats.totalResponses > 0;
 
@@ -67,8 +71,15 @@ export default async function AdminOverviewPage() {
         description={survey.title}
         actions={
           <>
-            <Badge variant={survey.status === "active" ? "success" : "neutral"} size="lg">
-              {survey.status === "active" ? "Accepting responses" : survey.status}
+            <Badge
+              variant={applicationAvailability === "open" ? "success" : "neutral"}
+              size="lg"
+            >
+              {applicationAvailability === "open"
+                ? "Accepting applications"
+                : applicationAvailability === "upcoming"
+                  ? "Opens soon"
+                  : "Applications closed"}
             </Badge>
             {hasResponses && (
               <Button asChild variant="outline" size="md">
@@ -79,6 +90,47 @@ export default async function AdminOverviewPage() {
         }
       />
 
+      {applicationAvailability === "upcoming" && session.canManage && (
+        <Panel
+          title="Open applications"
+          description="This immediately allows students to submit applications. The application page will update to show that it is open."
+          className="mb-6 border-plp-200 bg-plp-50/60"
+        >
+          <form action={setSurveyStatus}>
+            <input type="hidden" name="surveyId" value={survey.id} />
+            <input type="hidden" name="status" value="active" />
+            <Button type="submit" size="xl">
+              <PlayCircle aria-hidden="true" />
+              Open applications
+            </Button>
+          </form>
+        </Panel>
+      )}
+
+      {applicationAvailability === "open" && (
+        <div
+          role="status"
+          className="mb-6 rounded-2xl border border-success/25 bg-success-soft p-4 sm:p-5"
+        >
+          <p className="text-[1rem] font-semibold text-plp-800">Applications are open</p>
+          <p className="mt-1 text-[0.875rem] text-ink-soft">
+            Students can now view and submit the application.
+          </p>
+        </div>
+      )}
+
+      {applicationAvailability === "closed" && (
+        <div
+          role="status"
+          className="mb-6 rounded-2xl border border-border bg-surface p-4 sm:p-5"
+        >
+          <p className="text-[1rem] font-semibold text-plp-800">Applications are closed</p>
+          <p className="mt-1 text-[0.875rem] text-ink-soft">
+            The application period has ended.
+          </p>
+        </div>
+      )}
+
       {!hasResponses ? (
         <Panel
           title="No responses yet"
@@ -88,7 +140,7 @@ export default async function AdminOverviewPage() {
           <EmptyState
             icon={<ClipboardList className="size-5" />}
             title="Waiting for the first submission"
-            description={`The survey is seeded and ${survey.status === "active" ? "live" : survey.status}. ${surveyStats.questionCount} questions across ${surveyStats.sectionCount} sections, with ${surveyStats.schoolCount} schools available to choose from.`}
+            description={`The survey is seeded and ${applicationAvailability === "open" ? "accepting applications" : applicationAvailability === "upcoming" ? "scheduled to open" : "closed"}. ${surveyStats.questionCount} questions across ${surveyStats.sectionCount} sections, with ${surveyStats.schoolCount} schools available to choose from.`}
             action={
               <Button asChild variant="outline">
                 <Link href="/survey">Open the participant survey</Link>
