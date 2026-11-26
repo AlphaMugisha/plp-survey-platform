@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { authRedirectOrigin } from "@/lib/supabase/config";
 
 const schema = z.object({
   email: z
@@ -44,8 +45,12 @@ export function ForgotPasswordForm({ configured }: { configured: boolean }) {
 
     // The link in the email lands on /auth/confirm, which verifies the token,
     // establishes a short-lived recovery session and forwards to the reset page.
+    //
+    // The origin is the browser's own, so the same build works on localhost and
+    // in production with no change. NEXT_PUBLIC_SITE_URL overrides it only if
+    // the browser cannot see the real public URL (e.g. behind a proxy).
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(values.email, {
-      redirectTo: `${window.location.origin}/auth/confirm?next=/auth/reset-password`,
+      redirectTo: `${authRedirectOrigin()}/auth/confirm?next=/auth/reset-password`,
     });
 
     if (resetError) {

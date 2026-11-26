@@ -250,6 +250,38 @@ the same thing as `anon`.
 
 ---
 
+## 9b. Going live — what actually has to change
+
+Short answer: **no code changes.** Auth email links are built from the
+browser's own origin, so the same build works on `localhost:3000` today and on
+your real domain later.
+
+Three things to do when you deploy:
+
+| # | Where | Change |
+|---|---|---|
+| 1 | Supabase -> Authentication -> URL Configuration | **Add** the production URL to **Redirect URLs** (`https://your-domain/**`) and set **Site URL** to it |
+| 2 | Supabase -> Project Settings -> Authentication -> SMTP | Configure real SMTP, or reset emails will not reach most addresses |
+| 3 | Your host's env vars | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (as a secret) |
+
+**Keep the localhost entry in the Redirect URLs list.** It is an allow-list, not
+a single value — leaving `http://localhost:3000/**` there means local
+development keeps working after you go live.
+
+`NEXT_PUBLIC_SITE_URL` should stay **blank** unless the browser cannot see the
+real public URL (behind a reverse proxy), or you want to force one canonical
+domain. If you set it to localhost it will pin email links to localhost in
+production, which is exactly the bug it looks like it prevents.
+
+Also worth doing at go-live:
+- Run the migrations against the production Supabase project
+- Create the first administrator there (step 6)
+- Run `npm run verify:db` against production
+- Run `npm run verify:survey` in CI so content drift fails the build
+
+---
+
+
 ## 10. Deploying
 
 The app runs anywhere Next.js 15 runs (Vercel, a Node host, a container).

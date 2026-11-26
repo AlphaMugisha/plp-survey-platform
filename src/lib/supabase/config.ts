@@ -16,6 +16,26 @@ export const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.
 /** Optional salt for hashing submission IPs. Without it, no IP hash is stored. */
 export const IP_HASH_SALT = process.env.IP_HASH_SALT?.trim() ?? "";
 
+/**
+ * Canonical public origin, without a trailing slash.
+ *
+ * Normally left blank: the browser's own origin is correct, so the same build
+ * works on localhost and in production with no change. Set it only when the
+ * browser cannot see the real public URL — behind a reverse proxy, or when you
+ * want to force one canonical domain for the links Supabase emails.
+ */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL?.trim() ?? "").replace(/\/+$/u, "");
+
+/**
+ * Origin to use when building redirect links for Supabase Auth emails.
+ * Browser origin by default; SITE_URL overrides it when set.
+ */
+export function authRedirectOrigin(): string {
+  if (SITE_URL) return SITE_URL;
+  if (typeof window !== "undefined") return window.location.origin;
+  return "";
+}
+
 /** True when the public (browser-safe) credentials are present. */
 export function isSupabaseConfigured(): boolean {
   return SUPABASE_URL.length > 0 && SUPABASE_ANON_KEY.length > 0;
