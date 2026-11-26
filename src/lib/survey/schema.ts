@@ -10,6 +10,7 @@ import { z } from "zod";
 import { allQuestions, surveySource, type Question } from "./source";
 
 export const EMAIL_FIELD = "email" as const;
+export const COUNTRY_FIELD = "country_of_origin" as const;
 
 const MAX_SHORT = 300;
 const MAX_PARAGRAPH = 5000;
@@ -73,10 +74,19 @@ export const emailSchema = surveySource.collects_email.required
       .max(320, { message: "That email address is too long." })
   : z.string().trim().email().max(320).optional();
 
+export const countrySchema = z
+  .string({ required_error: "Please enter the country you are from." })
+  .trim()
+  .min(1, { message: "Please enter the country you are from." })
+  .max(100, { message: "Please keep the country name under 100 characters." });
+
 /** Schema covering a specific subset of questions — used for per-step validation. */
 export function buildSchemaFor(questions: Question[], includeEmail = false) {
   const shape: Record<string, z.ZodTypeAny> = {};
-  if (includeEmail) shape[EMAIL_FIELD] = emailSchema;
+  if (includeEmail) {
+    shape[EMAIL_FIELD] = emailSchema;
+    shape[COUNTRY_FIELD] = countrySchema;
+  }
   for (const q of questions) shape[q.fieldKey] = schemaForQuestion(q);
   return z.object(shape);
 }
@@ -86,6 +96,7 @@ export const fullSurveySchema = buildSchemaFor(allQuestions, true);
 
 export type SurveyFormValues = Record<string, string | undefined> & {
   email?: string;
+  country_of_origin?: string;
 };
 
 /**
@@ -96,7 +107,7 @@ export type SurveyFormValues = Record<string, string | undefined> & {
  * deployment pins the school list to a single school.
  */
 export function emptyFormValues(): SurveyFormValues {
-  const values: SurveyFormValues = { [EMAIL_FIELD]: "" };
+  const values: SurveyFormValues = { [EMAIL_FIELD]: "", [COUNTRY_FIELD]: "" };
   for (const q of allQuestions) {
     values[q.fieldKey] = q.options?.length === 1 ? q.options[0]! : "";
   }
@@ -115,6 +126,7 @@ export function emptyFormValues(): SurveyFormValues {
 export const submissionSchema = z.object({
   surveySlug: z.string().min(1),
   email: emailSchema,
+  countryOfOrigin: countrySchema,
   answers: z.record(z.string(), z.string()),
   meta: z
     .object({

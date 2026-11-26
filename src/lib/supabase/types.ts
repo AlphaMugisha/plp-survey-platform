@@ -70,6 +70,7 @@ export type SurveyResponseRow = {
   id: string;
   survey_id: string;
   email: string;
+  country_of_origin: string | null;
   full_name: string;
   school_id: string | null;
   school_name: string;

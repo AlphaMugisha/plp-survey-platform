@@ -72,12 +72,19 @@ export function ReviewPanel({
 
             <dl className="divide-y divide-border/60">
               {showEmail && (
-                <ReviewRow
-                  label="Email"
-                  icon={<Mail className="size-4" aria-hidden="true" />}
-                  value={values.email?.trim() ?? ""}
-                  missing={missingFields.has("email")}
-                />
+                <>
+                  <ReviewRow
+                    label="Email"
+                    icon={<Mail className="size-4" aria-hidden="true" />}
+                    value={values.email?.trim() ?? ""}
+                    missing={missingFields.has("email")}
+                  />
+                  <ReviewRow
+                    label="Country you are from"
+                    value={values.country_of_origin?.trim() ?? ""}
+                    missing={missingFields.has("country_of_origin")}
+                  />
+                </>
               )}
 
               {step.questions.map((question) => (

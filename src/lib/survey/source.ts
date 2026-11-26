@@ -119,6 +119,31 @@ const overrideSchema = z.object({
   options: z.array(z.string()).min(1),
 });
 
+/**
+ * Wrapper language only. This can never change a question, an option, the form
+ * title or the confirmation message — those are source content.
+ */
+const framingSchema = z.object({
+  mode: z.enum(["survey", "application"]),
+  reason: z.string(),
+  audience: z.string().optional(),
+  labels: z
+    .object({
+      noun: z.string().optional(),
+      nounPlural: z.string().optional(),
+      cta: z.string().optional(),
+      ctaShort: z.string().optional(),
+      headline: z.string().optional(),
+      lede: z.string().optional(),
+      eyebrow: z.string().optional(),
+      submit: z.string().optional(),
+      successTitle: z.string().optional(),
+      successBody: z.string().optional(),
+      reviewTitle: z.string().optional(),
+    })
+    .default({}),
+});
+
 const deploymentSchema = z.object({
   name: z.string(),
   rationale: z.string().optional(),
@@ -130,6 +155,7 @@ const deploymentSchema = z.object({
       yearLevels: overrideSchema.optional(),
     })
     .default({}),
+  framing: framingSchema.optional(),
 });
 
 export type Deployment = z.infer<typeof deploymentSchema>;

@@ -6,12 +6,37 @@
     "schools": {
       "reason": "Single-school recruitment drive. Everyone answering is at New Generation Academy, so the 180-school dropdown is replaced by that one value and filled in automatically.",
       "replacesSourceOptions": true,
-      "options": ["New Generation Academy"]
+      "options": [
+        "New Generation Academy"
+      ]
     },
     "yearLevels": {
       "reason": "New Generation Academy uses Grade 7 to Grade 10, not the S1-S6 levels on the official form.",
       "replacesSourceOptions": true,
-      "options": ["Grade 7", "Grade 8", "Grade 9", "Grade 10"]
+      "options": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9",
+        "Grade 10"
+      ]
+    }
+  },
+  "framing": {
+    "mode": "application",
+    "reason": "Students at New Generation Academy are applying to join the PLP club, not filling in a mid-programme baseline. The questions are unchanged — this only changes the wrapper language so the page reads as an application.",
+    "audience": "New Generation Academy",
+    "labels": {
+      "noun": "application",
+      "nounPlural": "applications",
+      "cta": "Start your application",
+      "ctaShort": "Apply now",
+      "headline": "Join the PLP club at New Generation Academy",
+      "lede": "Peace and Love Proclaimers is starting a club at New Generation Academy. Tell us about yourself and we will be in touch.",
+      "eyebrow": "Club applications are open",
+      "submit": "Submit application",
+      "successTitle": "Application received",
+      "successBody": "Thank you for applying to join the PLP club. We will contact you at the email address you gave.",
+      "reviewTitle": "Review your application"
     }
   },
   "note": "data/survey-source.json remains the untouched, verified extract of the original Google Form. Everything above is a documented deviation for THIS deployment only. `npm run verify:survey` checks the source is still intact AND lists these deviations, so nothing here is silent. To return to the official form, delete the entries under \"overrides\"."

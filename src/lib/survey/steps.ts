@@ -72,5 +72,5 @@ export const REVIEW_STEP_INDEX = surveySteps.length - 1;
 /** Field names validated by a given step (includes the email field on step 0). */
 export function fieldsForStep(step: SurveyStep): string[] {
   const fields = step.questions.map((q) => q.fieldKey);
-  return step.kind === "details" ? ["email", ...fields] : fields;
+  return step.kind === "details" ? ["email", "country_of_origin", ...fields] : fields;
 }

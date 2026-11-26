@@ -30,6 +30,7 @@ import {
 import {
   emptyFormValues,
   fullSurveySchema,
+  COUNTRY_FIELD,
   type SurveyFormValues,
 } from "@/lib/survey/schema";
 import { REVIEW_STEP_INDEX, fieldsForStep, surveySteps } from "@/lib/survey/steps";
@@ -156,13 +157,14 @@ export function SurveyForm() {
 
   const answeredCount = React.useMemo(() => {
     let n = (values.email ?? "").trim() ? 1 : 0;
+    if ((values.country_of_origin ?? "").trim()) n += 1;
     for (const q of allQuestions) {
       if ((values[q.fieldKey] ?? "").trim()) n += 1;
     }
     return n;
   }, [values]);
 
-  const totalFields = allQuestions.length + (surveySource.collects_email.enabled ? 1 : 0);
+  const totalFields = allQuestions.length + (surveySource.collects_email.enabled ? 2 : 1);
   const percent = Math.min(100, (answeredCount / totalFields) * 100);
 
   /** Required fields still empty — drives the review screen's warning. */
@@ -171,6 +173,7 @@ export function SurveyForm() {
     if (surveySource.collects_email.required && !(values.email ?? "").trim()) {
       missing.add("email");
     }
+    if (!(values.country_of_origin ?? "").trim()) missing.add(COUNTRY_FIELD);
     for (const q of allQuestions) {
       if (q.required && !(values[q.fieldKey] ?? "").trim()) missing.add(q.fieldKey);
     }
@@ -240,6 +243,7 @@ export function SurveyForm() {
         body: JSON.stringify({
           surveySlug: BASELINE_SURVEY_SLUG,
           email: (formValues.email ?? "").trim(),
+          countryOfOrigin: (formValues.country_of_origin ?? "").trim(),
           answers,
           meta: { startedAt: startedAtRef.current, durationSeconds },
         }),
@@ -435,6 +439,30 @@ export function SurveyForm() {
                       >
                         <AlertCircle className="mt-px size-4 shrink-0" aria-hidden="true" />
                         {String(errors.email.message)}
+                      </p>
+                    )}
+                    <Label htmlFor="country_of_origin" className="mt-5 block text-[1.0625rem] font-medium">
+                      Which country are you from?<RequiredMark />
+                    </Label>
+                    <div className="mt-4">
+                      <Input
+                        id="country_of_origin"
+                        type="text"
+                        autoComplete="country-name"
+                        placeholder="e.g. South Africa"
+                        invalid={Boolean(errors.country_of_origin)}
+                        aria-describedby={errors.country_of_origin ? "country_of_origin__error" : undefined}
+                        {...register("country_of_origin")}
+                      />
+                    </div>
+                    {errors.country_of_origin?.message && (
+                      <p
+                        id="country_of_origin__error"
+                        role="alert"
+                        className="mt-3 flex items-start gap-2 text-[0.8125rem] font-medium text-destructive"
+                      >
+                        <AlertCircle className="mt-px size-4 shrink-0" aria-hidden="true" />
+                        {String(errors.country_of_origin.message)}
                       </p>
                     )}
                   </div>

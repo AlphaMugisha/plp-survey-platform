@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { surveySlug, email, answers, meta } = parsed.data;
+  const { surveySlug, email, countryOfOrigin, answers, meta } = parsed.data;
 
   /* ---- 2. Authoritative content validation (never trust the client) ---- */
   const issues: ValidationIssue[] = validateSubmissionAnswers(answers);
@@ -182,6 +182,7 @@ export async function POST(request: NextRequest) {
     .insert({
       survey_id: survey.id,
       email: email!.trim(),
+      country_of_origin: countryOfOrigin,
       full_name: fullName,
       school_id: school.id,
       school_name: schoolName,
