@@ -4,14 +4,19 @@ import { ArrowLeft } from "lucide-react";
 import { SurveyForm } from "@/components/survey/survey-form";
 import { SetupNotice } from "@/components/site/setup-notice";
 import { ApplicationWindowNotice } from "@/components/site/application-window-notice";
+import { getApplicationWindowStatus } from "@/lib/survey/application-window";
 import { Logo } from "@/components/brand/logo";
 import { surveySource } from "@/lib/survey/source";
 
 export const metadata: Metadata = {
-  title: "Baseline survey",
+  title: "PLP application",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function SurveyPage() {
+  const applicationStatus = getApplicationWindowStatus();
+
   return (
     <div className="min-h-dvh bg-canvas">
       {/* Slim header — the survey itself is the focus */}
@@ -34,7 +39,7 @@ export default function SurveyPage() {
         <SetupNotice context="submit" />
 
         <div className="mb-6">
-          <ApplicationWindowNotice />
+          <ApplicationWindowNotice status={applicationStatus} />
         </div>
 
         {/* The exact form title, carried through from the source */}
@@ -43,9 +48,27 @@ export default function SurveyPage() {
         </p>
         <div className="rule-accent mt-3 max-w-[6rem]" />
 
-        <div className="mt-8">
-          <SurveyForm />
-        </div>
+        {applicationStatus === "open" ? (
+          <div className="mt-8">
+            <SurveyForm />
+          </div>
+        ) : (
+          <div
+            role="status"
+            className="mt-8 rounded-2xl border border-plp-200 bg-white p-6 sm:p-8"
+          >
+            <h1 className="font-display text-[1.5rem] font-semibold tracking-tight text-plp-800">
+              {applicationStatus === "upcoming"
+                ? "Applications are not open yet"
+                : "Applications are closed"}
+            </h1>
+            <p className="mt-3 max-w-2xl text-[1rem] leading-relaxed text-ink-soft">
+              {applicationStatus === "upcoming"
+                ? "Please come back at midnight on Friday, November 27, 2026 (Johannesburg time) to apply."
+                : "The application period ended on Thursday, January 7, 2027."}
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );

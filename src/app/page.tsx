@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
 import { ApplicationWindowNotice } from "@/components/site/application-window-notice";
+import { getApplicationWindowStatus } from "@/lib/survey/application-window";
 import { PhotoSlot } from "@/components/site/photo-slot";
 import { ImigongoBand, ImigongoPanel, ImigongoPattern } from "@/components/brand/imigongo";
 import { Logo } from "@/components/brand/logo";
@@ -22,6 +23,8 @@ import {
   surveySource,
   surveyStats,
 } from "@/lib/survey/source";
+
+export const dynamic = "force-dynamic";
 
 /* The intro is one field in the original form containing three blocks:
    the curriculum line, the explanation, and the privacy note. We lay them out
@@ -51,6 +54,8 @@ const ABOUT_PLP = {
 } as const;
 
 export default function LandingPage() {
+  const applicationStatus = getApplicationWindowStatus();
+
   return (
     <div className="min-h-dvh bg-white">
       {/* ===================== HEADER ===================== */}
@@ -94,7 +99,7 @@ export default function LandingPage() {
               </p>
 
               <div className="mt-6 max-w-xl">
-                <ApplicationWindowNotice />
+                <ApplicationWindowNotice status={applicationStatus} />
               </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
