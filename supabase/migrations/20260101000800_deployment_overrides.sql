@@ -52,9 +52,9 @@ begin
   update public.schools set is_active = true  where name =  any (array[E'New Generation Academy']);
 
   -- ---- Year levels ----
-  -- New Generation Academy uses Grade 7 to Grade 10, not the S1-S6 levels on the official form.
+  -- New Generation Academy uses Grade 7 to Grade 10, plus Year 1 and Year 2, rather than the S1-S6 levels on the official form.
   update public.questions
-     set options = E'["Grade 7", "Grade 8", "Grade 9", "Grade 10"]'::jsonb
+     set options = E'["Grade 7", "Grade 8", "Grade 9", "Grade 10", "Year 1", "Year 2"]'::jsonb
    where survey_id = v_survey and entry_id = 672559437;
 
   -- ---- School question options ----
@@ -88,7 +88,7 @@ begin
 
   select options into year_opts
     from public.questions where survey_id = v_survey and entry_id = 672559437;
-  if jsonb_array_length(year_opts) <> 4 then
+  if jsonb_array_length(year_opts) <> 6 then
     raise exception 'Year level options were not applied.';
   end if;
 

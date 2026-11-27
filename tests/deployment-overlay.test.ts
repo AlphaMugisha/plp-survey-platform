@@ -87,8 +87,15 @@ describe("the active deployment", () => {
     expect(schoolQuestion.options).toEqual(["New Generation Academy"]);
   });
 
-  it("offers Grade 7 to Grade 10", () => {
-    expect(yearLevelQuestion.options).toEqual(["Grade 7", "Grade 8", "Grade 9", "Grade 10"]);
+  it("offers Grade 7 to Grade 10, plus Year 1 and Year 2", () => {
+    expect(yearLevelQuestion.options).toEqual([
+      "Grade 7",
+      "Grade 8",
+      "Grade 9",
+      "Grade 10",
+      "Year 1",
+      "Year 2",
+    ]);
   });
 
   it("pre-fills the school, because there is no choice to make", () => {
@@ -140,5 +147,43 @@ describe("overrides reach the database migration", () => {
   it("restores the lock it had to lift", () => {
     expect(sql).toContain("update public.surveys set is_locked = false");
     expect(sql).toContain("update public.surveys set is_locked = coalesce(v_locked, true)");
+  });
+});
+
+describe("adding a year level is additive, never destructive", () => {
+  const sql = readFileSync(
+    join(process.cwd(), "supabase", "migrations", "20261127000100_add_year_levels.sql"),
+    "utf8",
+  );
+
+  it("offers every level the overlay declares", () => {
+    for (const level of yearLevelQuestion.options!) {
+      expect(sql).toContain(level);
+    }
+  });
+
+  it("aborts rather than removing or renaming an existing level", () => {
+    expect(sql).toMatch(/Refusing to continue/iu);
+    expect(sql).toMatch(/would remove or rename existing year level/iu);
+    expect(sql).toContain("if missing is not null then");
+  });
+
+  it("checks the current options are a subset of the new ones", () => {
+    expect(sql).toContain("from jsonb_array_elements_text(current_opts) as existing(value)");
+    expect(sql).toContain("where wanted.value = existing.value");
+  });
+
+  it("is a no-op when already applied", () => {
+    expect(sql).toContain("if current_opts = target_opts then");
+  });
+
+  it("restores the lock it lifts", () => {
+    expect(sql).toContain("update public.surveys set is_locked = false");
+    expect(sql).toContain("update public.surveys set is_locked = coalesce(v_locked, true)");
+  });
+
+  it("verifies afterwards that no answer was orphaned", () => {
+    expect(sql).toMatch(/no longer match an offered year level/iu);
+    expect(sql).toContain("select count(*) into orphans");
   });
 });

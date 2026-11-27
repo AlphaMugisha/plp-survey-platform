@@ -11,13 +11,15 @@
       ]
     },
     "yearLevels": {
-      "reason": "New Generation Academy uses Grade 7 to Grade 10, not the S1-S6 levels on the official form.",
+      "reason": "New Generation Academy uses Grade 7 to Grade 10, plus Year 1 and Year 2, rather than the S1-S6 levels on the official form.",
       "replacesSourceOptions": true,
       "options": [
         "Grade 7",
         "Grade 8",
         "Grade 9",
-        "Grade 10"
+        "Grade 10",
+        "Year 1",
+        "Year 2"
       ]
     }
   },
