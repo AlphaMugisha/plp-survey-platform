@@ -25,18 +25,89 @@ import { cn } from "@/lib/utils";
 
 type Action = (formData: FormData) => Promise<ActionResult>;
 
+/* ------------------------------------------------------------------ *
+ * Grouping
+ * ------------------------------------------------------------------ */
+
+/**
+ * Questions split by how they are answered, not by their database type.
+ *
+ * "Choose an answer" covers multiple_choice AND dropdown — the school
+ * selector is a dropdown but reads as a choice to anyone looking at the list.
+ * "Written answer" covers short_answer and paragraph.
+ */
+type AnswerKind = "choice" | "written";
+
+function answerKindOf(question: ManagedQuestion): AnswerKind {
+  return question.type === "multiple_choice" || question.type === "dropdown"
+    ? "choice"
+    : "written";
+}
+
+const GROUPS: Array<{ kind: AnswerKind; label: string; icon: React.ReactNode }> = [
+  {
+    kind: "choice",
+    label: "Choose an answer",
+    icon: <ListChecks className="size-3.5" aria-hidden="true" />,
+  },
+  {
+    kind: "written",
+    label: "Written answer",
+    icon: <Type className="size-3.5" aria-hidden="true" />,
+  },
+];
+
+function groupByKind(questions: ManagedQuestion[]) {
+  return GROUPS.map((group) => ({
+    ...group,
+    questions: questions.filter((q) => answerKindOf(q) === group.kind),
+  })).filter((group) => group.questions.length > 0);
+}
+
+/** Small heading above each group, with its count. */
+function GroupHeading({
+  icon,
+  label,
+  count,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  count: number;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 pb-1">
+      <span
+        aria-hidden="true"
+        className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-plp-50 text-plp-600"
+      >
+        {icon}
+      </span>
+      <h3 className="text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-plp-700">
+        {label}
+      </h3>
+      <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[0.6875rem] font-medium tabular-nums text-ink-muted">
+        {count}
+      </span>
+      <span aria-hidden="true" className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
 /**
  * Manage the questions on the live application.
  *
- * Two classes of question, shown together but never confusable:
+ * Two classes of question, shown separately and never confusable:
  *
- *   Seeded   — the questions extracted and verified from the PLP Google Form.
- *              Locked. No remove control is rendered at all for them.
- *   Added    — questions an administrator appended here. Removable, but only
- *              until someone answers one.
+ *   Seeded  — extracted and verified from the PLP Google Form. Read-only, with
+ *             no edit or remove control rendered at all.
+ *   Added   — appended by an administrator. Editable and removable, but only
+ *             until somebody answers one.
  *
- * The same two rules are enforced by the server action and, independently, by
- * a database trigger. This UI only reflects them.
+ * Within each, questions are grouped by how they are answered. The rules are
+ * enforced by the server action and, independently, by a database trigger;
+ * this UI only reflects them.
  */
 export function QuestionManager({
   surveyId,
@@ -58,6 +129,9 @@ export function QuestionManager({
 
   const seeded = questions.filter((q) => !q.isCustom);
   const added = questions.filter((q) => q.isCustom);
+
+  const seededGroups = groupByKind(seeded);
+  const addedGroups = groupByKind(added);
 
   async function run(action: Action, formData: FormData) {
     setPending(true);
@@ -109,15 +183,15 @@ export function QuestionManager({
         </div>
       )}
 
-      {/* ---- Questions you added ---- */}
+      {/* ================= Questions you added ================= */}
       <Panel
         title="Questions you added"
         description={
           added.length === 0
             ? "Questions added here appear on the application straight away."
-            : `${added.length} added. They appear after the ${seeded.length} questions from the PLP form.`
+            : `${added.length} added, shown after the ${seeded.length} questions from the PLP form.`
         }
-        bodyClassName={added.length === 0 ? "p-0" : undefined}
+        bodyClassName={added.length === 0 && !adding ? "p-0" : undefined}
         actions={
           canManage ? (
             adding ? (
@@ -149,222 +223,240 @@ export function QuestionManager({
             }
           />
         ) : (
-          <ul className="space-y-3">
-            {added.map((question) => (
-              <li
-                key={question.entryId}
-                className="card-quiet rounded-2xl border border-border bg-white p-4 sm:p-5"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="brand" size="sm">
-                        {question.type === "multiple_choice" ? (
-                          <ListChecks className="size-3" aria-hidden="true" />
-                        ) : (
-                          <Type className="size-3" aria-hidden="true" />
-                        )}
-                        {question.type === "multiple_choice" ? "Choice" : "Written"}
-                      </Badge>
-                      <Badge variant={question.isRequired ? "neutral" : "outline"} size="sm">
-                        {question.isRequired ? "Required" : "Optional"}
-                      </Badge>
-                      {question.answerCount > 0 && (
-                        <Badge variant="success" size="sm">
-                          {question.answerCount} answered
-                        </Badge>
-                      )}
-                    </div>
+          <div className="space-y-6">
+            {addedGroups.map((group) => (
+              <section key={group.kind}>
+                <GroupHeading
+                  icon={group.icon}
+                  label={group.label}
+                  count={group.questions.length}
+                />
 
-                    <p className="mt-2.5 text-[0.9375rem] font-medium leading-snug text-plp-800">
-                      {question.title}
-                    </p>
-                    {question.description && (
-                      <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-muted">
-                        {question.description}
-                      </p>
-                    )}
-                    {question.options && question.options.length > 0 && (
-                      <ul className="mt-2.5 flex flex-wrap gap-1.5">
-                        {question.options.map((option) => (
-                          <li
-                            key={option}
-                            className="rounded-lg border border-border bg-paper px-2 py-0.5 text-[0.75rem] text-ink-soft"
-                          >
-                            {option}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  {canManage && (
-                    <div className="shrink-0">
-                      {question.canRemove ? (
-                        editing === question.entryId ? (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditing(null)}
-                          >
-                            <X aria-hidden="true" />
-                            Cancel
-                          </Button>
-                        ) : confirming === question.entryId ? (
-                          <form
-                            action={(fd) => run(actions.remove, fd)}
-                            className="flex items-center gap-2"
-                          >
-                            <input type="hidden" name="surveyId" value={surveyId} />
-                            <input type="hidden" name="entryId" value={question.entryId} />
-                            <Button
-                              type="submit"
-                              variant="destructive"
+                <ul className="mt-3 space-y-3">
+                  {group.questions.map((question) => (
+                    <li
+                      key={question.entryId}
+                      className="card-quiet rounded-2xl border border-border bg-white p-4 sm:p-5"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge
+                              variant={question.isRequired ? "neutral" : "outline"}
                               size="sm"
-                              disabled={pending}
                             >
-                              <Trash2 aria-hidden="true" />
-                              Confirm
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setConfirming(null)}
-                            >
-                              Cancel
-                            </Button>
-                          </form>
-                        ) : (
-                          <div className="flex gap-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              disabled={pending}
-                              onClick={() => {
-                                setEditing(question.entryId);
-                                setConfirming(null);
-                              }}
-                            >
-                              <Pencil aria-hidden="true" />
-                              Edit
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              disabled={pending}
-                              onClick={() => setConfirming(question.entryId)}
-                            >
-                              <Trash2 aria-hidden="true" />
-                              Remove
-                            </Button>
+                              {question.isRequired ? "Required" : "Optional"}
+                            </Badge>
+                            {question.answerCount > 0 && (
+                              <Badge variant="success" size="sm">
+                                {question.answerCount} answered
+                              </Badge>
+                            )}
                           </div>
-                        )
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-[0.75rem] text-ink-muted">
-                          <Lock className="size-3.5" aria-hidden="true" />
-                          Answered — locked
-                        </span>
+
+                          <p className="mt-2.5 text-[0.9375rem] font-medium leading-snug text-plp-800">
+                            {question.title}
+                          </p>
+                          {question.description && (
+                            <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-muted">
+                              {question.description}
+                            </p>
+                          )}
+                          {question.options && question.options.length > 0 && (
+                            <ul className="mt-2.5 flex flex-wrap gap-1.5">
+                              {question.options.map((option) => (
+                                <li
+                                  key={option}
+                                  className="rounded-lg border border-border bg-paper px-2 py-0.5 text-[0.75rem] text-ink-soft"
+                                >
+                                  {option}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+
+                        {canManage && (
+                          <div className="shrink-0">
+                            {question.canRemove ? (
+                              editing === question.entryId ? (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditing(null)}
+                                >
+                                  <X aria-hidden="true" />
+                                  Cancel
+                                </Button>
+                              ) : confirming === question.entryId ? (
+                                <form
+                                  action={(fd) => run(actions.remove, fd)}
+                                  className="flex items-center gap-2"
+                                >
+                                  <input type="hidden" name="surveyId" value={surveyId} />
+                                  <input
+                                    type="hidden"
+                                    name="entryId"
+                                    value={question.entryId}
+                                  />
+                                  <Button
+                                    type="submit"
+                                    variant="destructive"
+                                    size="sm"
+                                    disabled={pending}
+                                  >
+                                    <Trash2 aria-hidden="true" />
+                                    Confirm
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setConfirming(null)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </form>
+                              ) : (
+                                <div className="flex gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={pending}
+                                    onClick={() => {
+                                      setEditing(question.entryId);
+                                      setConfirming(null);
+                                    }}
+                                  >
+                                    <Pencil aria-hidden="true" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={pending}
+                                    onClick={() => setConfirming(question.entryId)}
+                                  >
+                                    <Trash2 aria-hidden="true" />
+                                    Remove
+                                  </Button>
+                                </div>
+                              )
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-[0.75rem] text-ink-muted">
+                                <Lock className="size-3.5" aria-hidden="true" />
+                                Answered — locked
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ---- Inline edit ---- */}
+                      {editing === question.entryId && canManage && (
+                        <form
+                          className="mt-4 space-y-4 border-t border-border pt-4"
+                          action={(fd) => run(actions.edit, fd)}
+                        >
+                          <input type="hidden" name="surveyId" value={surveyId} />
+                          <input type="hidden" name="entryId" value={question.entryId} />
+
+                          <div className="space-y-2">
+                            <Label htmlFor={`edit-title-${question.entryId}`}>Question</Label>
+                            <Input
+                              id={`edit-title-${question.entryId}`}
+                              name="title"
+                              required
+                              minLength={3}
+                              defaultValue={question.title}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor={`edit-desc-${question.entryId}`}>
+                              Help text (optional)
+                            </Label>
+                            <Input
+                              id={`edit-desc-${question.entryId}`}
+                              name="description"
+                              defaultValue={question.description ?? ""}
+                            />
+                          </div>
+
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                              <Label htmlFor={`edit-type-${question.entryId}`}>
+                                Answer type
+                              </Label>
+                              <select
+                                id={`edit-type-${question.entryId}`}
+                                name="type"
+                                defaultValue={
+                                  question.type === "multiple_choice"
+                                    ? "multiple_choice"
+                                    : "paragraph"
+                                }
+                                className="h-12 w-full appearance-none rounded-xl border border-border bg-surface px-4 text-[0.9375rem] text-ink shadow-subtle focus:border-plp-400 focus:shadow-glow-brand focus:outline-none"
+                              >
+                                <option value="paragraph">Written answer</option>
+                                <option value="multiple_choice">Choose one option</option>
+                              </select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`edit-required-${question.entryId}`}>
+                                Must be answered?
+                              </Label>
+                              <select
+                                id={`edit-required-${question.entryId}`}
+                                name="required"
+                                defaultValue={question.isRequired ? "true" : "false"}
+                                className="h-12 w-full appearance-none rounded-xl border border-border bg-surface px-4 text-[0.9375rem] text-ink shadow-subtle focus:border-plp-400 focus:shadow-glow-brand focus:outline-none"
+                              >
+                                <option value="true">Required</option>
+                                <option value="false">Optional</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor={`edit-options-${question.entryId}`}>
+                              Answer options
+                            </Label>
+                            <Textarea
+                              id={`edit-options-${question.entryId}`}
+                              name="options"
+                              rows={4}
+                              defaultValue={(question.options ?? []).join("\n")}
+                              placeholder="One per line. Leave blank for a written answer."
+                            />
+                            <p className="text-[0.75rem] text-ink-muted">
+                              Only used when the answer type is a choice.
+                            </p>
+                          </div>
+
+                          <Button type="submit" loading={pending}>
+                            Save changes
+                          </Button>
+                        </form>
                       )}
-                    </div>
-                  )}
-                </div>
-
-                {/* ---- Inline edit ---- */}
-                {editing === question.entryId && canManage && (
-                  <form
-                    className="mt-4 space-y-4 border-t border-border pt-4"
-                    action={(fd) => run(actions.edit, fd)}
-                  >
-                    <input type="hidden" name="surveyId" value={surveyId} />
-                    <input type="hidden" name="entryId" value={question.entryId} />
-
-                    <div className="space-y-2">
-                      <Label htmlFor={`edit-title-${question.entryId}`}>Question</Label>
-                      <Input
-                        id={`edit-title-${question.entryId}`}
-                        name="title"
-                        required
-                        minLength={3}
-                        defaultValue={question.title}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor={`edit-desc-${question.entryId}`}>
-                        Help text (optional)
-                      </Label>
-                      <Input
-                        id={`edit-desc-${question.entryId}`}
-                        name="description"
-                        defaultValue={question.description ?? ""}
-                      />
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor={`edit-type-${question.entryId}`}>Answer type</Label>
-                        <select
-                          id={`edit-type-${question.entryId}`}
-                          name="type"
-                          defaultValue={
-                            question.type === "multiple_choice"
-                              ? "multiple_choice"
-                              : "paragraph"
-                          }
-                          className="h-12 w-full appearance-none rounded-xl border border-border bg-surface px-4 text-[0.9375rem] text-ink shadow-subtle focus:border-plp-400 focus:shadow-glow-brand focus:outline-none"
-                        >
-                          <option value="paragraph">Written answer</option>
-                          <option value="multiple_choice">Choose one option</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`edit-required-${question.entryId}`}>
-                          Must be answered?
-                        </Label>
-                        <select
-                          id={`edit-required-${question.entryId}`}
-                          name="required"
-                          defaultValue={question.isRequired ? "true" : "false"}
-                          className="h-12 w-full appearance-none rounded-xl border border-border bg-surface px-4 text-[0.9375rem] text-ink shadow-subtle focus:border-plp-400 focus:shadow-glow-brand focus:outline-none"
-                        >
-                          <option value="true">Required</option>
-                          <option value="false">Optional</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor={`edit-options-${question.entryId}`}>Answer options</Label>
-                      <Textarea
-                        id={`edit-options-${question.entryId}`}
-                        name="options"
-                        rows={4}
-                        defaultValue={(question.options ?? []).join("\n")}
-                        placeholder="One per line. Leave blank for a written answer."
-                      />
-                      <p className="text-[0.75rem] text-ink-muted">
-                        Only used when the answer type is a choice.
-                      </p>
-                    </div>
-
-                    <Button type="submit" loading={pending}>
-                      Save changes
-                    </Button>
-                  </form>
-                )}
-              </li>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         )}
 
         {/* ---- Add form ---- */}
         {adding && canManage && (
           <form
-            className="mt-5 space-y-4 border-t border-border pt-5"
+            className={cn(
+              "space-y-4",
+              added.length > 0 && "mt-6 border-t border-border pt-5",
+            )}
             action={(fd) => run(actions.add, fd)}
           >
             <input type="hidden" name="surveyId" value={surveyId} />
@@ -441,10 +533,10 @@ export function QuestionManager({
         )}
       </Panel>
 
-      {/* ---- Questions from the verified form ---- */}
+      {/* ================= Questions from the verified form ================= */}
       <Panel
         title="Questions from the PLP form"
-        description="Extracted and verified from the original Google Form. These cannot be edited or removed."
+        description={`${seeded.length} questions extracted and verified from the original Google Form. These cannot be edited or removed.`}
         actions={
           <Badge variant="outline" size="md">
             <ShieldCheck className="size-3" aria-hidden="true" />
@@ -452,27 +544,46 @@ export function QuestionManager({
           </Badge>
         }
       >
-        <ol className="space-y-1.5">
-          {seeded.map((question, i) => (
-            <li
-              key={question.entryId}
-              className="flex items-start gap-3 rounded-xl px-2 py-2 text-[0.875rem] transition-colors hover:bg-paper"
-            >
-              <span
-                aria-hidden="true"
-                className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md bg-plp-50 text-[0.6875rem] font-semibold tabular-nums text-plp-700"
-              >
-                {i + 1}
-              </span>
-              <span className="min-w-0 flex-1 leading-snug text-ink-soft">{question.title}</span>
-              {!question.isRequired && (
-                <Badge variant="outline" size="sm" className="shrink-0">
-                  Optional
-                </Badge>
-              )}
-            </li>
+        <div className="space-y-6">
+          {seededGroups.map((group) => (
+            <section key={group.kind}>
+              <GroupHeading
+                icon={group.icon}
+                label={group.label}
+                count={group.questions.length}
+              />
+
+              <ol className="mt-2 space-y-1">
+                {group.questions.map((question) => (
+                  <li
+                    key={question.entryId}
+                    className="flex items-start gap-3 rounded-xl px-2 py-2 text-[0.875rem] transition-colors hover:bg-paper"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md bg-plp-50 text-[0.6875rem] font-semibold tabular-nums text-plp-700"
+                    >
+                      {question.orderIndex + 1}
+                    </span>
+                    <span className="min-w-0 flex-1 leading-snug text-ink-soft">
+                      {question.title}
+                    </span>
+                    {question.options && question.options.length > 2 && (
+                      <span className="shrink-0 text-[0.75rem] tabular-nums text-ink-faint">
+                        {question.options.length} options
+                      </span>
+                    )}
+                    {!question.isRequired && (
+                      <Badge variant="outline" size="sm" className="shrink-0">
+                        Optional
+                      </Badge>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </section>
           ))}
-        </ol>
+        </div>
       </Panel>
     </div>
   );
