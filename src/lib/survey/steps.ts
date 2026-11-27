@@ -10,9 +10,12 @@
  *   1..n     one step per original section block, in original order
  *   last     review before submit
  */
+import { isApplication, labels } from "./framing";
 import {
-  allQuestions,
+  askedParticipantQuestions,
   participantQuestions,
+  sourceQuestions,
+  sourceSections,
   surveySections,
   type Question,
   type SurveySection,
@@ -38,9 +41,10 @@ const detailsStep: SurveyStep = {
   kind: "details",
   label: "You",
   title: "Your details",
-  description:
-    "So we can match this survey to the ones you will fill in at the end of each term.",
-  questions: participantQuestions,
+  description: isApplication
+    ? "So we know who the application belongs to and can get back to you."
+    : "So we can match this survey to the ones you will fill in at the end of each term.",
+  questions: askedParticipantQuestions,
   section: null,
 };
 
@@ -60,7 +64,7 @@ const reviewStep: SurveyStep = {
   id: "review",
   kind: "review",
   label: "Review",
-  title: "Review your answers",
+  title: labels.reviewTitle,
   description: "Check everything below, then submit. You can go back and change any answer.",
   questions: [],
   section: null,
@@ -68,22 +72,63 @@ const reviewStep: SurveyStep = {
 
 export const surveySteps: SurveyStep[] = [detailsStep, ...sectionSteps, reviewStep];
 
-/** Keep questions created by admins together in their own final answer step. */
+/**
+ * Build the step sequence for an arbitrary question set — the live path, since
+ * the questions come from the database and include anything an admin added.
+ *
+ * The order is always: the applicant's details, then each original section
+ * that still has a question in the set, then the admin's own questions, then
+ * review. A section with nothing left in it is dropped rather than rendered
+ * as an empty heading.
+ */
 export function stepsForQuestions(questions: Question[]): SurveyStep[] {
-  const sourceIds = new Set(allQuestions.map((question) => question.entry_id));
-  const additionalQuestions = questions.filter((question) => !sourceIds.has(question.entry_id));
-  if (additionalQuestions.length === 0) return surveySteps;
+  const participantIds = new Set(participantQuestions.map((question) => question.entry_id));
+  const byEntryId = new Map(questions.map((question) => [question.entry_id, question]));
 
-  const additionalStep: SurveyStep = {
-    id: "additional-questions",
-    kind: "section",
-    label: "More",
-    title: "Additional questions",
-    description: null,
-    questions: additionalQuestions,
-    section: null,
+  const details: SurveyStep = {
+    ...detailsStep,
+    questions: participantQuestions.filter((question) => byEntryId.has(question.entry_id)),
   };
-  return [...surveySteps.slice(0, -1), additionalStep, reviewStep];
+
+  // Original section questions, kept in their own sections and in source order.
+  // Built from the INSTRUMENT's section structure, filtered by what is actually
+  // present, rather than from the incoming order — so a database row can never
+  // reorder the verified form, and clearing the deployment overlay restores
+  // every section without touching this function.
+  const sections: SurveyStep[] = sourceSections
+    .map((section) => ({
+      id: `section-${section.order}`,
+      kind: "section" as const,
+      label: section.shortLabel,
+      title: section.title,
+      description: section.description,
+      questions: section.questions.filter((question) => byEntryId.has(question.entry_id)),
+      section,
+    }))
+    .filter((step) => step.questions.length > 0);
+
+  // Anything not in the verified source is a question an admin added.
+  const sourceIds = new Set(sourceQuestions.map((question) => question.entry_id));
+  const additionalQuestions = questions.filter(
+    (question) => !sourceIds.has(question.entry_id) && !participantIds.has(question.entry_id),
+  );
+
+  const additional: SurveyStep[] =
+    additionalQuestions.length === 0
+      ? []
+      : [
+          {
+            id: "additional-questions",
+            kind: "section",
+            label: sections.length > 0 ? "More" : "Questions",
+            title: sections.length > 0 ? "Additional questions" : "A few questions",
+            description: null,
+            questions: additionalQuestions,
+            section: null,
+          },
+        ];
+
+  return [details, ...sections, ...additional, reviewStep];
 }
 
 export const REVIEW_STEP_INDEX = surveySteps.length - 1;

@@ -73,6 +73,19 @@ export const isApplication = framingMode === "application";
 export const audience: string | null = deployment.framing?.audience ?? null;
 
 /**
+ * The small label above the headline, for a given application status.
+ *
+ * `labels.eyebrow` announces that applications are OPEN, so it must never be
+ * shown next to a banner saying they are closed — the page would contradict
+ * itself in two adjacent lines. When the window is shut, the eyebrow falls back
+ * to naming the thing instead of advertising it.
+ */
+export function eyebrowFor(status: string | undefined): string {
+  if (!isApplication) return labels.eyebrow;
+  return status === "open" ? labels.eyebrow : `PLP club ${labels.noun}`;
+}
+
+/**
  * Capitalise a label for use at the start of a sentence, without touching
  * labels that are already capitalised or are proper nouns.
  */

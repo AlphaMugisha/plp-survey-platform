@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getAdminSession } from "@/lib/admin/auth";
 import type { QuestionRow, SurveySectionRow } from "@/lib/supabase/types";
+import { sourceQuestions } from "@/lib/survey/source";
 
 /**
  * Survey management actions.
@@ -330,7 +331,15 @@ export async function addSurveyQuestion(formData: FormData): Promise<ActionResul
     .eq("survey_id", surveyId);
   if (loadError || !existing) return { ok: false, error: loadError?.message ?? "Questions could not be loaded." };
 
-  const entryId = Math.max(...existing.map((question) => Number(question.entry_id)), 0) + 1;
+  // Must clear every SOURCE entry id, not just the ones this deployment asks.
+  // A new question that reused a withheld source id would be treated as a
+  // source row by the question loader and silently vanish from the form.
+  const entryId =
+    Math.max(
+      ...sourceQuestions.map((question) => question.entry_id),
+      ...existing.map((question) => Number(question.entry_id)),
+      0,
+    ) + 1;
   const orderIndex = Math.max(...existing.map((question) => Number(question.order_index)), 0) + 1;
   const { error } = await supabase.from("questions").insert({
     survey_id: surveyId,

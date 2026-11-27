@@ -17,8 +17,10 @@ import {
   participantQuestions,
   scaleOptions,
   scaleQuestions,
+  sourceScaleQuestions,
   schoolQuestion,
   schools,
+  sourceSections,
   surveySections,
   surveySource,
   surveyStats,
@@ -27,7 +29,7 @@ import {
   questionByEntryId,
   sectionForQuestion,
 } from "@/lib/survey/source";
-import { surveySteps, fieldsForStep } from "@/lib/survey/steps";
+import { surveySteps, fieldsForStep, stepsForQuestions } from "@/lib/survey/steps";
 
 type RawItem = {
   index: number;
@@ -61,18 +63,19 @@ describe("source JSON parsing", () => {
 
   it("has the verified structure: 33 items = 5 sections + 28 questions", () => {
     expect(raw.items).toHaveLength(33);
-    expect(surveyStats.sectionCount).toBe(5);
-    expect(surveyStats.questionCount).toBe(28);
+    expect(sourceSections).toHaveLength(5);
+    expect(sourceQuestions).toHaveLength(28);
+    expect(surveyStats.sourceQuestionCount).toBe(28);
   });
 
   it("has 27 required and 1 optional question", () => {
-    expect(surveyStats.requiredCount).toBe(27);
-    expect(surveyStats.optionalCount).toBe(1);
+    expect(sourceQuestions.filter((q) => q.required)).toHaveLength(27);
+    expect(sourceQuestions.filter((q) => !q.required)).toHaveLength(1);
   });
 
   it("has 180 schools in the source and 21 rating questions", () => {
     expect(sourceSchools).toHaveLength(180);
-    expect(surveyStats.scaleQuestionCount).toBe(21);
+    expect(sourceScaleQuestions).toHaveLength(21);
   });
 
   it("records the required built-in email collection", () => {
@@ -88,17 +91,17 @@ describe("source JSON parsing", () => {
 
 describe("exact content verification", () => {
   it("preserves every section title and description verbatim", () => {
-    expect(surveySections).toHaveLength(rawSections.length);
+    expect(sourceSections).toHaveLength(rawSections.length);
     rawSections.forEach((rawSection, i) => {
-      expect(surveySections[i]!.title).toBe(rawSection.title);
-      expect(surveySections[i]!.description).toBe(rawSection.description);
+      expect(sourceSections[i]!.title).toBe(rawSection.title);
+      expect(sourceSections[i]!.description).toBe(rawSection.description);
     });
   });
 
   it("preserves every question's wording, help text and entry id verbatim", () => {
-    expect(allQuestions).toHaveLength(rawQuestions.length);
+    expect(sourceQuestions).toHaveLength(rawQuestions.length);
     rawQuestions.forEach((rawQuestion, i) => {
-      const q = allQuestions[i]!;
+      const q = sourceQuestions[i]!;
       expect(q.title).toBe(rawQuestion.title);
       expect(q.description).toBe(rawQuestion.description);
       expect(q.entry_id).toBe(rawQuestion.entry_id);
@@ -108,7 +111,7 @@ describe("exact content verification", () => {
   });
 
   it("preserves original question ordering", () => {
-    const appOrder = allQuestions.map((q) => q.index);
+    const appOrder = sourceQuestions.map((q) => q.index);
     const rawOrder = rawQuestions.map((q) => q.index);
     expect(appOrder).toEqual(rawOrder);
     // and the indices are strictly increasing
@@ -151,7 +154,7 @@ describe("exact content verification", () => {
   });
 
   it("keeps '(Optional)' inside the optional question's own wording", () => {
-    const optional = allQuestions.filter((q) => !q.required);
+    const optional = sourceQuestions.filter((q) => !q.required);
     expect(optional).toHaveLength(1);
     expect(optional[0]!.title).toBe(
       "Is there anything you are worried or unsure about as you start this program? (Optional)",
@@ -185,44 +188,64 @@ describe("derived structure", () => {
 
   it("excludes Year Level from the rating questions", () => {
     expect(isScaleQuestion(yearLevelQuestion)).toBe(false);
-    expect(scaleQuestions).toHaveLength(21);
-    expect(scaleQuestions.every((q) => q.options?.length === 5)).toBe(true);
+    expect(sourceScaleQuestions).toHaveLength(21);
+    expect(sourceScaleQuestions.every((q) => q.options?.length === 5)).toBe(true);
   });
 
   it("assigns every section question to its section", () => {
-    const totalInSections = surveySections.reduce((n, s) => n + s.questions.length, 0);
-    expect(totalInSections + participantQuestions.length).toBe(allQuestions.length);
+    const totalInSections = sourceSections.reduce((n, s) => n + s.questions.length, 0);
+    expect(totalInSections + participantQuestions.length).toBe(sourceQuestions.length);
   });
 
   it("maps a question back to its section", () => {
-    const first = surveySections[0]!.questions[0]!;
-    expect(sectionForQuestion(first.entry_id)?.title).toBe(surveySections[0]!.title);
+    const first = sourceSections[0]!.questions[0]!;
+    expect(sectionForQuestion(first.entry_id)?.title).toBe(sourceSections[0]!.title);
     // participant questions belong to no section
     expect(sectionForQuestion(nameQuestion.entry_id)).toBeNull();
   });
 
   it("looks questions up by original entry id", () => {
-    for (const q of allQuestions) {
+    for (const q of sourceQuestions) {
       expect(questionByEntryId(q.entry_id)?.title).toBe(q.title);
     }
     expect(questionByEntryId(-1)).toBeUndefined();
   });
 
   it("derives short section labels A1, A2, A3, B, C", () => {
-    expect(surveySections.map((s) => s.shortLabel)).toEqual(["A1", "A2", "A3", "B", "C"]);
+    expect(sourceSections.map((s) => s.shortLabel)).toEqual(["A1", "A2", "A3", "B", "C"]);
   });
 });
 
 describe("guided step layout preserves the survey", () => {
-  it("has 7 steps: details, 5 sections, review", () => {
-    expect(surveySteps).toHaveLength(7);
+  it("opens with the applicant's details and ends with review", () => {
     expect(surveySteps[0]!.kind).toBe("details");
     expect(surveySteps.at(-1)!.kind).toBe("review");
-    expect(surveySteps.filter((s) => s.kind === "section")).toHaveLength(5);
+    expect(surveySteps.filter((s) => s.kind === "section")).toHaveLength(
+      surveySections.length,
+    );
   });
 
-  it("covers all 28 questions exactly once, in original order", () => {
+  it("covers every question this deployment asks exactly once, in order", () => {
     const stepped = surveySteps.flatMap((s) => s.questions.map((q) => q.entry_id));
+    expect(stepped).toHaveLength(allQuestions.length);
+    expect(new Set(stepped).size).toBe(stepped.length);
+    // same relative order as the original form
+    const askedInSourceOrder = rawQuestions
+      .map((q) => q.entry_id!)
+      .filter((id) => stepped.includes(id));
+    expect(stepped).toEqual(askedInSourceOrder);
+  });
+
+  it("lays out the WHOLE instrument as 7 steps when every question is asked", () => {
+    // Guards the path back: clearing the overlay must restore the full form,
+    // sections and all, rather than collapsing it to details + review.
+    const full = stepsForQuestions(sourceQuestions);
+    expect(full).toHaveLength(7);
+    expect(full[0]!.kind).toBe("details");
+    expect(full.at(-1)!.kind).toBe("review");
+    expect(full.filter((s) => s.kind === "section")).toHaveLength(5);
+
+    const stepped = full.flatMap((s) => s.questions.map((q) => q.entry_id));
     expect(stepped).toHaveLength(28);
     expect(new Set(stepped).size).toBe(28);
     expect(stepped).toEqual(rawQuestions.map((q) => q.entry_id));
@@ -236,7 +259,7 @@ describe("guided step layout preserves the survey", () => {
   });
 
   it("uses the exact original section title for each section step", () => {
-    const sectionSteps = surveySteps.filter((s) => s.kind === "section");
+    const sectionSteps = stepsForQuestions(sourceQuestions).filter((s) => s.kind === "section");
     sectionSteps.forEach((step, i) => {
       expect(step.title).toBe(rawSections[i]!.title);
       expect(step.description).toBe(rawSections[i]!.description);

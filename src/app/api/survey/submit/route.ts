@@ -9,8 +9,10 @@ import {
 } from "@/lib/survey/schema";
 import {
   allQuestions,
+  isAsked,
   nameQuestion,
   schoolQuestion,
+  schools,
   yearLevelQuestion,
   fieldKeyFor,
   type Question,
@@ -112,23 +114,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // The seeded survey must still match the source file. A mismatch means the
-  // database was seeded from a different version — refuse rather than store
-  // answers against the wrong questions.
+  // Only admin-created questions belong to this application.
   const sourceIds = new Set(allQuestions.map((question) => question.entry_id));
-  if (!allQuestions.every((question) => questionRows.some((row) => Number(row.entry_id) === question.entry_id))) {
-    console.error(
-      `[submit] source questions missing from database: found ${questionRows.length}`,
-    );
-    return NextResponse.json(
-      {
-        error:
-          "The survey in the database does not match the published survey. Please tell your PLP coordinator.",
-      },
-      { status: 500 },
-    );
-  }
-
   const customQuestions: Question[] = questionRows.flatMap((row) => {
     const entryId = Number(row.entry_id);
     if (sourceIds.has(entryId)) return [];
@@ -148,7 +135,7 @@ export async function POST(request: NextRequest) {
   });
 
   /* ---- 5. Authoritative validation against this survey's live questions ---- */
-  const issues: ValidationIssue[] = validateSubmissionAnswers(answers, [...allQuestions, ...customQuestions]);
+  const issues: ValidationIssue[] = validateSubmissionAnswers(answers, customQuestions);
   if (issues.length > 0) {
     return NextResponse.json(
       {
@@ -173,20 +160,37 @@ export async function POST(request: NextRequest) {
   }
 
   /* ---- 5. Denormalised columns, read from the validated answers ---- */
-  const fullName = answers[String(nameQuestion.entry_id)]?.trim() ?? "";
-  const schoolName = answers[String(schoolQuestion.entry_id)]?.trim() ?? "";
+  const fullName = answers[String(nameQuestion.entry_id)]?.trim() || "Not provided";
   const yearLevel = answers[String(yearLevelQuestion.entry_id)]?.trim() ?? "";
 
-  const { data: school } = await supabase
-    .from("schools")
-    .select("id")
-    .eq("name", schoolName)
-    .maybeSingle();
+  // When this deployment does not ask for the school, there is still exactly
+  // one school it can be — the overlay declares it — so record that rather
+  // than leaving every response unattributed and unfilterable in the
+  // dashboard. If the question IS asked, the answer always wins.
+  const answeredSchool = answers[String(schoolQuestion.entry_id)]?.trim() ?? "";
+  const assumedSchool =
+    !answeredSchool && !isAsked(schoolQuestion.entry_id) && schools.length === 1
+      ? schools[0]!
+      : "";
+  const schoolName = answeredSchool || assumedSchool;
 
-  if (!school) {
+  const { data: school } = schoolName
+    ? await supabase
+        .from("schools")
+        .select("id")
+        .eq("name", schoolName)
+        .maybeSingle()
+    : { data: null };
+
+  if (answeredSchool && !school) {
     // The name passed source validation, so the school list in the database is
     // out of step with the source file.
-    console.error(`[submit] school not found in database: ${schoolName}`);
+    //
+    // Only an ANSWERED school can fail here. An assumed one was never the
+    // applicant's choice, so a missing row is our bookkeeping problem, not a
+    // reason to throw away their application — it is recorded by name with no
+    // school_id and shows up in the dashboard either way.
+    console.error(`[submit] school not found in database: ${answeredSchool}`);
     return NextResponse.json(
       {
         error:
@@ -206,7 +210,7 @@ export async function POST(request: NextRequest) {
       email: email!.trim(),
       country_of_origin: countryOfOrigin,
       full_name: fullName,
-      school_id: school.id,
+      school_id: school?.id ?? null,
       school_name: schoolName,
       year_level: yearLevel,
       duration_seconds: meta?.durationSeconds ?? null,
@@ -243,7 +247,9 @@ export async function POST(request: NextRequest) {
     answer_text: value.trim(),
   }));
 
-  const { error: answersError } = await supabase.from("answers").insert(answerRows);
+  const { error: answersError } = answerRows.length
+    ? await supabase.from("answers").insert(answerRows)
+    : { error: null };
 
   if (answersError) {
     // Roll back the response so we never keep a submission with partial answers.

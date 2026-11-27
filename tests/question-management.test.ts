@@ -13,7 +13,11 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { allQuestions } from "@/lib/survey/source";
+import {
+  allQuestions,
+  participantQuestions,
+  sourceQuestions,
+} from "@/lib/survey/source";
 
 const sql = readFileSync(
   join(process.cwd(), "supabase", "migrations", "20261126175105_admin_added_questions.sql"),
@@ -125,20 +129,32 @@ describe("the application reads questions from the database", () => {
     "utf8",
   );
 
-  it("starts from the verified source questions", () => {
+  it("starts from the questions this deployment declares it asks", () => {
     expect(loader).toContain("allQuestions");
-    expect(allQuestions).toHaveLength(28);
+    // allQuestions is already narrowed to the declared set, so the loader needs
+    // to know nothing about withholding. This deployment declares none of them,
+    // which is why the application is built entirely from admin-added questions.
+    expect(allQuestions.length).toBeLessThanOrEqual(sourceQuestions.length);
   });
 
-  it("falls back to the source when the database is unreachable", () => {
-    expect(loader).toContain("if (!isServiceRoleConfigured()) return allQuestions;");
-    expect(loader).toContain("if (error || !rows) return allQuestions;");
+  it("ignores a source row the deployment withholds", () => {
+    // Matching withheld rows against the SOURCE ids (not the asked ones) is
+    // what stops a withheld row reappearing as though an admin had added it.
+    expect(loader).toContain(
+      "const sourceIds = new Set(sourceQuestions.map((question) => question.entry_id));",
+    );
+  });
+
+  it("shows no questions when the database is unreachable", () => {
+    expect(loader).toContain("if (!isServiceRoleConfigured()) return [];");
+    expect(loader).toContain("if (error || !rows) return [];");
   });
 
   it("never lets a database row override a source question", () => {
     // Source entry ids are skipped when building the custom list, so a row that
     // collides with one cannot replace the verified wording.
-    expect(loader).toContain("if (sourceById.has(entryId)) return [];");
+    expect(loader).toContain("if (sourceIds.has(entryId)) return [];");
+    expect(participantQuestions).toHaveLength(3);
   });
 
   it("orders additions after the source questions", () => {

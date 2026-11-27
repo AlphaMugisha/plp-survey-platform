@@ -167,6 +167,16 @@ function section(title: string) {
   lines.push(`${BOLD}${title}${RESET}`);
 }
 
+/** A check that passed because it did not apply, said out loud rather than hidden. */
+function pass(name: string) {
+  lines.push(`  [${GREEN}PASS${RESET}] ${name}`);
+}
+
+/** Context that is neither a pass nor a failure. */
+function note(text: string) {
+  lines.push(`         ${DIM}${text}${RESET}`);
+}
+
 /* ------------------------------------------------------------------ *
  * Run
  * ------------------------------------------------------------------ */
@@ -255,16 +265,59 @@ async function main() {
     .eq("survey_id", survey.id)
     .order("order_index");
 
-  const qs = questions ?? [];
-  check(qs.length === srcQuestions.length, `${srcQuestions.length} questions seeded`, `found ${qs.length}`);
+  const allRows = questions ?? [];
+
+  // This deployment may declare that it asks only part of the instrument (see
+  // `overrides.questions` in data/deployment.json), and an admin may have added
+  // questions of their own. So the database is checked in two parts:
+  //
+  //   the DECLARED source questions  — must match the source exactly
+  //   everything else                — admin-added, and not the source's business
+  //
+  // A row for a withheld question is not an error: the rows are an archive of
+  // the verified instrument. What WOULD be an error is a declared question
+  // missing, or a source question whose stored wording has drifted.
+  const askedIds = new Set(effectiveQuestions.map((q) => q.entry_id));
+  const sourceIds = new Set(srcQuestions.map((q) => q.entry_id));
+
+  const qs = allRows.filter((r) => askedIds.has(Number(r.entry_id)));
+  const addedRows = allRows.filter((r) => !sourceIds.has(Number(r.entry_id)));
+  const archivedRows = allRows.filter(
+    (r) => sourceIds.has(Number(r.entry_id)) && !askedIds.has(Number(r.entry_id)),
+  );
+
+  const expectedQuestions = srcQuestions.filter(
+    (q) => q.entry_id !== undefined && askedIds.has(q.entry_id),
+  );
+
   check(
-    qs.filter((q) => q.is_required).length === srcQuestions.filter((q) => q.required).length,
-    "27 required / 1 optional",
+    qs.length === expectedQuestions.length,
+    `${expectedQuestions.length} declared source question(s) present`,
+    `found ${qs.length} of ${expectedQuestions.length}`,
+  );
+  check(
+    qs.filter((q) => q.is_required).length ===
+      expectedQuestions.filter((q) => q.required).length,
+    "Required flags match the declared set",
     `found ${qs.filter((q) => q.is_required).length} required`,
   );
 
+  if (addedRows.length > 0) {
+    note(
+      `${addedRows.length} question(s) added by an administrator (not from the source form).`,
+    );
+  }
+  if (archivedRows.length > 0) {
+    note(
+      `${archivedRows.length} source question row(s) kept but not asked — withheld by this deployment.`,
+    );
+  }
+  if (expectedQuestions.length === 0 && addedRows.length === 0) {
+    note("This form has no questions yet. Add them from the admin dashboard.");
+  }
+
   let qMismatch: string | null = null;
-  srcQuestions.forEach((src, i) => {
+  expectedQuestions.forEach((src, i) => {
     const row = qs[i];
     if (!row) {
       qMismatch ??= `question ${i + 1} missing`;
@@ -292,15 +345,27 @@ async function main() {
   if (qMismatch !== null && /options differ/u.test(qMismatch)) overlayLikelyMissing = true;
   check(qMismatch === null, "Wording, entry ids, order, flags and options match source exactly", qMismatch ?? undefined);
 
-  const scaleQs = qs.filter((q) => Array.isArray(q.options) && (q.options as string[]).length === 5);
-  check(scaleQs.length === 21, "21 rating questions", `found ${scaleQs.length}`);
-
-  const firstOption = (scaleQs[0]?.options as string[] | undefined)?.[0];
-  check(
-    firstOption === "1 — Strongly Disagree / Not at all",
-    "Scale options stored as exact strings (em dash intact)",
-    `found "${firstOption}"`,
+  // The 21 rating questions only need checking when this deployment asks them.
+  const expectedScale = expectedQuestions.filter((q) => q.options?.length === 5).length;
+  const scaleQs = qs.filter(
+    (q) => Array.isArray(q.options) && (q.options as string[]).length === 5,
   );
+  check(
+    scaleQs.length === expectedScale,
+    `${expectedScale} rating question(s) asked`,
+    `found ${scaleQs.length}`,
+  );
+
+  if (expectedScale > 0) {
+    const firstOption = (scaleQs[0]?.options as string[] | undefined)?.[0];
+    check(
+      firstOption === "1 — Strongly Disagree / Not at all",
+      "Scale options stored as exact strings (em dash intact)",
+      `found "${firstOption}"`,
+    );
+  } else {
+    pass("Scale option check skipped — no rating question is asked");
+  }
 
   /* ---------------- 4. Schools ---------------- */
   section("Schools");

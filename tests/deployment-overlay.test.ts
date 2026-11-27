@@ -19,6 +19,8 @@ import {
   yearLevelQuestion,
   deployment,
   hasDeploymentOverrides,
+  withheldQuestions,
+  sourceSections,
 } from "@/lib/survey/source";
 import { emptyFormValues } from "@/lib/survey/schema";
 
@@ -38,21 +40,38 @@ describe("the source file is never altered by an overlay", () => {
   });
 
   it("leaves every question's wording, id, type and required flag untouched", () => {
-    expect(allQuestions).toHaveLength(sourceQuestions.length);
-    allQuestions.forEach((q, i) => {
-      const src = sourceQuestions[i]!;
-      expect(q.title).toBe(src.title);
-      expect(q.description).toBe(src.description);
-      expect(q.entry_id).toBe(src.entry_id);
-      expect(q.type).toBe(src.type);
-      expect(q.required).toBe(src.required);
-      expect(q.index).toBe(src.index);
-    });
+    // The deployed set may be a declared SUBSET of the source, so match on
+    // entry id rather than position. Every question that survives must be
+    // character-for-character the source question.
+    const byEntryId = new Map(sourceQuestions.map((q) => [q.entry_id, q]));
+    for (const q of allQuestions) {
+      const src = byEntryId.get(q.entry_id);
+      expect(src, `entry ${q.entry_id} is not in the source`).toBeDefined();
+      expect(q.title).toBe(src!.title);
+      expect(q.description).toBe(src!.description);
+      expect(q.type).toBe(src!.type);
+      expect(q.required).toBe(src!.required);
+      expect(q.index).toBe(src!.index);
+    }
+  });
+
+  it("asks a subset of the source, never anything the source does not have", () => {
+    const sourceIds = new Set(sourceQuestions.map((q) => q.entry_id));
+    for (const q of allQuestions) {
+      expect(sourceIds.has(q.entry_id), `"${q.title}" is not in the source`).toBe(true);
+    }
+    expect(allQuestions.length + withheldQuestions.length).toBe(sourceQuestions.length);
+  });
+
+  it("keeps the whole instrument available even when questions are withheld", () => {
+    expect(sourceQuestions).toHaveLength(28);
+    expect(sourceSections).toHaveLength(5);
   });
 
   it("changes only the options of the school and year-level questions", () => {
-    const changed = allQuestions.filter((q, i) => {
-      const src = sourceQuestions[i]!;
+    const byEntryId = new Map(sourceQuestions.map((q) => [q.entry_id, q]));
+    const changed = allQuestions.filter((q) => {
+      const src = byEntryId.get(q.entry_id)!;
       return JSON.stringify(q.options ?? null) !== JSON.stringify(src.options ?? null);
     });
 
@@ -72,7 +91,12 @@ describe("every override is declared with a reason", () => {
     for (const [key, override] of Object.entries(deployment.overrides)) {
       if (!override) continue;
       expect(override.reason.length, `${key} needs a reason`).toBeGreaterThan(20);
-      expect(override.options.length, `${key} needs at least one option`).toBeGreaterThan(0);
+
+      // An option override must offer something; a question set may be empty,
+      // which declares that the admin writes every question.
+      if ("options" in override) {
+        expect(override.options.length, `${key} must offer an option`).toBeGreaterThan(0);
+      }
     }
   });
 });
@@ -98,20 +122,22 @@ describe("the active deployment", () => {
     ]);
   });
 
-  it("pre-fills the school, because there is no choice to make", () => {
-    const values = emptyFormValues();
+  it("pre-fills the school when the school question is asked", () => {
+    // This deployment withholds it, so the form has no school field at all —
+    // but the behaviour must still hold for a deployment that asks it.
+    const values = emptyFormValues([schoolQuestion]);
     expect(values[schoolQuestion.fieldKey]).toBe("New Generation Academy");
   });
 
   it("does not pre-fill the year level, which is a real choice", () => {
-    const values = emptyFormValues();
+    const values = emptyFormValues([yearLevelQuestion]);
     expect(values[yearLevelQuestion.fieldKey]).toBe("");
   });
 
-  it("leaves every other answer blank", () => {
+  it("leaves every answer blank on a form it does not pre-fill", () => {
     const values = emptyFormValues();
     const prefilled = Object.entries(values).filter(([, v]) => v !== "");
-    expect(prefilled.map(([k]) => k)).toEqual([schoolQuestion.fieldKey]);
+    expect(prefilled.map(([k]) => k)).toEqual([]);
   });
 });
 

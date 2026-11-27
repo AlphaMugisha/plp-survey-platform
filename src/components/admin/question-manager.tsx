@@ -113,11 +113,18 @@ export function QuestionManager({
   surveyId,
   questions,
   canManage,
+  withheldCount = 0,
   actions,
 }: {
   surveyId: string;
   questions: ManagedQuestion[];
   canManage: boolean;
+  /**
+   * Source questions this deployment does not ask. Reported rather than
+   * hidden, so the gap between the official instrument and this application
+   * is always visible to whoever is managing it.
+   */
+  withheldCount?: number;
   actions: { add: Action; edit: Action; remove: Action };
 }) {
   const [result, setResult] = React.useState<ActionResult | null>(null);
@@ -132,6 +139,34 @@ export function QuestionManager({
 
   const seededGroups = groupByKind(seeded);
   const addedGroups = groupByKind(added);
+
+  /*
+   * What this panel is depends on the deployment.
+   *
+   * When the PLP form's own questions are all withheld, these ARE the
+   * application — so the panel says so, and names the withheld count rather
+   * than leaving the reader wondering where the original questions went.
+   */
+  const applicationQuestionsDescription = (() => {
+    const whereabouts =
+      withheldCount > 0
+        ? ` The PLP form's ${withheldCount} baseline questions are not asked here — they are kept, not deleted, and come back when the deployment asks for them.`
+        : "";
+
+    if (added.length === 0) {
+      return (
+        (seeded.length === 0
+          ? "This application has no questions yet. Add the first one and it appears on the form straight away."
+          : "Questions added here appear on the application straight away, after the applicant's details.") +
+        whereabouts
+      );
+    }
+
+    const count = `${added.length} question${added.length === 1 ? "" : "s"}`;
+    return seeded.length === 0
+      ? `${count}, asked in this order.${whereabouts}`
+      : `${count}, asked after the applicant's details.${whereabouts}`;
+  })();
 
   async function run(action: Action, formData: FormData) {
     setPending(true);
@@ -185,12 +220,8 @@ export function QuestionManager({
 
       {/* ================= Questions you added ================= */}
       <Panel
-        title="Questions you added"
-        description={
-          added.length === 0
-            ? "Questions added here appear on the application straight away."
-            : `${added.length} added, shown after the ${seeded.length} questions from the PLP form.`
-        }
+        title={seeded.length === 0 ? "Application questions" : "Questions you added"}
+        description={applicationQuestionsDescription}
         bodyClassName={added.length === 0 && !adding ? "p-0" : undefined}
         actions={
           canManage ? (
@@ -533,10 +564,19 @@ export function QuestionManager({
         )}
       </Panel>
 
-      {/* ================= Questions from the verified form ================= */}
+      {/* =============== Questions from the verified form ===============
+          Hidden entirely when this deployment asks none of them: an empty
+          panel headed "Verified · locked" reads as something being broken.
+          The withheld count is reported on the panel above instead. */}
+      {seeded.length > 0 && (
       <Panel
-        title="Questions from the PLP form"
-        description={`${seeded.length} questions extracted and verified from the original Google Form. These cannot be edited or removed.`}
+        title={withheldCount > 0 ? "Applicant details" : "Questions from the PLP form"}
+        description={
+          withheldCount > 0
+            ? `${seeded.length} question${seeded.length === 1 ? "" : "s"} carried over from the verified PLP form. ` +
+              `The other ${withheldCount} belong to the termly baseline survey and are not asked on this application — they are kept, not deleted.`
+            : `${seeded.length} questions extracted and verified from the original Google Form. These cannot be edited or removed.`
+        }
         actions={
           <Badge variant="outline" size="md">
             <ShieldCheck className="size-3" aria-hidden="true" />
@@ -585,6 +625,7 @@ export function QuestionManager({
           ))}
         </div>
       </Panel>
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { NextRequest } from "next/server";
-import { allQuestions, nameQuestion, schoolQuestion, yearLevelQuestion } from "@/lib/survey/source";
+import { allQuestions, sourceQuestions } from "@/lib/survey/source";
 
 /* ------------------------------------------------------------------ *
  * A small chainable stand-in for the Supabase query builder
@@ -104,15 +104,25 @@ const { POST } = await import("@/app/api/survey/submit/route");
 const SURVEY_ID = "11111111-1111-1111-1111-111111111111";
 const SCHOOL_ID = "22222222-2222-2222-2222-222222222222";
 const RESPONSE_ID = "33333333-3333-3333-3333-333333333333";
+const CUSTOM_ENTRY_ID =
+  Math.max(...sourceQuestions.map((question) => question.entry_id)) + 1;
 
 function validAnswers(): Record<string, string> {
-  const answers: Record<string, string> = {};
-  for (const q of allQuestions) {
-    if (q.options?.length) answers[String(q.entry_id)] = q.options[0]!;
-    else if (q.type === "paragraph") answers[String(q.entry_id)] = "A considered answer.";
-    else answers[String(q.entry_id)] = "Alice Uwase";
-  }
-  return answers;
+  return {};
+}
+
+function customQuestion(options = ["Yes", "No"]) {
+  return {
+    id: `q-${CUSTOM_ENTRY_ID}`,
+    entry_id: CUSTOM_ENTRY_ID,
+    order_index: 3,
+    title: "Would you like to join?",
+    description: null,
+    type: "multiple_choice",
+    options,
+    is_required: true,
+    is_custom: true,
+  };
 }
 
 function request(body: unknown): NextRequest {
@@ -126,13 +136,7 @@ function request(body: unknown): NextRequest {
 function happyPath() {
   tables.surveys = { single: { id: SURVEY_ID, status: "active", title: "Baseline" } };
   tables.questions = {
-    rows: allQuestions.map((q) => ({
-      id: `q-${q.entry_id}`,
-      entry_id: q.entry_id,
-      type: q.type,
-      options: q.options ?? null,
-      is_required: q.required,
-    })),
+    rows: [],
   };
   tables.schools = { single: { id: SCHOOL_ID } };
   tables.survey_responses = { single: { id: RESPONSE_ID } };
@@ -168,7 +172,7 @@ describe("configuration honesty", () => {
 });
 
 describe("accepting a valid submission", () => {
-  it("stores the response and one answer per question", async () => {
+  it("stores the response when no questions have been added yet", async () => {
     const response = await POST(
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
@@ -181,10 +185,10 @@ describe("accepting a valid submission", () => {
     expect(response.status).toBe(201);
     const body = await response.json();
     expect(body.ok).toBe(true);
-    expect(body.answersStored).toBe(28);
+    expect(body.answersStored).toBe(0);
   });
 
-  it("links every answer to its response and its question", async () => {
+  it("does not create answer rows when there are no questions", async () => {
     await POST(
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
@@ -194,33 +198,12 @@ describe("accepting a valid submission", () => {
       }),
     );
 
-    const insert = calls.find((c) => c.table === "answers" && c.op === "insert");
-    expect(insert).toBeDefined();
-
-    const rows = insert!.payload as Array<{
-      response_id: string;
-      question_id: string;
-      entry_id: number;
-      answer_text: string;
-    }>;
-
-    expect(rows).toHaveLength(28);
-    for (const row of rows) {
-      expect(row.response_id).toBe(RESPONSE_ID);
-      expect(row.question_id).toBe(`q-${row.entry_id}`);
-      expect(row.answer_text.length).toBeGreaterThan(0);
-    }
-
-    // Every original entry id is represented exactly once.
-    const ids = rows.map((r) => r.entry_id).sort((a, b) => a - b);
-    const expected = allQuestions.map((q) => q.entry_id).sort((a, b) => a - b);
-    expect(ids).toEqual(expected);
+    expect(calls.some((c) => c.table === "answers" && c.op === "insert")).toBe(false);
   });
 
-  it("stores choice answers as the exact original option string", async () => {
-    const answers = validAnswers();
-    const rating = allQuestions.find((q) => q.options?.length === 5)!;
-    answers[String(rating.entry_id)] = rating.options![2]!;
+  it("stores admin-added choice answers with the selected option", async () => {
+    tables.questions = { rows: [customQuestion()] };
+    const answers = { [String(CUSTOM_ENTRY_ID)]: "No" };
 
     await POST(
       request({
@@ -235,18 +218,13 @@ describe("accepting a valid submission", () => {
       entry_id: number;
       answer_text: string;
     }>;
-    const stored = rows.find((r) => r.entry_id === rating.entry_id)!;
+    const stored = rows.find((r) => r.entry_id === CUSTOM_ENTRY_ID)!;
 
-    expect(stored.answer_text).toBe("3 — Neutral / Sometimes");
-    expect(stored.answer_text).not.toBe("3");
+    expect(stored.answer_text).toBe("No");
   });
 
   it("derives the denormalised columns from the validated answers", async () => {
     const answers = validAnswers();
-    answers[String(nameQuestion.entry_id)] = "Alice Uwase";
-    answers[String(schoolQuestion.entry_id)] = schoolQuestion.options![0]!;
-    answers[String(yearLevelQuestion.entry_id)] = yearLevelQuestion.options![0]!;
-
     await POST(
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
@@ -260,10 +238,15 @@ describe("accepting a valid submission", () => {
       (c) => c.table === "survey_responses" && c.op === "insert",
     )!.payload as Record<string, unknown>;
 
-    expect(payload.full_name).toBe("Alice Uwase");
-    expect(payload.school_name).toBe(schoolQuestion.options![0]);
-    expect(payload.year_level).toBe(yearLevelQuestion.options![0]);
-    expect(payload.school_id).toBe(SCHOOL_ID);
+    // The applicant's name now comes from a question the admin wrote, so the
+    // denormalised column has nothing to read.
+    expect(payload.full_name).toBe("Not provided");
+    expect(payload.year_level).toBe("");
+
+    // The school is not asked, but this deployment declares exactly one, so it
+    // is recorded anyway — otherwise every response would be unattributed and
+    // the dashboard's school filter would be useless.
+    expect(payload.school_name).toBe("New Generation Academy");
     expect(payload.country_of_origin).toBe("Rwanda");
     expect(payload.survey_id).toBe(SURVEY_ID);
   });
@@ -290,8 +273,8 @@ describe("accepting a valid submission", () => {
 
 describe("rejecting invalid submissions", () => {
   it("rejects a missing required answer with 422", async () => {
+    tables.questions = { rows: [customQuestion()] };
     const answers = validAnswers();
-    delete answers[String(nameQuestion.entry_id)];
 
     const response = await POST(
       request({
@@ -307,10 +290,10 @@ describe("rejecting invalid submissions", () => {
     expect(body.issues.length).toBeGreaterThan(0);
   });
 
-  it("rejects an option that is not in the source, even if the client sent it", async () => {
+  it("rejects a choice outside the admin question options", async () => {
+    tables.questions = { rows: [customQuestion()] };
     const answers = validAnswers();
-    const rating = allQuestions.find((q) => q.options?.length === 5)!;
-    answers[String(rating.entry_id)] = "5 — Totally Agree";
+    answers[String(CUSTOM_ENTRY_ID)] = "Maybe";
 
     const response = await POST(
       request({
@@ -326,9 +309,10 @@ describe("rejecting invalid submissions", () => {
     expect(calls.some((c) => c.op === "insert")).toBe(false);
   });
 
-  it("rejects a school that is not on the original list", async () => {
+  it("rejects answers to withheld source questions", async () => {
     const answers = validAnswers();
-    answers[String(schoolQuestion.entry_id)] = "Fake School";
+    // A question from the verified form that this deployment does not ask.
+    answers[String(sourceQuestions[0]!.entry_id)] = "Old question answer";
 
     const response = await POST(
       request({
@@ -393,17 +377,7 @@ describe("rejecting invalid submissions", () => {
     expect(response.status).toBe(404);
   });
 
-  it("refuses when the seeded question count does not match the source", async () => {
-    tables.questions = {
-      rows: allQuestions.slice(0, 10).map((q) => ({
-        id: `q-${q.entry_id}`,
-        entry_id: q.entry_id,
-        type: q.type,
-        options: q.options ?? null,
-        is_required: q.required,
-      })),
-    };
-
+  it("accepts submissions after the original questions are cleared", async () => {
     const response = await POST(
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
@@ -413,8 +387,7 @@ describe("rejecting invalid submissions", () => {
       }),
     );
 
-    expect(response.status).toBe(500);
-    expect((await response.json()).error).toMatch(/does not match the published survey/i);
+    expect(response.status).toBe(201);
   });
 
   it("reports a duplicate submission clearly", async () => {
@@ -439,6 +412,7 @@ describe("rejecting invalid submissions", () => {
 
 describe("no partial submissions", () => {
   it("rolls the response back when the answers fail to insert", async () => {
+    tables.questions = { rows: [customQuestion()] };
     tables.answers = { insertError: { message: "insert failed" } };
 
     const response = await POST(
@@ -446,7 +420,7 @@ describe("no partial submissions", () => {
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
         countryOfOrigin: "Rwanda",
-        answers: validAnswers(),
+        answers: { [String(CUSTOM_ENTRY_ID)]: "Yes" },
       }),
     );
 

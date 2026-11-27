@@ -7,14 +7,15 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SurveyForm } from "@/components/survey/survey-form";
 import {
-  allQuestions,
+  participantQuestions,
   nameQuestion,
-  scaleOptions,
   schoolQuestion,
   yearLevelQuestion,
-  surveySections,
 } from "@/lib/survey/source";
-import { surveySteps } from "@/lib/survey/steps";
+import { stepsForQuestions } from "@/lib/survey/steps";
+import { labels } from "@/lib/survey/framing";
+
+const applicationSteps = stepsForQuestions(participantQuestions);
 
 // Whatever school this deployment offers. With a single-school deployment
 // the field is pre-filled and shown as settled rather than as a dropdown.
@@ -59,20 +60,6 @@ async function fillDetails(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("radio", { name: YEAR }));
 }
 
-/** Answer every rating question on the current section step (if it has any). */
-async function answerCurrentSection(
-  user: ReturnType<typeof userEvent.setup>,
-  optionIndex = 4,
-) {
-  // Section C is free text, so a step may legitimately have no radio groups.
-  const groups = screen.queryAllByRole("radiogroup");
-  for (const group of groups) {
-    const radios = within(group).getAllByRole("radio");
-    const target = radios[optionIndex] ?? radios[0]!;
-    await user.click(target);
-  }
-}
-
 function clickContinue(user: ReturnType<typeof userEvent.setup>) {
   const button =
     screen.queryByRole("button", { name: /Continue/u }) ??
@@ -85,33 +72,41 @@ function clickContinue(user: ReturnType<typeof userEvent.setup>) {
  * ------------------------------------------------------------------ */
 
 describe("initial state", () => {
-  it("starts on the details step of 7", () => {
+  it("shows no questions until an admin adds them", () => {
     render(<SurveyForm />);
-    expect(screen.getByText(`Step 1 of ${surveySteps.length}`)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Email/u)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Which country are you from/u)).toBeInTheDocument();
+    expect(screen.queryByLabelText(nameQuestion.title)).not.toBeInTheDocument();
+    expect(screen.queryByRole("radio", { name: YEAR })).not.toBeInTheDocument();
+  });
+
+  it("starts on the details step, followed by review", () => {
+    render(<SurveyForm questions={participantQuestions} />);
+    expect(screen.getByText(`Step 1 of ${applicationSteps.length}`)).toBeInTheDocument();
     expect(screen.getByText("Your details")).toBeInTheDocument();
   });
 
   it("starts the progress indicator from whatever is pre-filled", () => {
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
     const bar = screen.getByRole("progressbar", { name: /Overall completion/u });
     // A single-school deployment answers the school question in advance, so
     // the bar legitimately starts just above zero.
     const shown = Number(bar.getAttribute("aria-valuenow"));
     if (SINGLE_SCHOOL) {
       expect(shown).toBeGreaterThan(0);
-      expect(shown).toBeLessThan(10);
+      expect(shown).toBeLessThan(100);
     } else {
       expect(shown).toBe(0);
     }
   });
 
   it("disables Previous on the first step", () => {
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
     expect(screen.getByRole("button", { name: /Previous/u })).toBeDisabled();
   });
 
   it("renders the required email field from the form's email-collection setting", () => {
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
     expect(screen.getByLabelText(/^Email/u)).toBeInTheDocument();
   });
 });
@@ -119,12 +114,12 @@ describe("initial state", () => {
 describe("required-field validation blocks navigation", () => {
   it("refuses to advance while the details step is empty", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await clickContinue(user);
 
     // Still on step 1, with errors surfaced.
-    expect(screen.getByText(`Step 1 of ${surveySteps.length}`)).toBeInTheDocument();
+    expect(screen.getByText(`Step 1 of ${applicationSteps.length}`)).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText("Your email address is required.")).toBeInTheDocument();
     });
@@ -144,61 +139,46 @@ describe("required-field validation blocks navigation", () => {
 
   it("advances once the details are valid", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await fillDetails(user);
     await clickContinue(user);
 
     await waitFor(() => {
-      expect(screen.getByText(`Step 2 of ${surveySteps.length}`)).toBeInTheDocument();
+      expect(screen.getByText(`Step 2 of ${applicationSteps.length}`)).toBeInTheDocument();
     });
-    expect(screen.getByText(surveySections[0]!.plainTitle)).toBeInTheDocument();
+    expect(screen.getByText(labels.reviewTitle)).toBeInTheDocument();
   });
 
-  it("refuses to leave a section with unanswered rating questions", async () => {
+  it("does not show the old survey questions", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await fillDetails(user);
     await clickContinue(user);
-    await waitFor(() => screen.getByText(`Step 2 of ${surveySteps.length}`));
-
-    await clickContinue(user);
-
-    await waitFor(() => {
-      expect(
-        screen.getAllByText("Please choose one of the options.").length,
-      ).toBeGreaterThan(0);
-    });
-    expect(screen.getByText(`Step 2 of ${surveySteps.length}`)).toBeInTheDocument();
+    await waitFor(() => screen.getByText(`Step 2 of ${applicationSteps.length}`));
+    expect(screen.queryByText("SECTION A1 — Leadership Identity & Confidence")).not.toBeInTheDocument();
   });
 });
 
 describe("rating selection", () => {
-  it("records the exact original option string", async () => {
+  it("records the selected year level", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await fillDetails(user);
-    await clickContinue(user);
-    await waitFor(() => screen.getByText(`Step 2 of ${surveySteps.length}`));
-
-    const chosen = scaleOptions[2]!;
-    const radio = screen.getAllByRole("radio", { name: chosen })[0]!;
+    const radio = screen.getByRole("radio", { name: YEAR });
     await user.click(radio);
 
     expect(radio).toBeChecked();
-    expect(radio).toHaveAttribute("value", chosen);
+    expect(radio).toHaveAttribute("value", YEAR);
   });
 
   it("marks only one option per question as selected", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await fillDetails(user);
-    await clickContinue(user);
-    await waitFor(() => screen.getByText(`Step 2 of ${surveySteps.length}`));
-
     const group = screen.getAllByRole("radiogroup")[0]!;
     const radios = within(group).getAllByRole("radio");
 
@@ -212,7 +192,7 @@ describe("rating selection", () => {
 
   it("advances the progress bar as answers are given", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await fillDetails(user);
     const bar = screen.getByRole("progressbar", { name: /Overall completion/u });
@@ -225,52 +205,54 @@ describe("rating selection", () => {
 describe("section navigation and answer persistence", () => {
   it("keeps answers when moving back and forward", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await fillDetails(user);
     await clickContinue(user);
-    await waitFor(() => screen.getByText(`Step 2 of ${surveySteps.length}`));
-
-    const chosen = scaleOptions[4]!;
-    await user.click(screen.getAllByRole("radio", { name: chosen })[0]!);
+    await waitFor(() => screen.getByText(labels.reviewTitle));
 
     // Back to the details step…
     await user.click(screen.getByRole("button", { name: /Previous/u }));
-    await waitFor(() => screen.getByText(`Step 1 of ${surveySteps.length}`));
+    await waitFor(() => screen.getByText(`Step 1 of ${applicationSteps.length}`));
     expect(screen.getByLabelText(/^Email/u)).toHaveValue("student@example.org");
     expect(screen.getByLabelText(nameQuestion.title)).toHaveValue("Alice Uwase");
 
-    // …and forward again: the rating is still selected.
+    // …and forward again: the details are still selected.
     await clickContinue(user);
-    await waitFor(() => screen.getByText(`Step 2 of ${surveySteps.length}`));
-    expect(screen.getAllByRole("radio", { name: chosen })[0]).toBeChecked();
+    await waitFor(() => screen.getByText(labels.reviewTitle));
+    await user.click(screen.getByRole("button", { name: /Edit/u }));
+    await waitFor(() => expect(screen.getByRole("radio", { name: YEAR })).toBeChecked());
   });
 
   it("lets a completed step be revisited from the progress rail", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await fillDetails(user);
     await clickContinue(user);
-    await waitFor(() => screen.getByText(`Step 2 of ${surveySteps.length}`));
+    await waitFor(() => screen.getByText(`Step 2 of ${applicationSteps.length}`));
 
     // The rail button's step number is aria-hidden, so its accessible name is
     // just the step label.
     await user.click(screen.getByRole("button", { name: "You" }));
     await waitFor(() => {
-      expect(screen.getByText(`Step 1 of ${surveySteps.length}`)).toBeInTheDocument();
+      expect(screen.getByText(`Step 1 of ${applicationSteps.length}`)).toBeInTheDocument();
     });
   });
 
   it("does not let an unreached step be jumped to", async () => {
-    render(<SurveyForm />);
-    // Section C has not been reached yet.
-    expect(screen.getByRole("button", { name: /Review/u })).toBeDisabled();
+    render(<SurveyForm questions={participantQuestions} />);
+    // Review has not been reached yet.
+    expect(
+      within(screen.getByRole("navigation", { name: "Survey progress" })).getByRole("button", {
+        name: "Review",
+      }),
+    ).toBeDisabled();
   });
 
   it("restores a saved draft after a remount", async () => {
     const user = userEvent.setup();
-    const first = render(<SurveyForm />);
+    const first = render(<SurveyForm questions={participantQuestions} />);
 
     await fillDetails(user);
     await waitFor(() =>
@@ -280,7 +262,7 @@ describe("section navigation and answer persistence", () => {
     );
 
     first.unmount();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await waitFor(() => {
       expect(screen.getByLabelText(/^Email/u)).toHaveValue("student@example.org");
@@ -290,58 +272,41 @@ describe("section navigation and answer persistence", () => {
 });
 
 describe("review screen and submission", () => {
-  /** Walk the whole survey: details, all five sections, then review. */
+  /** Walk the application: participant details, then review. */
   async function completeSurvey(user: ReturnType<typeof userEvent.setup>) {
     await fillDetails(user);
     await clickContinue(user);
-
-    for (let i = 0; i < surveySections.length; i += 1) {
-      await waitFor(() => screen.getByText(`Step ${i + 2} of ${surveySteps.length}`));
-
-      await answerCurrentSection(user);
-
-      // Section C is free text, not ratings.
-      for (const textarea of screen.queryAllByRole("textbox")) {
-        if (textarea.tagName === "TEXTAREA") {
-          await user.type(textarea, "My considered answer.");
-        }
-      }
-
-      await clickContinue(user);
-    }
-
-    await waitFor(() => screen.getByText("Review your answers"));
+    await waitFor(() => screen.getByText(labels.reviewTitle));
   }
 
   it("reaches the review screen with every answer shown exactly", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await completeSurvey(user);
 
     expect(screen.getByText("student@example.org")).toBeInTheDocument();
     expect(screen.getByText("Alice Uwase")).toBeInTheDocument();
     expect(screen.getByText(SCHOOL)).toBeInTheDocument();
-    // The full original option string, not a number.
-    expect(screen.getAllByText(scaleOptions[4]!).length).toBeGreaterThan(0);
+    expect(screen.getByText(YEAR)).toBeInTheDocument();
   });
 
   it("enables submit only when nothing required is missing", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await completeSurvey(user);
 
-    const submit = screen.getByRole("button", { name: /Submit survey/u });
+    const submit = screen.getByRole("button", { name: labels.submit });
     expect(submit).toBeEnabled();
   });
 
   it("posts the answers keyed by original entry id", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await completeSurvey(user);
-    await user.click(screen.getByRole("button", { name: /Submit survey/u }));
+    await user.click(screen.getByRole("button", { name: labels.submit }));
 
     await waitFor(() => expect(fetch).toHaveBeenCalled());
 
@@ -352,15 +317,14 @@ describe("review screen and submission", () => {
     expect(body.email).toBe("student@example.org");
     expect(body.surveySlug).toBe("plp-survey-1-baseline-term-1");
 
-    // All 27 required answers present, keyed by entry id.
-    const requiredIds = allQuestions.filter((q) => q.required).map((q) => String(q.entry_id));
+    // The required participant details are keyed by their entry ids.
+    const requiredIds = participantQuestions.filter((q) => q.required).map((q) => String(q.entry_id));
     for (const id of requiredIds) {
       expect(body.answers[id]).toBeTruthy();
     }
 
-    // Choice answers are the exact option strings.
-    const rating = allQuestions.find((q) => q.options?.length === 5)!;
-    expect(body.answers[String(rating.entry_id)]).toBe(scaleOptions[4]);
+    // The participant detail choices remain the exact option strings.
+    expect(body.answers[String(yearLevelQuestion.entry_id)]).toBe(YEAR);
 
     // And the school is the exact original name.
     expect(body.answers[String(schoolQuestion.entry_id)]).toBe(SCHOOL);
@@ -368,10 +332,10 @@ describe("review screen and submission", () => {
 
   it("clears the saved draft once the submission is accepted", async () => {
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await completeSurvey(user);
-    await user.click(screen.getByRole("button", { name: /Submit survey/u }));
+    await user.click(screen.getByRole("button", { name: labels.submit }));
 
     await waitFor(() => {
       expect(window.localStorage.getItem("plp-survey-draft-v1")).toBeNull();
@@ -388,10 +352,10 @@ describe("review screen and submission", () => {
     );
 
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await completeSurvey(user);
-    await user.click(screen.getByRole("button", { name: /Submit survey/u }));
+    await user.click(screen.getByRole("button", { name: labels.submit }));
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent("This survey is closed.");
@@ -409,10 +373,10 @@ describe("review screen and submission", () => {
     );
 
     const user = userEvent.setup();
-    render(<SurveyForm />);
+    render(<SurveyForm questions={participantQuestions} />);
 
     await completeSurvey(user);
-    await user.click(screen.getByRole("button", { name: /Submit survey/u }));
+    await user.click(screen.getByRole("button", { name: labels.submit }));
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(/could not reach the server/i);

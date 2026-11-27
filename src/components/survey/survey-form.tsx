@@ -22,7 +22,6 @@ import { QuestionField } from "./question-field";
 import { ReviewPanel } from "./review-panel";
 import { ScaleKey } from "./scale-key";
 import {
-  allQuestions,
   isScaleLegend,
   surveySource,
   BASELINE_SURVEY_SLUG,
@@ -35,6 +34,7 @@ import {
 } from "@/lib/survey/schema";
 import { fieldsForStep, stepsForQuestions } from "@/lib/survey/steps";
 import type { Question } from "@/lib/survey/source";
+import { isApplication, labels } from "@/lib/survey/framing";
 import { cn } from "@/lib/utils";
 import type { ApplicationWindowStatus } from "@/lib/survey/application-window";
 
@@ -51,7 +51,7 @@ type SubmitState =
 
 export function SurveyForm({
   previewStatus,
-  questions = allQuestions,
+  questions = [],
 }: {
   previewStatus?: Exclude<ApplicationWindowStatus, "open">;
   questions?: Question[];
@@ -448,8 +448,9 @@ export function SurveyForm({
                       {surveySource.collects_email.required && <RequiredMark />}
                     </Label>
                     <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-faint">
-                      Recorded with your response so your later surveys can be matched to this
-                      one.
+                      {isApplication
+                        ? "So PLP can get back to you about your application."
+                        : "Recorded with your response so your later surveys can be matched to this one."}
                     </p>
                     <div className="mt-4">
                       <Input
@@ -570,7 +571,7 @@ export function SurveyForm({
             disabled={preview || submitting || missingFields.size > 0}
             className="w-full sm:w-auto"
           >
-            {preview ? "Preview only" : submitting ? "Submitting…" : "Submit survey"}
+            {preview ? "Preview only" : submitting ? "Submitting…" : labels.submit}
             {!preview && !submitting && <Send aria-hidden="true" />}
           </Button>
         ) : (

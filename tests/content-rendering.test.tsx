@@ -15,12 +15,15 @@ import { SchoolCombobox } from "@/components/survey/school-combobox";
 import { ReviewPanel } from "@/components/survey/review-panel";
 import {
   allQuestions,
+  sourceQuestions,
+  sourceSections,
   isScaleLegend,
   sourceSchools as schools,
   scaleOptions,
   surveySections,
   type Question,
 } from "@/lib/survey/source";
+import { stepsForQuestions } from "@/lib/survey/steps";
 import type { SurveyFormValues } from "@/lib/survey/schema";
 
 /** Mounts one question exactly as the survey page does. */
@@ -39,7 +42,7 @@ function QuestionHarness({ question }: { question: Question }) {
 }
 
 describe("rendered question content", () => {
-  it.each(allQuestions.map((q) => [q.title, q] as const))(
+  it.each(sourceQuestions.map((q) => [q.title, q] as const))(
     "renders %s with its exact wording",
     (title, question) => {
       render(<QuestionHarness question={question} />);
@@ -49,7 +52,7 @@ describe("rendered question content", () => {
   );
 
   it("renders every question's help text verbatim when the source has one", () => {
-    for (const question of allQuestions) {
+    for (const question of sourceQuestions) {
       if (!question.description) continue;
       const { unmount } = render(<QuestionHarness question={question} />);
 
@@ -66,7 +69,7 @@ describe("rendered question content", () => {
   });
 
   it("renders all five original option strings for every rating question", () => {
-    const rating = allQuestions.filter(
+    const rating = sourceQuestions.filter(
       (q) => q.type === "multiple_choice" && q.options?.length === 5,
     );
     expect(rating).toHaveLength(21);
@@ -82,7 +85,7 @@ describe("rendered question content", () => {
   });
 
   it("submits the exact original option string as the radio value", () => {
-    const question = allQuestions.find((q) => q.options?.length === 5)!;
+    const question = sourceQuestions.find((q) => q.options?.length === 5)!;
     render(<QuestionHarness question={question} />);
 
     for (const option of question.options!) {
@@ -92,7 +95,7 @@ describe("rendered question content", () => {
   });
 
   it("renders the Year Level options exactly", () => {
-    const yearLevel = allQuestions.find((q) => q.title === "Year Level")!;
+    const yearLevel = sourceQuestions.find((q) => q.title === "Year Level")!;
     render(<QuestionHarness question={yearLevel} />);
     // Whatever year levels this deployment offers must all be rendered.
     for (const option of yearLevel.options!) {
@@ -101,12 +104,12 @@ describe("rendered question content", () => {
   });
 
   it("marks required questions and leaves the optional one unmarked", () => {
-    const required = allQuestions.find((q) => q.required)!;
+    const required = sourceQuestions.find((q) => q.required)!;
     const { unmount } = render(<QuestionHarness question={required} />);
     expect(screen.getByLabelText("required")).toBeInTheDocument();
     unmount();
 
-    const optional = allQuestions.find((q) => !q.required)!;
+    const optional = sourceQuestions.find((q) => !q.required)!;
     render(<QuestionHarness question={optional} />);
     expect(screen.queryByLabelText("required")).not.toBeInTheDocument();
     // "(Optional)" survives inside the original wording
@@ -114,7 +117,7 @@ describe("rendered question content", () => {
   });
 
   it("renders paragraph questions as multiline textareas", () => {
-    for (const question of allQuestions.filter((q) => q.type === "paragraph")) {
+    for (const question of sourceQuestions.filter((q) => q.type === "paragraph")) {
       const { unmount } = render(<QuestionHarness question={question} />);
       const field = screen.getByLabelText(question.title, { exact: false });
       expect(field.tagName).toBe("TEXTAREA");
@@ -159,8 +162,14 @@ describe("rendered school list", () => {
 });
 
 describe("rendered review screen", () => {
+  // The review panel defaults to the steps of the DEPLOYED form, which may ask
+  // only part of the instrument — or none of it. Where a test is making a claim
+  // about how the ORIGINAL content is displayed, it passes the full layout
+  // explicitly so the claim keeps being checked whatever this rollout asks.
+  const fullSteps = stepsForQuestions(sourceQuestions);
+
   it("shows the full original option string, not a number", () => {
-    const question = allQuestions.find((q) => q.options?.length === 5)!;
+    const question = sourceQuestions.find((q) => q.options?.length === 5)!;
     const chosen = scaleOptions[2]!;
 
     const values: SurveyFormValues = {
@@ -169,7 +178,12 @@ describe("rendered review screen", () => {
     };
 
     render(
-      <ReviewPanel values={values} onEditStep={() => {}} missingFields={new Set()} />,
+      <ReviewPanel
+        values={values}
+        onEditStep={() => {}}
+        missingFields={new Set()}
+        steps={fullSteps}
+      />,
     );
 
     expect(screen.getByText(chosen)).toBeInTheDocument();
@@ -177,19 +191,27 @@ describe("rendered review screen", () => {
   });
 
   it("lists every section with its exact original title", () => {
-    render(<ReviewPanel values={{}} onEditStep={() => {}} missingFields={new Set()} />);
-    for (const section of surveySections) {
+    render(
+      <ReviewPanel
+        values={{}}
+        onEditStep={() => {}}
+        missingFields={new Set()}
+        steps={fullSteps}
+      />,
+    );
+    for (const section of sourceSections) {
       expect(screen.getByText(section.title)).toBeInTheDocument();
     }
   });
 
   it("flags missing required answers instead of silently accepting them", () => {
-    const question = allQuestions.find((q) => q.required)!;
+    const question = sourceQuestions.find((q) => q.required)!;
     render(
       <ReviewPanel
         values={{}}
         onEditStep={() => {}}
         missingFields={new Set([question.fieldKey])}
+        steps={fullSteps}
       />,
     );
     expect(screen.getByText(/1 required answer is still missing/i)).toBeInTheDocument();
@@ -214,7 +236,7 @@ describe("the repeated scale legend is shown once, not 21 times", () => {
     );
   }
 
-  const ratingQuestion = allQuestions.find(
+  const ratingQuestion = sourceQuestions.find(
     (q) => q.options?.length === 5 && q.description && isScaleLegend(q.description),
   )!;
 

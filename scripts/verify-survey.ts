@@ -40,6 +40,7 @@ import { fileURLToPath } from "node:url";
 import {
   allQuestions,
   sourceQuestions,
+  withheldQuestions,
   deployment,
   hasDeploymentOverrides,
   schools,
@@ -133,8 +134,46 @@ eq(
   raw.collects_email.required,
 );
 
+/* ------------------------------------------------------------------ *
+ * What this deployment DECLARES it asks.
+ *
+ * Layer 1 above proves the source file still matches the original form. The
+ * checks below prove the running app matches what the deployment declares, so
+ * a withheld question is a declared subset — while a question that disappears
+ * WITHOUT being declared is still a failure.
+ *
+ * Both sides are computed from the raw JSON, never from the app's own model,
+ * so the app can never define its own expectation.
+ * ------------------------------------------------------------------ */
+const askedIds = deployment.overrides.questions?.include;
+const isAskedRaw = (entryId: number | undefined) =>
+  askedIds === undefined || (entryId !== undefined && askedIds.includes(entryId));
+
+const declaredQuestions = rawQuestions.filter((q) => isAskedRaw(q.entry_id));
+
+/** Raw section blocks that still have at least one asked question under them. */
+const declaredSections = (() => {
+  type Block = { section: RawItem; questions: RawItem[] };
+  const blocks: Block[] = [];
+  let current: Block | null = null;
+  for (const item of raw.items) {
+    if (item.type === "section_header") {
+      current = { section: item, questions: [] };
+      blocks.push(current);
+      continue;
+    }
+    if (current && isAskedRaw(item.entry_id)) current.questions.push(item);
+  }
+  return blocks.filter((b) => b.questions.length > 0).map((b) => b.section);
+})();
+
 // ---- Counts ----
-eq("Section count", surveySections.length, rawSections.length, `${rawSections.length} sections`);
+eq(
+  "Section count",
+  surveySections.length,
+  declaredSections.length,
+  `${declaredSections.length} section(s) asked`,
+);
 eq("Question count", sourceQuestions.length, rawQuestions.length, `${rawQuestions.length} questions`);
 eq(
   "Required question count",
@@ -149,7 +188,7 @@ eq(
 eq("School count", sourceSchoolList.length, rawSchools.length, `${rawSchools.length} schools`);
 
 // ---- Section titles and descriptions, exactly ----
-rawSections.forEach((rawSection, i) => {
+declaredSections.forEach((rawSection, i) => {
   const appSection = surveySections[i];
   if (!appSection) {
     check(`Section ${i + 1} present`, false, "missing from the application model");
@@ -213,7 +252,7 @@ rawQuestions.forEach((rawQuestion, i) => {
 // ---- The guided step layout must cover every question exactly once ----
 {
   const stepped = surveySteps.flatMap((step) => step.questions.map((q) => q.entry_id));
-  const expected = rawQuestions.map((q) => q.entry_id!);
+  const expected = declaredQuestions.map((q) => q.entry_id!);
 
   eq("Steps contain every question exactly once", stepped.length, expected.length);
 
@@ -264,7 +303,17 @@ rawQuestions.forEach((rawQuestion, i) => {
     scaleOptions.every((o, i) => o === expectedScale[i]),
     "the 5-point option strings differ from the source",
   );
-  eq("Scale question count", scaleQuestions.length, bestCount, `${bestCount} rating questions`);
+  // The scale's own option strings are still checked against the whole source
+  // above. How many questions USE it depends on what this deployment asks.
+  const askedScale = declaredQuestions.filter(
+    (q) => q.options && JSON.stringify(q.options) === bestKey,
+  ).length;
+  eq(
+    "Scale question count",
+    scaleQuestions.length,
+    askedScale,
+    `${askedScale} of ${bestCount} rating question(s) asked`,
+  );
 }
 
 /* ================================================================== *
@@ -465,7 +514,7 @@ for (const c of checks) {
 
 lines.push("");
 lines.push(`${BOLD}Deployment overlay${RESET}`);
-if (!hasDeploymentOverrides) {
+if (!hasDeploymentOverrides && !deployment.framing) {
   lines.push(`  ${DIM}None — this deployment matches the original form exactly.${RESET}`);
 } else {
   lines.push(`  ${BOLD}${deployment.name}${RESET}`);
@@ -493,8 +542,41 @@ if (!hasDeploymentOverrides) {
     lines.push(`      ${DIM}${yearOverride.reason}${RESET}`);
   }
 
+  const questionSet = deployment.overrides.questions;
+  if (questionSet) {
+    lines.push(
+      `  · Questions     ${sourceQuestions.length} in the official form -> ${allQuestions.length} asked here`,
+    );
+    for (const q of allQuestions) {
+      lines.push(`      asked: ${q.title}`);
+    }
+    lines.push(`      ${DIM}${questionSet.reason}${RESET}`);
+    lines.push(
+      `      ${DIM}${withheldQuestions.length} question(s) withheld. They are still present and${RESET}`,
+    );
+    lines.push(
+      `      ${DIM}still verified above, and return if this list is cleared.${RESET}`,
+    );
+  }
+
+  const framing = deployment.framing;
+  if (framing) {
+    lines.push(
+      `  · Wording       presented as a${framing.mode === "application" ? "n " : " "}${framing.mode}, not a survey`,
+    );
+    lines.push(`      ${DIM}heading: "${framing.labels?.headline ?? "(default)"}"${RESET}`);
+    lines.push(`      ${DIM}${framing.reason}${RESET}`);
+    lines.push(
+      `      ${DIM}The form's own title and intro are not shown to applicants in this${RESET}`,
+    );
+    lines.push(
+      `      ${DIM}mode. Questions, options and section text are unaffected.${RESET}`,
+    );
+  }
+
   lines.push("");
-  lines.push(`  ${DIM}Clear "overrides" in data/deployment.json to return to the official form.${RESET}`);
+  lines.push(`  ${DIM}Clear "overrides" and "framing" in data/deployment.json to return${RESET}`);
+  lines.push(`  ${DIM}to the official form.${RESET}`);
 }
 
 lines.push("");

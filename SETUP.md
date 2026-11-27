@@ -173,15 +173,51 @@ with, rather than showing a form that cannot work.
 and is **never** edited for one rollout. Where a rollout genuinely needs
 different answer options, they are declared in **`data/deployment.json`**.
 
-This install declares two:
+This install declares four:
 
 | Override | Official form | This deployment | Why |
 |---|---|---|---|
 | School list | 180 schools | **New Generation Academy** | Recruitment drive at a school not yet on the official form |
-| Year levels | S1–S6 | **Grade 7 – Grade 10** | The school grades its years that way |
+| Year levels | S1–S6 | **Grade 7 – Grade 10, Year 1, Year 2** | The school grades its years that way |
+| Questions | 28 questions | **none — all withheld** | This is a club application, not the termly baseline. The club writes its own questions in the admin dashboard. |
+| Wording | a survey | **an application** | Applicants are applying to join a club, not filling in a baseline |
 
 Everything else — question wording, help text, ordering, required flags, the
 original Google entry ids — comes from the source file unchanged.
+
+### Withholding questions
+
+`overrides.questions.include` lists the entry ids a rollout asks. The rest are
+**withheld, not deleted**:
+
+* they stay in `data/survey-source.json`, and `npm run verify:survey` still
+  checks all 28 of them against the original form on every run
+* their rows stay in the database as an archive of the verified instrument —
+  `npm run verify:db` reports them as "kept but not asked" rather than as an
+  error
+* an answer submitted to a withheld question is **rejected** by the server, so
+  withholding is enforced and not merely cosmetic
+* clearing the `include` list restores the whole form, all five sections, with
+  no code change
+
+An empty list is legal and is what this install uses: the admin writes every
+question in **Admin → Surveys → Application questions**, and those appear on
+the form immediately.
+
+Because no question is asked, two things are filled in on the applicant's
+behalf rather than left blank:
+
+* the **school**, since the overlay declares exactly one — otherwise every
+  response would be unattributed and the dashboard's school filter useless
+* nothing else; the applicant's name now comes from a question the admin wrote,
+  so `full_name` reads "Not provided" and the name lives with the answers
+
+### Wording
+
+`framing` changes only the chrome — headings, button labels, the word used for
+a submission — and can never touch a question, an option, the form title or the
+confirmation message. Defaults live in `src/lib/survey/framing.ts`, so clearing
+`framing` returns every label to its survey wording.
 
 ### Applying it to the database
 
@@ -208,7 +244,9 @@ run, and its fingerprint is unchanged.
 
 ### Going back to the official form
 
-1. Clear the entries under `"overrides"` in `data/deployment.json`
+1. Clear the entries under `"overrides"` and `"framing"` in
+   `data/deployment.json` — including `overrides.questions`, which restores all
+   28 questions and all 5 sections
 2. Re-activate the schools:
    ```sql
    update public.schools set is_active = true;

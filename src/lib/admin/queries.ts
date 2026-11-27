@@ -9,7 +9,7 @@ import type {
   SurveyRow,
   SurveySectionRow,
 } from "@/lib/supabase/types";
-import { BASELINE_SURVEY_SLUG } from "@/lib/survey/source";
+import { BASELINE_SURVEY_SLUG, isAsked } from "@/lib/survey/source";
 import { distribution, meanScale } from "@/lib/survey/scale";
 
 /**
@@ -536,7 +536,18 @@ export type ManagedQuestion = {
  * explanation — which is exactly how this went wrong the first time.
  */
 export type ManagedQuestionsResult =
-  | { ok: true; questions: ManagedQuestion[] }
+  | {
+      ok: true;
+      /** The questions this deployment actually asks. */
+      questions: ManagedQuestion[];
+      /**
+       * Source questions the deployment withholds (see `overrides.questions`
+       * in data/deployment.json). Their rows are still in the database — the
+       * archive of the verified instrument — but applicants never see them,
+       * so the admin list leaves them out and reports the count instead.
+       */
+      withheldCount: number;
+    }
   | { ok: false; reason: "needs_migration" | "error"; message: string };
 
 /** Every question on a survey, with what the admin UI needs to manage it. */
@@ -578,7 +589,17 @@ export async function listManagedQuestions(
     is_custom: boolean | null;
   }>;
 
-  if (questions.length === 0) return { ok: true, questions: [] };
+  // Drop the source rows this deployment withholds. They are not deleted —
+  // they remain in the database and in data/survey-source.json — but they are
+  // not part of this application, so they are not shown as live questions.
+  const withheld = questions.filter(
+    (q) => !q.is_custom && !isAsked(Number(q.entry_id)),
+  );
+  const live = questions.filter((q) => !withheld.includes(q));
+
+  if (live.length === 0) {
+    return { ok: true, questions: [], withheldCount: withheld.length };
+  }
 
   // One grouped count rather than a query per question.
   const { data: answerRows } = await supabase
@@ -586,7 +607,7 @@ export async function listManagedQuestions(
     .select("question_id")
     .in(
       "question_id",
-      questions.map((q) => q.id),
+      live.map((q) => q.id),
     );
 
   const counts = new Map<string, number>();
@@ -594,7 +615,7 @@ export async function listManagedQuestions(
     counts.set(row.question_id, (counts.get(row.question_id) ?? 0) + 1);
   }
 
-  const managed: ManagedQuestion[] = questions.map((q) => {
+  const managed: ManagedQuestion[] = live.map((q) => {
     const answerCount = counts.get(q.id) ?? 0;
     const isCustom = Boolean(q.is_custom);
     return {
@@ -611,5 +632,5 @@ export async function listManagedQuestions(
     };
   });
 
-  return { ok: true, questions: managed };
+  return { ok: true, questions: managed, withheldCount: withheld.length };
 }

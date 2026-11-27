@@ -7,6 +7,7 @@ import { ApplicationWindowNotice } from "@/components/site/application-window-no
 import { getApplicationAvailability } from "@/lib/survey/application-window-server";
 import { Logo } from "@/components/brand/logo";
 import { surveySource } from "@/lib/survey/source";
+import { eyebrowFor, isApplication, labels, sentenceCase } from "@/lib/survey/framing";
 import { getApplicationQuestions } from "@/lib/survey/database-questions";
 
 export const metadata: Metadata = {
@@ -44,9 +45,10 @@ export default async function SurveyPage() {
           <ApplicationWindowNotice status={applicationStatus} />
         </div>
 
-        {/* The exact form title, carried through from the source */}
+        {/* The instrument's own name when this is the survey; what the reader
+            is doing when it is an application. */}
         <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-plp-500">
-          {surveySource.form_title}
+          {isApplication ? eyebrowFor(applicationStatus) : surveySource.form_title}
         </p>
         <div className="rule-accent mt-3 max-w-[6rem]" />
 

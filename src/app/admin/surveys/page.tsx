@@ -72,6 +72,7 @@ export default async function SurveysPage() {
               surveyId={live.id}
               questions={questionResult.questions}
               canManage={session.canManage}
+              withheldCount={questionResult.withheldCount}
               actions={{
                 add: addSurveyQuestion,
                 edit: updateSurveyQuestion,

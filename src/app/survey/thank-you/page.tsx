@@ -5,6 +5,7 @@ import { SuccessSeal } from "@/components/survey/success-seal";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/brand/logo";
 import { surveySource, headerParagraphs } from "@/lib/survey/source";
+import { labels } from "@/lib/survey/framing";
 
 export const metadata: Metadata = {
   title: "Thank you",
@@ -26,7 +27,7 @@ export default function ThankYouPage() {
             />
             <SuccessSeal />
             <h1 className="mt-7 text-balance font-display text-[1.875rem] font-semibold leading-tight tracking-tight text-paper-warm sm:text-[2.125rem]">
-              Your survey is in
+              {labels.successTitle}
             </h1>
           </div>
 
@@ -40,7 +41,7 @@ export default function ThankYouPage() {
               <Assurance
                 icon={<ShieldCheck className="size-[1.125rem]" aria-hidden="true" />}
                 title="Response received"
-                body="Your answers have been saved. You do not need to do anything else."
+                body={labels.successBody}
               />
               <Assurance
                 icon={<Lock className="size-[1.125rem]" aria-hidden="true" />}

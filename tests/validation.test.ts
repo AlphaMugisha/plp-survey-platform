@@ -12,7 +12,7 @@ import {
   validateSubmissionAnswers,
 } from "@/lib/survey/schema";
 import {
-  allQuestions,
+  sourceQuestions,
   nameQuestion,
   scaleOptions,
   schoolQuestion,
@@ -24,7 +24,7 @@ import {
 /** A complete, valid set of answers keyed by original entry id. */
 function validAnswers(): Record<string, string> {
   const answers: Record<string, string> = {};
-  for (const q of allQuestions) {
+  for (const q of sourceQuestions) {
     if (q.options?.length) answers[String(q.entry_id)] = q.options[0]!;
     else if (q.type === "paragraph") answers[String(q.entry_id)] = "A considered answer.";
     else answers[String(q.entry_id)] = "Alice Uwase";
@@ -54,7 +54,7 @@ describe("email validation", () => {
 
 describe("required-field validation", () => {
   it("rejects a blank answer for every required question", () => {
-    for (const question of allQuestions.filter((q) => q.required)) {
+    for (const question of sourceQuestions.filter((q) => q.required)) {
       const schema = schemaForQuestion(question);
       expect(schema.safeParse("").success).toBe(false);
       expect(schema.safeParse(undefined).success).toBe(false);
@@ -67,7 +67,7 @@ describe("required-field validation", () => {
   });
 
   it("gives a helpful message rather than a raw type error", () => {
-    const rating = allQuestions.find((q) => q.options?.length === 5)!;
+    const rating = sourceQuestions.find((q) => q.options?.length === 5)!;
     const result = schemaForQuestion(rating).safeParse("");
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -84,12 +84,13 @@ describe("required-field validation", () => {
   });
 
   it("fails the whole-survey schema when any required answer is absent", () => {
+    // fullSurveySchema covers the deployed form, whatever it currently asks.
     expect(fullSurveySchema.safeParse(emptyFormValues()).success).toBe(false);
   });
 });
 
 describe("optional-field validation", () => {
-  const optional = allQuestions.find((q) => !q.required)!;
+  const optional = sourceQuestions.find((q) => !q.required)!;
 
   it("accepts an empty answer for the one optional question", () => {
     const schema = schemaForQuestion(optional);
@@ -104,13 +105,13 @@ describe("optional-field validation", () => {
   it("does not block submission when only the optional answer is missing", () => {
     const answers = validAnswers();
     delete answers[String(optional.entry_id)];
-    expect(validateSubmissionAnswers(answers)).toEqual([]);
+    expect(validateSubmissionAnswers(answers, sourceQuestions)).toEqual([]);
   });
 });
 
 describe("choice answers must be original option strings", () => {
   it("rejects a numeric value for a rating question", () => {
-    const rating = allQuestions.find((q) => q.options?.length === 5)!;
+    const rating = sourceQuestions.find((q) => q.options?.length === 5)!;
     const schema = schemaForQuestion(rating);
     // The scale is literal strings — "3" is not a valid answer.
     expect(schema.safeParse("3").success).toBe(false);
@@ -118,7 +119,7 @@ describe("choice answers must be original option strings", () => {
   });
 
   it("rejects a paraphrased option", () => {
-    const rating = allQuestions.find((q) => q.options?.length === 5)!;
+    const rating = sourceQuestions.find((q) => q.options?.length === 5)!;
     const schema = schemaForQuestion(rating);
     expect(schema.safeParse("3 - Neutral / Sometimes").success).toBe(false); // hyphen, not em dash
     expect(schema.safeParse("Neutral").success).toBe(false);
@@ -183,37 +184,37 @@ describe("per-step validation", () => {
 
 describe("server-side submission validation", () => {
   it("accepts a complete, valid submission", () => {
-    expect(validateSubmissionAnswers(validAnswers())).toEqual([]);
+    expect(validateSubmissionAnswers(validAnswers(), sourceQuestions)).toEqual([]);
   });
 
   it("reports every missing required answer", () => {
-    const issues = validateSubmissionAnswers({});
+    const issues = validateSubmissionAnswers({}, sourceQuestions);
     expect(issues).toHaveLength(27);
     expect(issues.every((i) => i.entryId !== null)).toBe(true);
   });
 
   it("rejects an answer that is not one of the question's options", () => {
     const answers = validAnswers();
-    const rating = allQuestions.find((q) => q.options?.length === 5)!;
+    const rating = sourceQuestions.find((q) => q.options?.length === 5)!;
     answers[String(rating.entry_id)] = "1";
 
-    const issues = validateSubmissionAnswers(answers);
+    const issues = validateSubmissionAnswers(answers, sourceQuestions);
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toMatch(/not one of the allowed options/i);
   });
 
   it("rejects unknown question ids rather than dropping them", () => {
     const answers = { ...validAnswers(), "999999999": "injected" };
-    const issues = validateSubmissionAnswers(answers);
+    const issues = validateSubmissionAnswers(answers, sourceQuestions);
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toMatch(/Unknown question id/);
   });
 
   it("enforces a length limit on free text", () => {
     const answers = validAnswers();
-    const paragraph = allQuestions.find((q) => q.type === "paragraph")!;
+    const paragraph = sourceQuestions.find((q) => q.type === "paragraph")!;
     answers[String(paragraph.entry_id)] = "x".repeat(5001);
-    expect(validateSubmissionAnswers(answers)[0]!.message).toMatch(/character limit/);
+    expect(validateSubmissionAnswers(answers, sourceQuestions)[0]!.message).toMatch(/character limit/);
   });
 
   it("validates the submission envelope", () => {

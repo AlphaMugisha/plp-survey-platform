@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { surveySource } from "@/lib/survey/source";
+import { isApplication, labels } from "@/lib/survey/framing";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -14,11 +15,12 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: surveySource.form_title,
+    default: isApplication ? labels.headline : surveySource.form_title,
     template: `%s · ${surveySource.owner}`,
   },
-  description:
-    "Baseline survey for the Peace and Love Proclaimers school curriculum. Captures each student's starting confidence, skills and values before the PLP programme begins.",
+  description: isApplication
+    ? labels.lede
+    : "Baseline survey for the Peace and Love Proclaimers school curriculum. Captures each student's starting confidence, skills and values before the PLP programme begins.",
   applicationName: "PLP Survey Platform",
   authors: [{ name: surveySource.owner }],
   robots: { index: false, follow: false },

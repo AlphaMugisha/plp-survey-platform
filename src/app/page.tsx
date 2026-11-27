@@ -8,8 +8,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site/site-footer";
+import { eyebrowFor, isApplication, labels, sentenceCase } from "@/lib/survey/framing";
 import { ApplicationWindowNotice } from "@/components/site/application-window-notice";
 import { getApplicationAvailability } from "@/lib/survey/application-window-server";
+import { getApplicationQuestions } from "@/lib/survey/database-questions";
 import { PhotoSlot } from "@/components/site/photo-slot";
 import { ImigongoBand, ImigongoPanel, ImigongoPattern } from "@/components/brand/imigongo";
 import { Logo } from "@/components/brand/logo";
@@ -56,6 +58,25 @@ const ABOUT_PLP = {
 export default async function LandingPage() {
   const applicationStatus = await getApplicationAvailability();
 
+  // The live form is the declared source questions PLUS whatever the admin has
+  // added, so the only honest count comes from the same loader the form uses.
+  const liveQuestions = await getApplicationQuestions();
+  const liveCount = liveQuestions.length;
+  const liveSections = surveySections.length;
+  const liveRequired = liveQuestions.filter((q) => q.required).length;
+  const liveOptional = liveCount - liveRequired;
+
+  const questionSummary = {
+    value:
+      liveSections > 0
+        ? `${liveCount} across ${liveSections} section${liveSections === 1 ? "" : "s"}`
+        : `${liveCount} question${liveCount === 1 ? "" : "s"}`,
+    note:
+      liveOptional > 0
+        ? `${liveRequired} required, ${liveOptional} optional.`
+        : "All of them required.",
+  };
+
   return (
     <div className="min-h-dvh bg-white">
       {/* ===================== HEADER ===================== */}
@@ -74,7 +95,7 @@ export default async function LandingPage() {
               Staff sign in
             </Link>
             <Button asChild size="sm" className="shrink-0">
-              <Link href="/survey">Start the survey</Link>
+              <Link href="/survey">{labels.cta}</Link>
             </Button>
           </div>
         </div>
@@ -86,16 +107,22 @@ export default async function LandingPage() {
           <div className="container grid gap-12 py-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start lg:gap-16 lg:py-20">
             <div>
               <p className="text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-plp-600">
-                {curriculumLine}
+                {isApplication ? eyebrowFor(applicationStatus) : curriculumLine}
               </p>
 
+              {/* In application mode the page is headed by what the reader is
+                  doing. The instrument's own name — "PLP Survey 1 — Baseline
+                  (Beginning of Term 1)" — means nothing to someone who has not
+                  joined yet, and reads as the wrong thing entirely. It stays in
+                  the database, the admin and the verification report. */}
               <h1 className="mt-4 text-balance font-display text-[2rem] font-bold leading-[1.15] tracking-tight text-plp-900 sm:text-[2.5rem] lg:text-[2.875rem]">
-                {surveySource.form_title}
+                {isApplication ? labels.headline : surveySource.form_title}
               </h1>
 
               <p className="mt-5 max-w-xl text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
-                {/* The original intro, verbatim */}
-                {introBody}
+                {/* The form's own intro when this IS the survey; the deployment's
+                    own wording when it is being used as an application. */}
+                {isApplication ? labels.lede : introBody}
               </p>
 
               <div className="mt-6 max-w-xl">
@@ -105,7 +132,7 @@ export default async function LandingPage() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button asChild size="xl" className="group w-full sm:w-auto">
                   <Link href="/survey">
-                    Start the survey
+                    {labels.cta}
                     <ArrowRight
                       className="transition-transform duration-300 ease-premium group-hover:translate-x-1"
                       aria-hidden="true"
@@ -146,8 +173,8 @@ export default async function LandingPage() {
                 <Row
                   icon={<ListChecks className="size-[1.0625rem]" aria-hidden="true" />}
                   label="Questions"
-                  value={`${surveyStats.questionCount} across ${surveyStats.sectionCount} sections`}
-                  note={`${surveyStats.requiredCount} required, ${surveyStats.optionalCount} optional.`}
+                  value={questionSummary.value}
+                  note={questionSummary.note}
                 />
                 <Row
                   icon={<Lock className="size-[1.0625rem]" aria-hidden="true" />}
@@ -204,8 +231,10 @@ export default async function LandingPage() {
                 <p>
                   The <strong className="font-semibold text-plp-800">PLP Academy</strong> is its
                   educational programme, built to develop writing, public speaking,
-                  entrepreneurship, critical thinking and peacebuilding. This survey is part of
-                  the school curriculum that programme delivers.
+                  entrepreneurship, critical thinking and peacebuilding.{" "}
+                  {isApplication
+                    ? "This club is part of the school curriculum that programme delivers."
+                    : "This survey is part of the school curriculum that programme delivers."}
                 </p>
               </div>
             </div>
@@ -250,8 +279,8 @@ export default async function LandingPage() {
                 },
                 {
                   n: 2,
-                  title: "Five short sections",
-                  body: `${surveyStats.questionCount} questions, shown a few at a time. You can go back and change anything.`,
+                  title: liveSections > 0 ? "A few short sections" : "The questions",
+                  body: `${liveCount} question${liveCount === 1 ? "" : "s"}, shown a few at a time. You can go back and change anything.`,
                 },
                 {
                   n: 3,
@@ -279,7 +308,7 @@ export default async function LandingPage() {
             <div className="mt-9">
               <Button asChild size="lg" className="group w-full sm:w-auto">
                 <Link href="/survey">
-                  Start the survey
+                  {labels.cta}
                   <ArrowRight
                     className="transition-transform duration-300 ease-premium group-hover:translate-x-1"
                     aria-hidden="true"
@@ -295,18 +324,57 @@ export default async function LandingPage() {
           <div className="container py-14 lg:py-20">
             <div className="max-w-2xl">
               <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-plp-600">
-                The survey
+                {isApplication ? sentenceCase(labels.noun) : "The survey"}
               </p>
               <h2 className="mt-3 font-display text-[1.75rem] font-bold tracking-tight text-plp-900 sm:text-[2rem]">
                 What you will be asked
               </h2>
               <p className="mt-4 text-[1.0625rem] leading-relaxed text-ink-muted">
-                Five sections, shown one at a time. Your answers are kept as you move between
-                them, so you can stop and come back.
+                {liveSections > 0
+                  ? `${liveSections} section${liveSections === 1 ? "" : "s"}, shown a few at a time. Your answers are kept as you move between them, so you can stop and come back.`
+                  : "Shown a few at a time. Your answers are kept as you move between them, so you can stop and come back."}
               </p>
             </div>
 
             <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {/* No sections means this deployment asks its own short set of
+                  questions rather than the termly instrument, so the reader is
+                  shown the questions themselves. */}
+              {liveSections === 0 &&
+                liveQuestions.map((question, i) => (
+                  <li key={question.entry_id}>
+                    <article className="card-surface card-interactive group h-full p-6">
+                      <div className="flex items-center justify-between gap-3">
+                        <span
+                          className="inline-flex size-10 items-center justify-center rounded-xl bg-plp-50 text-[0.875rem] font-bold text-plp-700 transition-all duration-300 ease-premium group-hover:bg-plp-600 group-hover:text-white group-hover:shadow-glow-brand"
+                          aria-hidden="true"
+                        >
+                          {i + 1}
+                        </span>
+                        <Badge
+                          variant="neutral"
+                          size="sm"
+                          className="transition-colors duration-300 group-hover:border-plp-200 group-hover:bg-plp-50 group-hover:text-plp-700"
+                        >
+                          {question.options?.length ? "Choose" : "Write"}
+                        </Badge>
+                      </div>
+
+                      <h3 className="mt-4 font-display text-[1.0625rem] font-bold leading-snug text-plp-800 transition-colors duration-300 group-hover:text-plp-600">
+                        {question.title}
+                      </h3>
+
+                      <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
+                        {question.description
+                          ? question.description.split(/\n{2,}/u)[0]
+                          : question.options?.length
+                            ? `Pick one of ${question.options.length}.`
+                            : "In your own words."}
+                      </p>
+                    </article>
+                  </li>
+                ))}
+
               {surveySections.map((section) => (
                 <li key={section.index}>
                   <article className="card-surface card-interactive group h-full p-6">
@@ -355,7 +423,7 @@ export default async function LandingPage() {
                   </p>
                   <Button asChild size="md" className="mt-5 w-full">
                     <Link href="/survey">
-                      Start the survey
+                      {labels.cta}
                       <ArrowRight
                         className="transition-transform duration-300 ease-premium group-hover:translate-x-1"
                         aria-hidden="true"
@@ -386,12 +454,22 @@ export default async function LandingPage() {
                 <p className="text-[1.0625rem] leading-relaxed text-ink-soft">{privacyNote}</p>
 
                 <ul className="mt-7 grid gap-3 sm:grid-cols-2">
-                  {[
-                    "Only PLP programme staff can see individual answers.",
-                    "Your answers are never shown publicly or to other students.",
-                    "Results are reported as school and programme averages.",
-                    "Your email is collected so later surveys can be matched to this one.",
-                  ].map((item) => (
+                  {/* Ours, not the form's — so it has to describe what this
+                      deployment actually does with the answers. */}
+                  {(isApplication
+                    ? [
+                        "Only PLP programme staff can see individual applications.",
+                        "Your answers are never shown publicly or to other students.",
+                        "Your application is read by the people running the club.",
+                        "Your email is collected so PLP can get back to you.",
+                      ]
+                    : [
+                        "Only PLP programme staff can see individual answers.",
+                        "Your answers are never shown publicly or to other students.",
+                        "Results are reported as school and programme averages.",
+                        "Your email is collected so later surveys can be matched to this one.",
+                      ]
+                  ).map((item) => (
                     <li
                       key={item}
                       className="card-quiet flex gap-3 rounded-xl border border-border bg-white p-4 text-[0.9375rem] leading-relaxed text-ink-soft"
@@ -431,7 +509,7 @@ export default async function LandingPage() {
               </p>
               <Button asChild size="xl" className="group mt-7 w-full sm:w-auto">
                 <Link href="/survey">
-                  Start the survey
+                  {labels.cta}
                   <ArrowRight
                     className="transition-transform duration-300 ease-premium group-hover:translate-x-1"
                     aria-hidden="true"

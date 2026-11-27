@@ -136,3 +136,63 @@ describe("admin-added questions are grouped too", () => {
     expect(screen.queryByRole("button", { name: /^remove$/iu })).not.toBeInTheDocument();
   });
 });
+
+describe("when the deployment withholds the PLP form's questions", () => {
+  const added: ManagedQuestion[] = [
+    q({
+      entryId: 1,
+      type: "paragraph",
+      title: "Full name, preferred name, and class:",
+      isCustom: true,
+      canRemove: true,
+    }),
+    q({
+      entryId: 2,
+      type: "multiple_choice",
+      title: "2. How would you describe your personality?",
+      options: ["Introverted", "Extroverted", "Ambivert (a mixture of both)"],
+      isCustom: true,
+      canRemove: true,
+    }),
+  ];
+
+  function renderWithheld(questions: ManagedQuestion[]) {
+    return render(
+      <QuestionManager
+        surveyId="11111111-1111-1111-1111-111111111111"
+        questions={questions}
+        canManage
+        withheldCount={28}
+        actions={actions}
+      />,
+    );
+  }
+
+  it("does not render an empty 'Verified · locked' panel", () => {
+    // An empty locked panel reads as something being broken.
+    renderWithheld(added);
+    expect(screen.queryByText(/Verified · locked/u)).not.toBeInTheDocument();
+  });
+
+  it("presents the admin's questions as the application itself", () => {
+    renderWithheld(added);
+    expect(screen.getByText("Application questions")).toBeInTheDocument();
+  });
+
+  it("says where the PLP form's questions went, rather than leaving a gap", () => {
+    renderWithheld(added);
+    expect(screen.getByText(/28 baseline questions are not asked here/u)).toBeInTheDocument();
+    expect(screen.getByText(/kept, not deleted/u)).toBeInTheDocument();
+  });
+
+  it("still groups the admin's questions by how they are answered", () => {
+    renderWithheld(added);
+    expect(screen.getByText("Choose an answer")).toBeInTheDocument();
+    expect(screen.getByText("Written answer")).toBeInTheDocument();
+  });
+
+  it("invites the first question when there are none at all", () => {
+    renderWithheld([]);
+    expect(screen.getByText(/no questions yet/u)).toBeInTheDocument();
+  });
+});

@@ -21,6 +21,10 @@
         "Year 1",
         "Year 2"
       ]
+    },
+    "questions": {
+      "reason": "The club writes its own application questions in the admin dashboard. None of the baseline instrument's 28 questions are asked here — the admin's own first question already collects the applicant's name and class, and the school is fixed for this rollout. The source questions are WITHHELD, not deleted: they stay in data/survey-source.json, still verified, and the full form returns by clearing this list.",
+      "include": []
     }
   },
   "framing": {
