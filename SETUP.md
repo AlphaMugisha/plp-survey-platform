@@ -261,10 +261,18 @@ questions" step — never silently dropped.
 
 ### Two things worth knowing
 
-* **"Other: __________" has no text box.** It is stored verbatim as an option,
-  as supplied. Someone who picks it cannot say what their "other" is. Adding a
-  companion free-text field would mean adding a question, which was explicitly
-  out of scope — raise it if you want it.
+* **"Other: __________" is filled in, not just chosen.** The option is stored
+  exactly as supplied, and the underscores are treated as what they are on
+  paper — a blank. Picking it reveals a text box, and the answer is stored as
+  the option with its blank filled: `Other: Debate club`. One answer in one
+  column, reads correctly in a CSV export, and no extra question.
+
+  Validation accepts an exact option or a filled-in one and nothing else.
+  Choosing "Other" and writing nothing is not a valid answer, on the client or
+  the server, and does not count towards progress. The rule is generic: any
+  option ending in two or more underscores behaves this way, so a question an
+  admin writes later needs no code change. See
+  `src/lib/survey/fill-in-option.ts`.
 * **The leading list numbers are not stored.** The form renders its own
   question numbering per step, so storing "2. How would you describe…" would
   number everything twice. The question text itself is untouched.
