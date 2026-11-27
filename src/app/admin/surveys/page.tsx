@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { FileStack } from "lucide-react";
+import { FileStack, TriangleAlert } from "lucide-react";
 import { PageHeader, Panel, EmptyState } from "@/components/admin/ui";
 import { SurveyManager } from "@/components/admin/survey-manager";
 import { QuestionManager } from "@/components/admin/question-manager";
@@ -34,7 +34,7 @@ export default async function SurveysPage() {
   // The live application is the survey students are filling in, so that is the
   // one whose questions can be managed here.
   const live = surveys.find((s) => s.status === "active") ?? surveys[0];
-  const managedQuestions = live ? await listManagedQuestions(live.id) : [];
+  const questionResult = live ? await listManagedQuestions(live.id) : null;
 
   return (
     <>
@@ -64,14 +64,45 @@ export default async function SurveysPage() {
         />
       )}
 
-      {live && managedQuestions.length > 0 && (
+      {live && questionResult && (
         <div className="mt-6">
-          <QuestionManager
-            surveyId={live.id}
-            questions={managedQuestions}
-            canManage={session.canManage}
-            actions={{ add: addSurveyQuestion, remove: removeSurveyQuestion }}
-          />
+          {questionResult.ok ? (
+            <QuestionManager
+              surveyId={live.id}
+              questions={questionResult.questions}
+              canManage={session.canManage}
+              actions={{ add: addSurveyQuestion, remove: removeSurveyQuestion }}
+            />
+          ) : (
+            /* Say what is missing rather than hiding the panel. */
+            <Panel
+              title="Question management is not set up yet"
+              description={
+                questionResult.reason === "needs_migration"
+                  ? "One migration has not been applied to this database."
+                  : "The questions could not be loaded."
+              }
+            >
+              <div className="flex items-start gap-3 rounded-2xl border border-accent-400/40 bg-accent-100/40 p-4 sm:p-5">
+                <TriangleAlert
+                  className="mt-0.5 size-5 shrink-0 text-accent-600"
+                  aria-hidden="true"
+                />
+                <div className="min-w-0">
+                  <p className="text-[0.9375rem] leading-relaxed text-ink-soft">
+                    {questionResult.message}
+                  </p>
+                  {questionResult.reason === "needs_migration" && (
+                    <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-muted">
+                      Open the Supabase SQL Editor and run that file. Adding and removing
+                      questions will appear here straight afterwards. Nothing else is affected
+                      in the meantime.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </Panel>
+          )}
         </div>
       )}
     </>

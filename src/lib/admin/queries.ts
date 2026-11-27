@@ -528,15 +528,43 @@ export type ManagedQuestion = {
   canRemove: boolean;
 };
 
+/**
+ * Outcome of loading the manageable questions.
+ *
+ * `needsMigration` is its own case on purpose: without it the query simply
+ * errors, the list comes back empty and the whole panel vanishes with no
+ * explanation — which is exactly how this went wrong the first time.
+ */
+export type ManagedQuestionsResult =
+  | { ok: true; questions: ManagedQuestion[] }
+  | { ok: false; reason: "needs_migration" | "error"; message: string };
+
 /** Every question on a survey, with what the admin UI needs to manage it. */
-export async function listManagedQuestions(surveyId: string): Promise<ManagedQuestion[]> {
+export async function listManagedQuestions(
+  surveyId: string,
+): Promise<ManagedQuestionsResult> {
   const supabase = await createServerSupabase();
 
-  const { data: rows } = await supabase
+  const { data: rows, error: loadError } = await supabase
     .from("questions")
     .select("id, entry_id, order_index, title, description, type, options, is_required, is_custom")
     .eq("survey_id", surveyId)
     .order("order_index");
+
+  if (loadError) {
+    // 42703 = undefined_column. The is_custom column arrives with
+    // 20261126175105_admin_added_questions.sql.
+    const missingColumn =
+      loadError.code === "42703" || /is_custom/iu.test(loadError.message);
+    return missingColumn
+      ? {
+          ok: false,
+          reason: "needs_migration",
+          message:
+            "Run supabase/migrations/20261126175105_admin_added_questions.sql to enable adding and removing questions.",
+        }
+      : { ok: false, reason: "error", message: loadError.message };
+  }
 
   const questions = (rows ?? []) as Array<{
     id: string;
@@ -550,7 +578,7 @@ export async function listManagedQuestions(surveyId: string): Promise<ManagedQue
     is_custom: boolean | null;
   }>;
 
-  if (questions.length === 0) return [];
+  if (questions.length === 0) return { ok: true, questions: [] };
 
   // One grouped count rather than a query per question.
   const { data: answerRows } = await supabase
@@ -566,7 +594,7 @@ export async function listManagedQuestions(surveyId: string): Promise<ManagedQue
     counts.set(row.question_id, (counts.get(row.question_id) ?? 0) + 1);
   }
 
-  return questions.map((q) => {
+  const managed: ManagedQuestion[] = questions.map((q) => {
     const answerCount = counts.get(q.id) ?? 0;
     const isCustom = Boolean(q.is_custom);
     return {
@@ -582,4 +610,6 @@ export async function listManagedQuestions(surveyId: string): Promise<ManagedQue
       canRemove: isCustom && answerCount === 0,
     };
   });
+
+  return { ok: true, questions: managed };
 }
