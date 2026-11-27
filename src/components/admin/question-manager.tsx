@@ -5,6 +5,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ListChecks,
+  Layers,
   Lock,
   Pencil,
   Plus,
@@ -281,6 +282,16 @@ export function QuestionManager({
                             {question.answerCount > 0 && (
                               <Badge variant="success" size="sm">
                                 {question.answerCount} answered
+                              </Badge>
+                            )}
+                            {/* The part an applicant sees this question under.
+                                The list itself stays grouped by answer kind, so
+                                this is how the form's own structure stays
+                                visible without reorganising the list. */}
+                            {question.groupTitle && (
+                              <Badge variant="outline" size="sm" className="min-w-0">
+                                <Layers className="size-3 shrink-0" aria-hidden="true" />
+                                <span className="truncate">{question.groupTitle}</span>
                               </Badge>
                             )}
                           </div>

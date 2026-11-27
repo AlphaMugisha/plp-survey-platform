@@ -57,6 +57,23 @@ export type SurveySource = z.infer<typeof sourceSchema>;
 export type SurveyItem = z.infer<typeof itemSchema>;
 export type QuestionType = (typeof QUESTION_TYPES)[number];
 
+/**
+ * The group an admin-added question belongs to — a `survey_sections` row the
+ * administrator created, used to lay the form out in parts.
+ *
+ * Source questions do not carry this: their grouping comes from the original
+ * form's own section headers, which are already modelled by `SurveySection`.
+ */
+export type QuestionGroup = {
+  id: string;
+  /** Exact group title, as the administrator typed it. */
+  title: string;
+  description: string | null;
+  shortLabel: string;
+  /** Display order among the groups. */
+  order: number;
+};
+
 /** A real question (never a section header). */
 export type Question = SurveyItem & {
   type: Exclude<QuestionType, "section_header">;
@@ -64,6 +81,8 @@ export type Question = SurveyItem & {
   required: boolean;
   /** Stable form/DB field key derived from the original Google entry id. */
   fieldKey: string;
+  /** Set only for admin-added questions that sit in a group. */
+  group?: QuestionGroup | null;
 };
 
 export type SurveySection = {

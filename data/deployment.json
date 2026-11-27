@@ -29,19 +29,19 @@
   },
   "framing": {
     "mode": "application",
-    "reason": "Students at New Generation Academy are applying to join the PLP club, not filling in a mid-programme baseline. The questions are unchanged — this only changes the wrapper language so the page reads as an application.",
+    "reason": "Students at New Generation Academy are applying to join PLP Ishami using PLP's own Membership Application & Family Questionnaire, not filling in the termly baseline survey. This changes only the wrapper language — headings, button labels, the word used for a submission — never a question, an option, the form title or the confirmation message.",
     "audience": "New Generation Academy",
     "labels": {
       "noun": "application",
       "nounPlural": "applications",
       "cta": "Start your application",
-      "ctaShort": "Apply now",
-      "headline": "Join the PLP club at New Generation Academy",
-      "lede": "Peace and Love Proclaimers is starting a club at New Generation Academy. Tell us about yourself and we will be in touch.",
-      "eyebrow": "Club applications are open",
+      "ctaShort": "Apply",
+      "headline": "PLP Ishami — Membership Application & Family Questionnaire",
+      "lede": "“We learn together. We grow together. We look out for each other.” Tell us who you are, why you want to join, and what you will bring to the family.",
+      "eyebrow": "Membership applications are open",
       "submit": "Submit application",
       "successTitle": "Application received",
-      "successBody": "Thank you for applying to join the PLP club. We will contact you at the email address you gave.",
+      "successBody": "Thank you for applying to join PLP Ishami. We will contact you at the email address you gave us.",
       "reviewTitle": "Review your application"
     }
   },

@@ -20,6 +20,7 @@ function q(partial: Partial<ManagedQuestion> & { entryId: number }): ManagedQues
     isCustom: false,
     answerCount: 0,
     canRemove: false,
+    groupTitle: null,
     ...partial,
   };
 }

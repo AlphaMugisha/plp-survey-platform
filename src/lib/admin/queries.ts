@@ -526,6 +526,12 @@ export type ManagedQuestion = {
   answerCount: number;
   /** Only an admin-added question with no answers can be removed. */
   canRemove: boolean;
+  /**
+   * The part this question sits in, as the applicant sees it, or null when it
+   * is not in one. Shown so the admin can see the form's structure without
+   * leaving the list grouped by answer kind.
+   */
+  groupTitle: string | null;
 };
 
 /**
@@ -558,7 +564,9 @@ export async function listManagedQuestions(
 
   const { data: rows, error: loadError } = await supabase
     .from("questions")
-    .select("id, entry_id, order_index, title, description, type, options, is_required, is_custom")
+    .select(
+      "id, entry_id, order_index, title, description, type, options, is_required, is_custom, section_id",
+    )
     .eq("survey_id", surveyId)
     .order("order_index");
 
@@ -587,6 +595,7 @@ export async function listManagedQuestions(
     options: string[] | null;
     is_required: boolean;
     is_custom: boolean | null;
+    section_id: string | null;
   }>;
 
   // Drop the source rows this deployment withholds. They are not deleted —
@@ -600,6 +609,16 @@ export async function listManagedQuestions(
   if (live.length === 0) {
     return { ok: true, questions: [], withheldCount: withheld.length };
   }
+
+  // Part titles, so the list can show where each question sits. A database
+  // without the admin-sections migration simply shows no part labels.
+  const { data: sectionRows } = await supabase
+    .from("survey_sections")
+    .select("id, title")
+    .eq("survey_id", surveyId);
+  const sectionTitles = new Map(
+    ((sectionRows ?? []) as Array<{ id: string; title: string }>).map((r) => [r.id, r.title]),
+  );
 
   // One grouped count rather than a query per question.
   const { data: answerRows } = await supabase
@@ -629,6 +648,7 @@ export async function listManagedQuestions(
       isCustom,
       answerCount,
       canRemove: isCustom && answerCount === 0,
+      groupTitle: q.section_id ? sectionTitles.get(q.section_id) ?? null : null,
     };
   });
 

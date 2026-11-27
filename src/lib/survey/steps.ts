@@ -18,6 +18,7 @@ import {
   sourceSections,
   surveySections,
   type Question,
+  type QuestionGroup,
   type SurveySection,
 } from "./source";
 
@@ -113,22 +114,57 @@ export function stepsForQuestions(questions: Question[]): SurveyStep[] {
     (question) => !sourceIds.has(question.entry_id) && !participantIds.has(question.entry_id),
   );
 
+  // Admin questions are laid out in the GROUPS the administrator created, one
+  // step per group, in group order. A long questionnaire is far easier to fill
+  // in as named parts than as one list, and the group's own description carries
+  // text like the final agreement.
+  const grouped = new Map<string, { group: QuestionGroup; questions: Question[] }>();
+  const ungrouped: Question[] = [];
+
+  for (const question of additionalQuestions) {
+    const group = question.group;
+    if (!group) {
+      ungrouped.push(question);
+      continue;
+    }
+    const bucket = grouped.get(group.id);
+    if (bucket) bucket.questions.push(question);
+    else grouped.set(group.id, { group, questions: [question] });
+  }
+
+  const groupSteps: SurveyStep[] = [...grouped.values()]
+    .sort((a, b) => a.group.order - b.group.order)
+    .map(({ group, questions: inGroup }) => ({
+      id: `group-${group.id}`,
+      kind: "section" as const,
+      label: group.shortLabel,
+      title: group.title,
+      description: group.description,
+      questions: inGroup,
+      section: null,
+    }));
+
+  // Questions the admin added without a group keep their own trailing step, so
+  // they are never silently dropped just because they are not in a part.
   const additional: SurveyStep[] =
-    additionalQuestions.length === 0
+    ungrouped.length === 0
       ? []
       : [
           {
             id: "additional-questions",
             kind: "section",
-            label: sections.length > 0 ? "More" : "Questions",
-            title: sections.length > 0 ? "Additional questions" : "A few questions",
+            label: sections.length + groupSteps.length > 0 ? "More" : "Questions",
+            title:
+              sections.length + groupSteps.length > 0
+                ? "Additional questions"
+                : "A few questions",
             description: null,
-            questions: additionalQuestions,
+            questions: ungrouped,
             section: null,
           },
         ];
 
-  return [details, ...sections, ...additional, reviewStep];
+  return [details, ...sections, ...groupSteps, ...additional, reviewStep];
 }
 
 export const REVIEW_STEP_INDEX = surveySteps.length - 1;

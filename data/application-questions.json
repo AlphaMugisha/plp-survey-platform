@@ -1,0 +1,245 @@
+{
+  "_comment": [
+    "PLP Ishami — Membership Application & Family Questionnaire.",
+    "",
+    "This is the SEED for the live application: it is what the database is",
+    "populated with, and it is transcribed verbatim from the questionnaire PLP",
+    "supplied. Question wording and every answer option are exactly as given.",
+    "",
+    "Unlike data/survey-source.json, this file is NOT a locked source of truth.",
+    "Once seeded, the database is authoritative: administrators may edit, add and",
+    "remove these questions from the dashboard, and this file is not re-checked",
+    "against them. It exists so the initial content is reviewable and the seed is",
+    "reproducible.",
+    "",
+    "The only change made to the supplied text: the leading list numbers",
+    "('1. ', '2. ' ...) are not stored in the titles, because the form renders its",
+    "own question numbering per step and would otherwise number everything twice.",
+    "The question text itself is untouched."
+  ],
+
+  "title": "PLP ISHAMI",
+  "subtitle": "Membership Application & Family Questionnaire",
+  "epigraph": "“We learn together. We grow together. We look out for each other.”",
+
+  "parts": [
+    {
+      "shortLabel": "1",
+      "title": "PART 1: GETTING TO KNOW YOU",
+      "description": null,
+      "questions": [
+        {
+          "entryId": 1,
+          "type": "paragraph",
+          "title": "Full name, preferred name, and class:",
+          "required": true
+        },
+        {
+          "entryId": 2,
+          "type": "multiple_choice",
+          "title": "How would you describe your personality?",
+          "required": true,
+          "options": [
+            "Introverted",
+            "Extroverted",
+            "Ambivert (a mixture of both)",
+            "Other: __________"
+          ]
+        },
+        {
+          "entryId": 3,
+          "type": "multiple_choice",
+          "title": "What are your interests, talents, or passions?",
+          "required": true,
+          "options": [
+            "Leadership and public speaking",
+            "Creativity and arts",
+            "Sports and fitness",
+            "Technology and innovation",
+            "Volunteering and helping others",
+            "Music and entertainment",
+            "Other: __________"
+          ]
+        }
+      ]
+    },
+
+    {
+      "shortLabel": "2",
+      "title": "PART 2: YOUR PURPOSE & EXPECTATIONS",
+      "description": null,
+      "questions": [
+        {
+          "entryId": 4,
+          "type": "multiple_choice",
+          "title": "Have you been part of PLP before?",
+          "required": true,
+          "options": ["Yes", "No"]
+        },
+        {
+          "entryId": 5,
+          "type": "paragraph",
+          "title": "If yes, briefly describe your experience.",
+          "required": false,
+          "_note": "Printed under question 4 as a follow-up. Kept as its own field because there is nowhere else to write it, and optional because it only applies to a 'Yes'."
+        },
+        {
+          "entryId": 6,
+          "type": "paragraph",
+          "title": "Why do you genuinely want to become part of the PLP family, and what do you hope to gain from it?",
+          "required": true
+        },
+        {
+          "entryId": 7,
+          "type": "paragraph",
+          "title": "What do you believe you can bring to this family that will make it better?",
+          "required": true
+        }
+      ]
+    },
+
+    {
+      "shortLabel": "3",
+      "title": "PART 3: CHARACTER & RELATIONSHIPS",
+      "description": null,
+      "questions": [
+        {
+          "entryId": 8,
+          "type": "multiple_choice",
+          "title": "When you disagree with someone, especially someone you are close to, how do you usually handle the situation?",
+          "required": true,
+          "options": [
+            "Discuss the issue calmly and respectfully.",
+            "Listen to understand their perspective.",
+            "Take time to cool down before addressing it.",
+            "Avoid the person or ignore the issue.",
+            "Other: __________"
+          ]
+        },
+        {
+          "entryId": 9,
+          "type": "multiple_choice",
+          "title": "Imagine a member makes a mistake, shares an unpopular opinion, or struggles to fit in. How would you treat them?",
+          "required": true,
+          "options": [
+            "Encourage and support them.",
+            "Respect their differences and give them space.",
+            "Help them improve without embarrassing them.",
+            "Distance myself from them.",
+            "Other: __________"
+          ]
+        },
+        {
+          "entryId": 10,
+          "type": "multiple_choice",
+          "title": "If you witnessed gossip, bullying, betrayal of trust, or intentional exclusion within PLP, what would you do?",
+          "required": true,
+          "options": [
+            "Address the situation respectfully.",
+            "Support the affected person.",
+            "Report it to the coordinator or appropriate committee member.",
+            "Stay silent to avoid involvement.",
+            "Other: __________"
+          ]
+        },
+        {
+          "entryId": 11,
+          "type": "paragraph",
+          "title": "If someone trusted you with a personal struggle or secret, what would that trust mean to you, and how would you protect it?",
+          "required": true
+        }
+      ]
+    },
+
+    {
+      "shortLabel": "4",
+      "title": "PART 4: COMMITMENT & ACCOUNTABILITY",
+      "description": null,
+      "questions": [
+        {
+          "entryId": 12,
+          "type": "multiple_choice",
+          "title": "How would you balance your academic responsibilities with your commitment to PLP?",
+          "required": true,
+          "options": [
+            "Plan and manage my time responsibly.",
+            "Communicate when I have conflicting responsibilities.",
+            "Participate whenever my schedule allows.",
+            "I am still learning how to manage my time."
+          ]
+        },
+        {
+          "entryId": 13,
+          "type": "multiple_choice",
+          "title": "If you make a commitment to the family but fail to fulfill it, what would you do?",
+          "required": true,
+          "options": [
+            "Take responsibility and apologize.",
+            "Explain the situation and find a solution.",
+            "Wait for someone to remind me.",
+            "Ignore it and move on."
+          ]
+        },
+        {
+          "entryId": 14,
+          "type": "multiple_choice",
+          "title": "Are you willing to contribute even when you are not in a leadership position, receive no recognition, or are not directly benefiting?",
+          "required": true,
+          "options": [
+            "Yes, absolutely.",
+            "Yes, but I may need encouragement.",
+            "Only when I have enough time.",
+            "No, I prefer taking part when I benefit directly."
+          ]
+        }
+      ]
+    },
+
+    {
+      "shortLabel": "5",
+      "title": "PART 5: THE MEANING OF FAMILY",
+      "description": null,
+      "questions": [
+        {
+          "entryId": 15,
+          "type": "paragraph",
+          "title": "PLP believes: \"Nobody gets left behind. Nobody gets intentionally pushed out.\" What does this statement mean to you, and how would you put it into practice?",
+          "required": true
+        },
+        {
+          "entryId": 16,
+          "type": "paragraph",
+          "title": "What kind of person do you want to become through PLP, and what personal change or contribution are you willing to commit to make this family stronger?",
+          "required": true
+        }
+      ]
+    },
+
+    {
+      "shortLabel": "6",
+      "title": "FINAL FAMILY AGREEMENT",
+      "description": "By joining PLP Ishami, I understand that being part of this family comes with responsibilities, not just privileges.\n\nI agree to respect others, communicate honestly, protect confidentiality, avoid bullying and gossip, participate actively, take accountability for my actions, and contribute to creating a safe and supportive environment.",
+      "questions": [
+        {
+          "entryId": 17,
+          "type": "short_answer",
+          "title": "Name:",
+          "required": true
+        },
+        {
+          "entryId": 18,
+          "type": "short_answer",
+          "title": "Signature:",
+          "required": true,
+          "_note": "Typed, since the form is filled in a browser. The submission also records a timestamp and the applicant's email."
+        },
+        {
+          "entryId": 19,
+          "type": "short_answer",
+          "title": "Date:",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

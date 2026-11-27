@@ -212,6 +212,65 @@ behalf rather than left blank:
 * nothing else; the applicant's name now comes from a question the admin wrote,
   so `full_name` reads "Not provided" and the name lives with the answers
 
+## 6d. The live application: PLP Ishami
+
+The questions applicants actually answer are PLP's **Membership Application &
+Family Questionnaire** — a different instrument from the Google Form baseline
+survey. It lives in **`data/application-questions.json`**: 6 parts, 19
+questions, transcribed verbatim.
+
+That file is a **seed, not a source of truth**. Once applied, the database is
+authoritative — every question is inserted with `is_custom = true`, so
+administrators can edit, add and remove them from
+**Admin → Surveys → Application questions**. `verify:survey` does not police
+them; it only ever checks the Google Form extract.
+
+### Applying it
+
+Run these two migrations in the SQL Editor, in order:
+
+| Migration | What it does |
+|---|---|
+| `20261127085000_admin_added_sections.sql` | Adds `survey_sections.is_custom` and replaces the section guard, so admin-created question GROUPS are possible at all. Also makes `questions.section_id` `ON DELETE SET NULL`, so deleting a group cannot delete its questions. |
+| `20261127090000_seed_plp_ishami_application.sql` | Seeds the 6 parts and 19 questions. Refuses to run once there are responses. |
+
+Then:
+
+```bash
+npm run verify:db
+```
+
+### Editing the questions
+
+Day to day, edit them in the dashboard. If you want to change the *seed* — so a
+fresh database starts from the new text — edit the JSON and regenerate:
+
+```bash
+node scripts/generate-application-seed.mjs
+```
+
+Never hand-edit the generated migration. `tests/application-questions.test.ts`
+asserts every title and option appears in the SQL, so the two cannot drift.
+
+### How an applicant sees it
+
+One step per part, in PLP's order, with the part title as the heading and the
+final agreement text shown above the Name / Signature / Date fields. A question
+an admin adds without a part still appears, in a trailing "Additional
+questions" step — never silently dropped.
+
+### Two things worth knowing
+
+* **"Other: __________" has no text box.** It is stored verbatim as an option,
+  as supplied. Someone who picks it cannot say what their "other" is. Adding a
+  companion free-text field would mean adding a question, which was explicitly
+  out of scope — raise it if you want it.
+* **The leading list numbers are not stored.** The form renders its own
+  question numbering per step, so storing "2. How would you describe…" would
+  number everything twice. The question text itself is untouched.
+
+---
+
 ### Wording
 
 `framing` changes only the chrome — headings, button labels, the word used for

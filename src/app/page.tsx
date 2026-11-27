@@ -62,7 +62,15 @@ export default async function LandingPage() {
   // added, so the only honest count comes from the same loader the form uses.
   const liveQuestions = await getApplicationQuestions();
   const liveCount = liveQuestions.length;
-  const liveSections = surveySections.length;
+
+  // The form's parts: the original form's sections when it asks them, plus the
+  // groups an admin created for their own questions.
+  const liveGroups = [
+    ...new Map(
+      liveQuestions.flatMap((q) => (q.group ? [[q.group.id, q.group] as const] : [])),
+    ).values(),
+  ].sort((a, b) => a.order - b.order);
+  const liveSections = surveySections.length + liveGroups.length;
   const liveRequired = liveQuestions.filter((q) => q.required).length;
   const liveOptional = liveCount - liveRequired;
 
@@ -337,9 +345,50 @@ export default async function LandingPage() {
             </div>
 
             <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {/* No sections means this deployment asks its own short set of
-                  questions rather than the termly instrument, so the reader is
-                  shown the questions themselves. */}
+              {/* The form's own parts, when it has them: an applicant scanning
+                  this wants to know the shape of what they are about to fill
+                  in, not all nineteen questions at once. */}
+              {liveGroups.map((group) => {
+                const inGroup = liveQuestions.filter((q) => q.group?.id === group.id);
+                return (
+                  <li key={group.id}>
+                    <article className="card-surface card-interactive group h-full p-6">
+                      <div className="flex items-center justify-between gap-3">
+                        <span
+                          className="inline-flex size-10 items-center justify-center rounded-xl bg-plp-50 text-[0.875rem] font-bold text-plp-700 transition-all duration-300 ease-premium group-hover:bg-plp-600 group-hover:text-white group-hover:shadow-glow-brand"
+                          aria-hidden="true"
+                        >
+                          {group.shortLabel}
+                        </span>
+                        <Badge
+                          variant="neutral"
+                          size="sm"
+                          className="transition-colors duration-300 group-hover:border-plp-200 group-hover:bg-plp-50 group-hover:text-plp-700"
+                        >
+                          {inGroup.length} {inGroup.length === 1 ? "question" : "questions"}
+                        </Badge>
+                      </div>
+
+                      <h3 className="mt-4 font-display text-[1.0625rem] font-bold leading-snug text-plp-800 transition-colors duration-300 group-hover:text-plp-600">
+                        {group.title}
+                      </h3>
+
+                      <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted">
+                        {group.description
+                          ? group.description.split(/\n{2,}/u)[0]
+                          : inGroup.every((q) => q.options?.length)
+                            ? "Multiple choice."
+                            : inGroup.some((q) => q.options?.length)
+                              ? "A mix of choices and written answers."
+                              : "Written answers, in your own words."}
+                      </p>
+                    </article>
+                  </li>
+                );
+              })}
+
+              {/* With no parts at all, show the questions themselves rather
+                  than an empty grid. */}
               {liveSections === 0 &&
                 liveQuestions.map((question, i) => (
                   <li key={question.entry_id}>
