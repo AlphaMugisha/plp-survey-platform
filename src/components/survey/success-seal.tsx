@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { labels, sentenceCase } from "@/lib/survey/framing";
 
 /**
  * Submission success animation — a brand seal with a drawn tick and two
@@ -56,7 +57,8 @@ export function SuccessSeal() {
         </svg>
       </motion.div>
 
-      <span className="sr-only">Survey submitted successfully</span>
+      {/* Screen readers get the same wording sighted users see. */}
+      <span className="sr-only">{sentenceCase(labels.noun)} submitted successfully</span>
     </div>
   );
 }

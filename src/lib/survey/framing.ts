@@ -38,6 +38,15 @@ export type FramingLabels = {
   submit: string;
   /** Heading on the confirmation screen. */
   successTitle: string;
+  /**
+   * The main line on the confirmation screen.
+   *
+   * In survey mode this is the ORIGINAL form's own confirmation message, shown
+   * verbatim. An application cannot use it: it calls the form a baseline survey
+   * and welcomes the reader to PLP, which is wrong when they have applied and
+   * not yet been accepted.
+   */
+  confirmation: string;
   /** Supporting line on the confirmation screen. */
   successBody: string;
   /** Heading on the review step. */
@@ -55,6 +64,7 @@ const SURVEY_DEFAULTS: FramingLabels = {
   eyebrow: "PLP School Curriculum",
   submit: "Submit survey",
   successTitle: "Your survey is in",
+  confirmation: surveySource.confirmation_message,
   successBody: "Your answers have been saved. You do not need to do anything else.",
   reviewTitle: "Review your answers",
 };

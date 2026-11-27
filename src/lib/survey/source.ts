@@ -157,6 +157,7 @@ const framingSchema = z.object({
       eyebrow: z.string().optional(),
       submit: z.string().optional(),
       successTitle: z.string().optional(),
+      confirmation: z.string().optional(),
       successBody: z.string().optional(),
       reviewTitle: z.string().optional(),
     })

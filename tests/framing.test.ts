@@ -160,3 +160,39 @@ describe("the eyebrow never contradicts the status banner", () => {
     }
   });
 });
+
+describe("the confirmation screen does not welcome an applicant in", () => {
+  it("replaces the form's own confirmation message in application mode", () => {
+    // The source message reads "Welcome to PLP. Lead with peace..." — written
+    // for students already on the programme, not for someone awaiting a
+    // decision. It stays in the source, unshown.
+    expect(surveySource.confirmation_message).toMatch(/Welcome to PLP/u);
+    expect(labels.confirmation).not.toMatch(/welcome/iu);
+    expect(labels.confirmation).not.toBe(surveySource.confirmation_message);
+  });
+
+  it("says to wait, and by when an answer comes", () => {
+    expect(labels.confirmation).toMatch(/wait for further response/iu);
+    expect(labels.confirmation).toMatch(/7 January 2027/u);
+  });
+
+  it("does not call it a survey anywhere on the screen", () => {
+    for (const text of [labels.successTitle, labels.confirmation, labels.successBody]) {
+      expect(text).not.toMatch(/\bsurvey\b/iu);
+    }
+  });
+
+  it("does not call it a survey to screen readers either", () => {
+    // The seal's sr-only text is the one place this was missed.
+    const seal = readFileSync(join(srcDir, "components", "survey", "success-seal.tsx"), "utf8");
+    expect(seal).not.toContain("Survey submitted successfully");
+    expect(seal).toMatch(/survey\/framing"/u);
+  });
+
+  it("falls back to the form's own message with no framing", () => {
+    // The default is the source message itself, so clearing `framing` restores
+    // the original confirmation with no code change.
+    const source = readFileSync(join(srcDir, "lib", "survey", "framing.ts"), "utf8");
+    expect(source).toContain("confirmation: surveySource.confirmation_message,");
+  });
+});

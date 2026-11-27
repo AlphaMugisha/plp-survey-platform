@@ -32,9 +32,12 @@ export default function ThankYouPage() {
           </div>
 
           <div className="px-6 py-9 sm:px-9">
-            {/* The original form's confirmation message, verbatim */}
+            {/* The original form's confirmation message, verbatim, when this is
+                the survey. An application says what happens next instead — the
+                source message welcomes the reader to PLP, which they have not
+                been accepted into yet. */}
             <p className="text-pretty text-[1.0625rem] leading-relaxed text-ink-soft">
-              {surveySource.confirmation_message}
+              {labels.confirmation}
             </p>
 
             <div className="mt-8 space-y-3 text-left">

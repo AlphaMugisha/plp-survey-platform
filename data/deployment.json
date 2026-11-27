@@ -41,8 +41,9 @@
       "eyebrow": "Membership applications are open",
       "submit": "Submit application",
       "successTitle": "Application received",
-      "successBody": "Thank you for applying to join PLP Ishami. We will contact you at the email address you gave us.",
-      "reviewTitle": "Review your application"
+      "successBody": "We will reply to the email address you gave us. There is nothing else to do for now.",
+      "reviewTitle": "Review your application",
+      "confirmation": "Thank you for applying. Please wait for further response — you will be given an answer before the start of 7 January 2027."
     }
   },
   "note": "data/survey-source.json remains the untouched, verified extract of the original Google Form. Everything above is a documented deviation for THIS deployment only. `npm run verify:survey` checks the source is still intact AND lists these deviations, so nothing here is silent. To return to the official form, delete the entries under \"overrides\"."
