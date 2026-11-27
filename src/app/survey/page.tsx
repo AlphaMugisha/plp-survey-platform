@@ -7,6 +7,7 @@ import { ApplicationWindowNotice } from "@/components/site/application-window-no
 import { getApplicationAvailability } from "@/lib/survey/application-window-server";
 import { Logo } from "@/components/brand/logo";
 import { surveySource } from "@/lib/survey/source";
+import { getApplicationQuestions } from "@/lib/survey/database-questions";
 
 export const metadata: Metadata = {
   title: "PLP application",
@@ -16,6 +17,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SurveyPage() {
   const applicationStatus = await getApplicationAvailability();
+  const questions = await getApplicationQuestions();
 
   return (
     <div className="min-h-dvh bg-canvas">
@@ -51,6 +53,7 @@ export default async function SurveyPage() {
         <div className="mt-8">
           <SurveyForm
             previewStatus={applicationStatus === "open" ? undefined : applicationStatus}
+            questions={questions}
           />
         </div>
       </main>

@@ -41,6 +41,7 @@ afterEach(() => {
 async function fillDetails(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/^Email/u), "student@example.org");
   await user.type(screen.getByLabelText(nameQuestion.title), "Alice Uwase");
+  await user.type(screen.getByLabelText(/Which country are you from/u), "Rwanda");
 
   // One school means there is no choice to make: the value is pre-filled and
   // shown as settled, so there is no combobox to open.

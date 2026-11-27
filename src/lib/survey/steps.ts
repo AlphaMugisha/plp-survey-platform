@@ -11,6 +11,7 @@
  *   last     review before submit
  */
 import {
+  allQuestions,
   participantQuestions,
   surveySections,
   type Question,
@@ -66,6 +67,24 @@ const reviewStep: SurveyStep = {
 };
 
 export const surveySteps: SurveyStep[] = [detailsStep, ...sectionSteps, reviewStep];
+
+/** Keep questions created by admins together in their own final answer step. */
+export function stepsForQuestions(questions: Question[]): SurveyStep[] {
+  const sourceIds = new Set(allQuestions.map((question) => question.entry_id));
+  const additionalQuestions = questions.filter((question) => !sourceIds.has(question.entry_id));
+  if (additionalQuestions.length === 0) return surveySteps;
+
+  const additionalStep: SurveyStep = {
+    id: "additional-questions",
+    kind: "section",
+    label: "More",
+    title: "Additional questions",
+    description: null,
+    questions: additionalQuestions,
+    section: null,
+  };
+  return [...surveySteps.slice(0, -1), additionalStep, reviewStep];
+}
 
 export const REVIEW_STEP_INDEX = surveySteps.length - 1;
 

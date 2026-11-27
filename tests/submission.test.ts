@@ -154,7 +154,12 @@ describe("configuration honesty", () => {
   it("returns 503 and says so when the service role key is missing", async () => {
     serviceConfigured = false;
     const response = await POST(
-      request({ surveySlug: "x", email: "a@b.co", answers: validAnswers() }),
+      request({
+        surveySlug: "x",
+        email: "a@b.co",
+        countryOfOrigin: "Rwanda",
+        answers: validAnswers(),
+      }),
     );
     expect(response.status).toBe(503);
     const body = await response.json();
@@ -168,6 +173,7 @@ describe("accepting a valid submission", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );
@@ -183,6 +189,7 @@ describe("accepting a valid submission", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );
@@ -219,6 +226,7 @@ describe("accepting a valid submission", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers,
       }),
     );
@@ -243,6 +251,7 @@ describe("accepting a valid submission", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers,
       }),
     );
@@ -255,6 +264,7 @@ describe("accepting a valid submission", () => {
     expect(payload.school_name).toBe(schoolQuestion.options![0]);
     expect(payload.year_level).toBe(yearLevelQuestion.options![0]);
     expect(payload.school_id).toBe(SCHOOL_ID);
+    expect(payload.country_of_origin).toBe("Rwanda");
     expect(payload.survey_id).toBe(SURVEY_ID);
   });
 
@@ -263,6 +273,7 @@ describe("accepting a valid submission", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );
@@ -286,6 +297,7 @@ describe("rejecting invalid submissions", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers,
       }),
     );
@@ -304,6 +316,7 @@ describe("rejecting invalid submissions", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers,
       }),
     );
@@ -321,6 +334,7 @@ describe("rejecting invalid submissions", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers,
       }),
     );
@@ -332,6 +346,7 @@ describe("rejecting invalid submissions", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "not-an-email",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );
@@ -356,6 +371,7 @@ describe("rejecting invalid submissions", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );
@@ -370,6 +386,7 @@ describe("rejecting invalid submissions", () => {
       request({
         surveySlug: "missing-survey",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );
@@ -391,6 +408,7 @@ describe("rejecting invalid submissions", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );
@@ -409,6 +427,7 @@ describe("rejecting invalid submissions", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );
@@ -426,6 +445,7 @@ describe("no partial submissions", () => {
       request({
         surveySlug: "plp-survey-1-baseline-term-1",
         email: "student@example.org",
+        countryOfOrigin: "Rwanda",
         answers: validAnswers(),
       }),
     );

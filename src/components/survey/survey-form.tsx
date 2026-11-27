@@ -28,12 +28,13 @@ import {
   BASELINE_SURVEY_SLUG,
 } from "@/lib/survey/source";
 import {
+  buildSchemaFor,
   emptyFormValues,
-  fullSurveySchema,
   COUNTRY_FIELD,
   type SurveyFormValues,
 } from "@/lib/survey/schema";
-import { REVIEW_STEP_INDEX, fieldsForStep, surveySteps } from "@/lib/survey/steps";
+import { fieldsForStep, stepsForQuestions } from "@/lib/survey/steps";
+import type { Question } from "@/lib/survey/source";
 import { cn } from "@/lib/utils";
 import type { ApplicationWindowStatus } from "@/lib/survey/application-window";
 
@@ -50,12 +51,17 @@ type SubmitState =
 
 export function SurveyForm({
   previewStatus,
+  questions = allQuestions,
 }: {
   previewStatus?: Exclude<ApplicationWindowStatus, "open">;
+  questions?: Question[];
 }) {
   const router = useRouter();
   const reduce = useReducedMotion();
   const preview = Boolean(previewStatus);
+  const surveySteps = React.useMemo(() => stepsForQuestions(questions), [questions]);
+  const reviewStepIndex = surveySteps.length - 1;
+  const fullSchema = React.useMemo(() => buildSchemaFor(questions, true), [questions]);
 
   const [stepIndex, setStepIndex] = React.useState(0);
   const [furthest, setFurthest] = React.useState(0);
@@ -66,8 +72,8 @@ export function SurveyForm({
   const topRef = React.useRef<HTMLDivElement>(null);
 
   const form = useForm<SurveyFormValues>({
-    resolver: zodResolver(fullSurveySchema),
-    defaultValues: emptyFormValues(),
+    resolver: zodResolver(fullSchema),
+    defaultValues: emptyFormValues(questions),
     mode: "onTouched",
     reValidateMode: "onChange",
     shouldFocusError: false,
@@ -127,20 +133,20 @@ export function SurveyForm({
         startedAt?: string;
       };
       if (parsed.values) {
-        reset({ ...emptyFormValues(), ...parsed.values });
+        reset({ ...emptyFormValues(questions), ...parsed.values });
         setDraftRestored(true);
       }
       if (typeof parsed.furthest === "number") {
-        setFurthest(Math.min(Math.max(parsed.furthest, 0), REVIEW_STEP_INDEX));
+        setFurthest(Math.min(Math.max(parsed.furthest, 0), reviewStepIndex));
       }
       if (typeof parsed.stepIndex === "number") {
-        setStepIndex(Math.min(Math.max(parsed.stepIndex, 0), REVIEW_STEP_INDEX));
+        setStepIndex(Math.min(Math.max(parsed.stepIndex, 0), reviewStepIndex));
       }
       if (parsed.startedAt) startedAtRef.current = parsed.startedAt;
     } catch {
       // A corrupt draft must never block the survey.
     }
-  }, [preview, reset]);
+  }, [preview, reset, questions, reviewStepIndex]);
 
   React.useEffect(() => {
     if (preview) return;
@@ -167,13 +173,13 @@ export function SurveyForm({
   const answeredCount = React.useMemo(() => {
     let n = (values.email ?? "").trim() ? 1 : 0;
     if ((values.country_of_origin ?? "").trim()) n += 1;
-    for (const q of allQuestions) {
+    for (const q of questions) {
       if ((values[q.fieldKey] ?? "").trim()) n += 1;
     }
     return n;
-  }, [values]);
+  }, [values, questions]);
 
-  const totalFields = allQuestions.length + (surveySource.collects_email.enabled ? 2 : 1);
+  const totalFields = questions.length + (surveySource.collects_email.enabled ? 2 : 1);
   const percent = Math.min(100, (answeredCount / totalFields) * 100);
 
   /** Required fields still empty — drives the review screen's warning. */
@@ -183,11 +189,11 @@ export function SurveyForm({
       missing.add("email");
     }
     if (!(values.country_of_origin ?? "").trim()) missing.add(COUNTRY_FIELD);
-    for (const q of allQuestions) {
+    for (const q of questions) {
       if (q.required && !(values[q.fieldKey] ?? "").trim()) missing.add(q.fieldKey);
     }
     return missing;
-  }, [values]);
+  }, [values, questions]);
 
   /* ---------------- Navigation ---------------- */
 
@@ -212,7 +218,7 @@ export function SurveyForm({
       return;
     }
 
-    const next = Math.min(stepIndex + 1, REVIEW_STEP_INDEX);
+    const next = Math.min(stepIndex + 1, reviewStepIndex);
     setStepIndex(next);
     setFurthest((f) => Math.max(f, next));
     scrollToTop();
@@ -238,7 +244,7 @@ export function SurveyForm({
     // Answers are keyed by the ORIGINAL Google entry id, so the payload cannot
     // drift from the source definition.
     const answers: Record<string, string> = {};
-    for (const q of allQuestions) {
+    for (const q of questions) {
       const value = (formValues[q.fieldKey] ?? "").trim();
       if (value) answers[String(q.entry_id)] = value;
     }
@@ -306,7 +312,7 @@ export function SurveyForm({
           container's own padding at every breakpoint (1.25rem / 2rem / 2.5rem),
           otherwise content scrolls through an uncovered strip at each edge. */}
       <div className="sticky top-0 z-30 -mx-5 mb-8 border-b border-border/70 bg-paper/85 px-5 py-4 backdrop-blur-md sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10">
-        <ProgressRail
+      <ProgressRail
           steps={surveySteps}
           current={stepIndex}
           furthest={furthest}
@@ -533,6 +539,7 @@ export function SurveyForm({
               values={getValues()}
               onEditStep={jumpTo}
               missingFields={preview ? NO_MISSING_FIELDS : missingFields}
+              steps={surveySteps}
             />
           )}
             </div>
@@ -574,7 +581,7 @@ export function SurveyForm({
             disabled={submitting}
             className="group w-full sm:w-auto"
           >
-            {stepIndex === REVIEW_STEP_INDEX - 1 ? "Review answers" : "Continue"}
+            {stepIndex === reviewStepIndex - 1 ? "Review answers" : "Continue"}
             <ArrowRight
               className="transition-transform duration-300 ease-premium group-hover:translate-x-0.5"
               aria-hidden="true"

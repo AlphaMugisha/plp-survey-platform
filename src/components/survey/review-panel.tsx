@@ -3,7 +3,7 @@
 import { AlertCircle, Mail, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { surveySteps } from "@/lib/survey/steps";
+import { surveySteps as defaultSteps, type SurveyStep } from "@/lib/survey/steps";
 import type { SurveyFormValues } from "@/lib/survey/schema";
 
 /**
@@ -16,13 +16,15 @@ export function ReviewPanel({
   values,
   onEditStep,
   missingFields,
+  steps = defaultSteps,
 }: {
   values: SurveyFormValues;
   onEditStep: (stepIndex: number) => void;
   /** Field keys that are required but still empty. */
   missingFields: Set<string>;
+  steps?: SurveyStep[];
 }) {
-  const answerSteps = surveySteps.filter((s) => s.kind !== "review");
+  const answerSteps = steps.filter((s) => s.kind !== "review");
 
   return (
     <div className="space-y-5">
@@ -42,7 +44,7 @@ export function ReviewPanel({
       )}
 
       {answerSteps.map((step) => {
-        const stepIndex = surveySteps.findIndex((s) => s.id === step.id);
+        const stepIndex = steps.findIndex((s) => s.id === step.id);
         const showEmail = step.kind === "details";
 
         return (

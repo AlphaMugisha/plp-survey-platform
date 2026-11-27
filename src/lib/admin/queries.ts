@@ -94,7 +94,7 @@ export type OverviewStats = {
 export async function getOverviewStats(surveyId: string): Promise<OverviewStats> {
   const supabase = await createServerSupabase();
 
-  const [{ count: totalResponses }, { count: totalSchools }, { count: questionCount }] =
+  const [{ count: totalResponses }, { count: totalSchools }, { data: questionRows }] =
     await Promise.all([
       supabase
         .from("survey_responses")
@@ -103,7 +103,7 @@ export async function getOverviewStats(surveyId: string): Promise<OverviewStats>
       supabase.from("schools").select("id", { count: "exact", head: true }),
       supabase
         .from("questions")
-        .select("id", { count: "exact", head: true })
+        .select("id, created_at")
         .eq("survey_id", surveyId),
     ]);
 
@@ -127,6 +127,14 @@ export async function getOverviewStats(surveyId: string): Promise<OverviewStats>
       | "duration_seconds"
     >
   >;
+
+  // A question added later should not make older submissions look incomplete.
+  const expectedCells = responses.reduce((total, response) => {
+    const submittedAt = new Date(response.submitted_at).getTime();
+    return total + (questionRows ?? []).filter(
+      (question) => new Date(question.created_at).getTime() <= submittedAt,
+    ).length;
+  }, 0);
 
   const schoolSet = new Set(responses.map((r) => r.school_name));
   const studentSet = new Set(responses.map((r) => r.email.trim().toLowerCase()));
@@ -202,7 +210,7 @@ export async function getOverviewStats(surveyId: string): Promise<OverviewStats>
     })),
     medianDurationSeconds,
     answeredCells: answeredCells ?? 0,
-    expectedCells: (totalResponses ?? responses.length) * (questionCount ?? 0),
+    expectedCells,
     optionalAnswered,
     firstSubmission: sorted[0]?.submitted_at ?? null,
     lastSubmission: sorted[sorted.length - 1]?.submitted_at ?? null,
@@ -498,4 +506,80 @@ export async function listYearLevels(surveyId: string): Promise<string[]> {
   return [...new Set(((data ?? []) as Array<{ year_level: string }>).map((r) => r.year_level))].sort(
     (a, b) => a.localeCompare(b, undefined, { numeric: true }),
   );
+}
+
+/* ------------------------------------------------------------------ *
+ * Question management
+ * ------------------------------------------------------------------ */
+
+export type ManagedQuestion = {
+  entryId: number;
+  orderIndex: number;
+  title: string;
+  description: string | null;
+  type: string;
+  options: string[] | null;
+  isRequired: boolean;
+  /** False for the questions seeded from the verified form. */
+  isCustom: boolean;
+  /** How many submitted answers reference it. */
+  answerCount: number;
+  /** Only an admin-added question with no answers can be removed. */
+  canRemove: boolean;
+};
+
+/** Every question on a survey, with what the admin UI needs to manage it. */
+export async function listManagedQuestions(surveyId: string): Promise<ManagedQuestion[]> {
+  const supabase = await createServerSupabase();
+
+  const { data: rows } = await supabase
+    .from("questions")
+    .select("id, entry_id, order_index, title, description, type, options, is_required, is_custom")
+    .eq("survey_id", surveyId)
+    .order("order_index");
+
+  const questions = (rows ?? []) as Array<{
+    id: string;
+    entry_id: number;
+    order_index: number;
+    title: string;
+    description: string | null;
+    type: string;
+    options: string[] | null;
+    is_required: boolean;
+    is_custom: boolean | null;
+  }>;
+
+  if (questions.length === 0) return [];
+
+  // One grouped count rather than a query per question.
+  const { data: answerRows } = await supabase
+    .from("answers")
+    .select("question_id")
+    .in(
+      "question_id",
+      questions.map((q) => q.id),
+    );
+
+  const counts = new Map<string, number>();
+  for (const row of (answerRows ?? []) as Array<{ question_id: string }>) {
+    counts.set(row.question_id, (counts.get(row.question_id) ?? 0) + 1);
+  }
+
+  return questions.map((q) => {
+    const answerCount = counts.get(q.id) ?? 0;
+    const isCustom = Boolean(q.is_custom);
+    return {
+      entryId: Number(q.entry_id),
+      orderIndex: q.order_index,
+      title: q.title,
+      description: q.description,
+      type: q.type,
+      options: Array.isArray(q.options) ? q.options : null,
+      isRequired: q.is_required,
+      isCustom,
+      answerCount,
+      canRemove: isCustom && answerCount === 0,
+    };
+  });
 }

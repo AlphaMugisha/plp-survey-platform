@@ -21,7 +21,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { surveyStats } from "@/lib/survey/source";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { getApplicationAvailability } from "@/lib/survey/application-window-server";
-import { setSurveyStatus } from "./surveys/actions";
+import { openApplicationsAction } from "./surveys/actions";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -96,7 +96,7 @@ export default async function AdminOverviewPage() {
           description="This immediately allows students to submit applications. The application page will update to show that it is open."
           className="mb-6 border-plp-200 bg-plp-50/60"
         >
-          <form action={setSurveyStatus}>
+          <form action={openApplicationsAction}>
             <input type="hidden" name="surveyId" value={survey.id} />
             <input type="hidden" name="status" value="active" />
             <Button type="submit" size="xl">

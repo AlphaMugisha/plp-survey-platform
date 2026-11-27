@@ -12,6 +12,8 @@ import {
   nameQuestion,
   schoolQuestion,
   yearLevelQuestion,
+  fieldKeyFor,
+  type Question,
 } from "@/lib/survey/source";
 import { getApplicationWindowStatus } from "@/lib/survey/application-window";
 
@@ -62,18 +64,6 @@ export async function POST(request: NextRequest) {
 
   const { surveySlug, email, countryOfOrigin, answers, meta } = parsed.data;
 
-  /* ---- 2. Authoritative content validation (never trust the client) ---- */
-  const issues: ValidationIssue[] = validateSubmissionAnswers(answers);
-  if (issues.length > 0) {
-    return NextResponse.json(
-      {
-        error: "Some answers are missing or not allowed. Please review and try again.",
-        issues: issues.map((i) => ({ field: i.field, message: i.message })),
-      },
-      { status: 422 },
-    );
-  }
-
   const supabase = createAdminClient();
 
   /* ---- 3. Resolve the survey ---- */
@@ -111,7 +101,7 @@ export async function POST(request: NextRequest) {
   /* ---- 4. Map original entry ids to database question rows ---- */
   const { data: questionRows, error: questionsError } = await supabase
     .from("questions")
-    .select("id, entry_id, type, options, is_required")
+    .select("id, entry_id, order_index, title, description, type, options, is_required")
     .eq("survey_id", survey.id);
 
   if (questionsError || !questionRows) {
@@ -125,9 +115,10 @@ export async function POST(request: NextRequest) {
   // The seeded survey must still match the source file. A mismatch means the
   // database was seeded from a different version — refuse rather than store
   // answers against the wrong questions.
-  if (questionRows.length !== allQuestions.length) {
+  const sourceIds = new Set(allQuestions.map((question) => question.entry_id));
+  if (!allQuestions.every((question) => questionRows.some((row) => Number(row.entry_id) === question.entry_id))) {
     console.error(
-      `[submit] question count mismatch: database has ${questionRows.length}, source has ${allQuestions.length}`,
+      `[submit] source questions missing from database: found ${questionRows.length}`,
     );
     return NextResponse.json(
       {
@@ -135,6 +126,36 @@ export async function POST(request: NextRequest) {
           "The survey in the database does not match the published survey. Please tell your PLP coordinator.",
       },
       { status: 500 },
+    );
+  }
+
+  const customQuestions: Question[] = questionRows.flatMap((row) => {
+    const entryId = Number(row.entry_id);
+    if (sourceIds.has(entryId)) return [];
+    if (row.type !== "paragraph" && row.type !== "short_answer" && row.type !== "multiple_choice") {
+      return [];
+    }
+    return [{
+      index: Number(row.order_index),
+      entry_id: entryId,
+      type: row.type,
+      title: row.title,
+      description: row.description,
+      required: row.is_required,
+      options: Array.isArray(row.options) ? row.options : undefined,
+      fieldKey: fieldKeyFor(entryId),
+    }];
+  });
+
+  /* ---- 5. Authoritative validation against this survey's live questions ---- */
+  const issues: ValidationIssue[] = validateSubmissionAnswers(answers, [...allQuestions, ...customQuestions]);
+  if (issues.length > 0) {
+    return NextResponse.json(
+      {
+        error: "Some answers are missing or not allowed. Please review and try again.",
+        issues: issues.map((i) => ({ field: i.field, message: i.message })),
+      },
+      { status: 422 },
     );
   }
 

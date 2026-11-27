@@ -106,9 +106,9 @@ export type SurveyFormValues = Record<string, string | undefined> & {
  * decision to make, and asking for one is just friction. This happens when a
  * deployment pins the school list to a single school.
  */
-export function emptyFormValues(): SurveyFormValues {
+export function emptyFormValues(questions: Question[] = allQuestions): SurveyFormValues {
   const values: SurveyFormValues = { [EMAIL_FIELD]: "", [COUNTRY_FIELD]: "" };
-  for (const q of allQuestions) {
+  for (const q of questions) {
     values[q.fieldKey] = q.options?.length === 1 ? q.options[0]! : "";
   }
   return values;
@@ -144,10 +144,13 @@ export type ValidationIssue = { entryId: number | null; field: string; message: 
  * Authoritative server-side check of a submission's answers against the source.
  * Returns the issues found; an empty array means the submission is valid.
  */
-export function validateSubmissionAnswers(answers: Record<string, string>): ValidationIssue[] {
+export function validateSubmissionAnswers(
+  answers: Record<string, string>,
+  questions: Question[] = allQuestions,
+): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
-  for (const q of allQuestions) {
+  for (const q of questions) {
     const raw = answers[String(q.entry_id)];
     const value = typeof raw === "string" ? raw.trim() : "";
 
@@ -178,7 +181,7 @@ export function validateSubmissionAnswers(answers: Record<string, string>): Vali
   }
 
   // Reject unknown entry ids rather than silently dropping them.
-  const knownIds = new Set(allQuestions.map((q) => String(q.entry_id)));
+  const knownIds = new Set(questions.map((q) => String(q.entry_id)));
   for (const key of Object.keys(answers)) {
     if (!knownIds.has(key)) {
       issues.push({

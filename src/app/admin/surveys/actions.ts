@@ -280,3 +280,161 @@ export async function updateDraftSurvey(formData: FormData): Promise<ActionResul
   revalidatePath("/admin/surveys");
   return { ok: true, message: "Draft updated." };
 }
+
+/* ------------------------------------------------------------------ *
+ * Add a question without changing existing questions or saved answers
+ * ------------------------------------------------------------------ */
+
+const addQuestionSchema = z.object({
+  surveyId: z.string().uuid(),
+  title: z.string().trim().min(3, "Write a question.").max(500),
+  description: z.string().trim().max(1000).optional(),
+  type: z.enum(["multiple_choice", "paragraph"]),
+  required: z.enum(["true", "false"]),
+  options: z.string().optional(),
+});
+
+export async function addSurveyQuestion(formData: FormData): Promise<ActionResult> {
+  const { error: authError } = await requireManagerOrFail();
+  if (authError) return { ok: false, error: authError };
+
+  const parsed = addQuestionSchema.safeParse({
+    surveyId: formData.get("surveyId"),
+    title: formData.get("title"),
+    description: formData.get("description") ?? undefined,
+    type: formData.get("type"),
+    required: formData.get("required"),
+    options: formData.get("options") ?? undefined,
+  });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid question." };
+
+  const { surveyId, title, description, type, required } = parsed.data;
+  const options = (parsed.data.options ?? "")
+    .split(/\r?\n/u)
+    .map((option) => option.trim())
+    .filter(Boolean);
+  if (type === "multiple_choice" && options.length < 2) {
+    return { ok: false, error: "Add at least two answer options, one per line." };
+  }
+  if (new Set(options.map((option) => option.toLocaleLowerCase())).size !== options.length) {
+    return { ok: false, error: "Each answer option must be unique." };
+  }
+  if (options.some((option) => option.length > 300)) {
+    return { ok: false, error: "Keep each answer option under 300 characters." };
+  }
+
+  const supabase = await createServerSupabase();
+  const { data: existing, error: loadError } = await supabase
+    .from("questions")
+    .select("entry_id, order_index")
+    .eq("survey_id", surveyId);
+  if (loadError || !existing) return { ok: false, error: loadError?.message ?? "Questions could not be loaded." };
+
+  const entryId = Math.max(...existing.map((question) => Number(question.entry_id)), 0) + 1;
+  const orderIndex = Math.max(...existing.map((question) => Number(question.order_index)), 0) + 1;
+  const { error } = await supabase.from("questions").insert({
+    survey_id: surveyId,
+    section_id: null,
+    entry_id: entryId,
+    order_index: orderIndex,
+    title,
+    description: description || null,
+    type,
+    options: type === "multiple_choice" ? options : null,
+    is_required: required === "true",
+    // Flags this as admin-added, which is what makes it removable later.
+    // Seeded questions are is_custom = false and can never be deleted.
+    is_custom: true,
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/surveys");
+  revalidatePath("/survey");
+  revalidatePath("/admin");
+  return { ok: true, message: "Question added to the application." };
+}
+
+/* ------------------------------------------------------------------ *
+ * Form-action wrappers
+ * ------------------------------------------------------------------ */
+
+/**
+ * React form `action` props must resolve to void. These thin wrappers let a
+ * plain <form action={...}> call an action that normally returns a result,
+ * for the cases where the page just revalidates rather than showing a message.
+ */
+export async function openApplicationsAction(formData: FormData): Promise<void> {
+  await setSurveyStatus(formData);
+}
+
+/* ------------------------------------------------------------------ *
+ * Remove an admin-added question
+ * ------------------------------------------------------------------ */
+
+const removeQuestionSchema = z.object({
+  surveyId: z.string().uuid(),
+  entryId: z.coerce.number().int(),
+});
+
+/**
+ * Deletes a question an administrator added.
+ *
+ * Refuses, in order:
+ *   - a question seeded from the verified source form (never deletable)
+ *   - a question that already has answers (deleting would lose them)
+ *
+ * The same two rules are enforced independently by a database trigger, so a
+ * mistake here cannot destroy content.
+ */
+export async function removeSurveyQuestion(formData: FormData): Promise<ActionResult> {
+  const { error: authError } = await requireManagerOrFail();
+  if (authError) return { ok: false, error: authError };
+
+  const parsed = removeQuestionSchema.safeParse({
+    surveyId: formData.get("surveyId"),
+    entryId: formData.get("entryId"),
+  });
+  if (!parsed.success) return { ok: false, error: "Invalid request." };
+
+  const { surveyId, entryId } = parsed.data;
+  const supabase = await createServerSupabase();
+
+  const { data: question } = await supabase
+    .from("questions")
+    .select("id, title, is_custom")
+    .eq("survey_id", surveyId)
+    .eq("entry_id", entryId)
+    .maybeSingle();
+
+  if (!question) return { ok: false, error: "That question no longer exists." };
+
+  if (!question.is_custom) {
+    return {
+      ok: false,
+      error:
+        "That question comes from the verified PLP form and cannot be removed. Only questions added here can be deleted.",
+    };
+  }
+
+  const { count } = await supabase
+    .from("answers")
+    .select("id", { count: "exact", head: true })
+    .eq("question_id", question.id);
+
+  if ((count ?? 0) > 0) {
+    return {
+      ok: false,
+      error: `"${question.title}" already has ${count} answer(s), so it cannot be removed.`,
+    };
+  }
+
+  const { error } = await supabase.from("questions").delete().eq("id", question.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/surveys");
+  revalidatePath("/survey");
+  revalidatePath("/admin");
+
+  return { ok: true, message: `Removed "${question.title}" from the application.` };
+}

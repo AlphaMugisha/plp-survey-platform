@@ -164,10 +164,18 @@ describe("per-step validation", () => {
   it("includes the email field when asked", () => {
     const schema = buildSchemaFor([nameQuestion], true);
     expect(schema.safeParse({ [nameQuestion.fieldKey]: "Alice" }).success).toBe(false);
+    // The details step also collects the email and the country of origin.
     expect(
       schema.safeParse({
         [nameQuestion.fieldKey]: "Alice",
         email: "a@example.org",
+      }).success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        [nameQuestion.fieldKey]: "Alice",
+        email: "a@example.org",
+        country_of_origin: "Rwanda",
       }).success,
     ).toBe(true);
   });
@@ -212,6 +220,7 @@ describe("server-side submission validation", () => {
     const ok = submissionSchema.safeParse({
       surveySlug: "plp-survey-1-baseline-term-1",
       email: "student@example.org",
+      countryOfOrigin: "Rwanda",
       answers: validAnswers(),
     });
     expect(ok.success).toBe(true);

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   CopyPlus,
   Lock,
+  ListPlus,
   Pencil,
   PlayCircle,
   XCircle,
@@ -234,6 +235,10 @@ export function SurveyManager({
                 </Button>
               </form>
             )}
+
+            {/* Adding and removing questions lives on its own panel below,
+                so there is one place to manage them rather than a form
+                buried inside each survey card. */}
           </Panel>
         );
       })}

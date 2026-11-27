@@ -2,11 +2,18 @@ import type { Metadata } from "next";
 import { FileStack } from "lucide-react";
 import { PageHeader, Panel, EmptyState } from "@/components/admin/ui";
 import { SurveyManager } from "@/components/admin/survey-manager";
+import { QuestionManager } from "@/components/admin/question-manager";
 import { SetupNotice } from "@/components/site/setup-notice";
 import { requireAdmin } from "@/lib/admin/auth";
-import { listSurveys } from "@/lib/admin/queries";
+import { listManagedQuestions, listSurveys } from "@/lib/admin/queries";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { createSurveyFromTemplate, setSurveyStatus, updateDraftSurvey } from "./actions";
+import {
+  addSurveyQuestion,
+  createSurveyFromTemplate,
+  removeSurveyQuestion,
+  setSurveyStatus,
+  updateDraftSurvey,
+} from "./actions";
 
 export const metadata: Metadata = { title: "Surveys" };
 
@@ -23,6 +30,11 @@ export default async function SurveysPage() {
   }
 
   const surveys = await listSurveys();
+
+  // The live application is the survey students are filling in, so that is the
+  // one whose questions can be managed here.
+  const live = surveys.find((s) => s.status === "active") ?? surveys[0];
+  const managedQuestions = live ? await listManagedQuestions(live.id) : [];
 
   return (
     <>
@@ -50,6 +62,17 @@ export default async function SurveysPage() {
             updateDraft: updateDraftSurvey,
           }}
         />
+      )}
+
+      {live && managedQuestions.length > 0 && (
+        <div className="mt-6">
+          <QuestionManager
+            surveyId={live.id}
+            questions={managedQuestions}
+            canManage={session.canManage}
+            actions={{ add: addSurveyQuestion, remove: removeSurveyQuestion }}
+          />
+        </div>
       )}
     </>
   );
