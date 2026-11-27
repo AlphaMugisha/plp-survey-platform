@@ -5,12 +5,12 @@ import {
   ClipboardList,
   Database,
   GraduationCap,
-  PlayCircle,
   School,
   Timer,
   Users,
 } from "lucide-react";
 import { PageHeader, Panel, StatCard, EmptyState } from "@/components/admin/ui";
+import { ApplicationToggle } from "@/components/admin/application-toggle";
 import { YearLevelChart } from "@/components/admin/charts";
 import { SetupNotice } from "@/components/site/setup-notice";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { surveyStats } from "@/lib/survey/source";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { getApplicationAvailability } from "@/lib/survey/application-window-server";
-import { openApplicationsAction } from "./surveys/actions";
+import { toggleApplications } from "./surveys/actions";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -90,22 +90,13 @@ export default async function AdminOverviewPage() {
         }
       />
 
-      {applicationAvailability === "upcoming" && session.canManage && (
-        <Panel
-          title="Open applications"
-          description="This immediately allows students to submit applications. The application page will update to show that it is open."
-          className="mb-6 border-plp-200 bg-plp-50/60"
-        >
-          <form action={openApplicationsAction}>
-            <input type="hidden" name="surveyId" value={survey.id} />
-            <input type="hidden" name="status" value="active" />
-            <Button type="submit" size="xl">
-              <PlayCircle aria-hidden="true" />
-              Open applications
-            </Button>
-          </form>
-        </Panel>
-      )}
+      <ApplicationToggle
+        surveyId={survey.id}
+        isOpen={applicationAvailability === "open"}
+        responseCount={stats.totalResponses}
+        canManage={session.canManage}
+        toggle={toggleApplications}
+      />
 
       {applicationAvailability === "open" && (
         <div

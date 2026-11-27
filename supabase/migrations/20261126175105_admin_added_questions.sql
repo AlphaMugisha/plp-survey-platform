@@ -9,7 +9,9 @@
 -- The rules this installs, on public.questions:
 --
 --   INSERT  allowed. Adding a question cannot invalidate an existing answer.
---   UPDATE  blocked once the survey has responses or is locked — unchanged.
+--   UPDATE  an admin-added question stays editable until it has answers.
+--           A seeded question is frozen once the survey is locked or answered,
+--           and its identity (entry_id, survey_id, is_custom) can never change.
 --   DELETE  allowed ONLY for an admin-added question that nobody has answered.
 --           A seeded question can never be deleted, at any point.
 --
@@ -75,11 +77,39 @@ begin
     return old;
   end if;
 
-  -- ---- UPDATE: wording stays frozen once the survey is in use ----
+  -- ---- UPDATE ----
   if tg_op = 'UPDATE' then
+    -- Identity can never change, whoever owns the question.
+    if new.entry_id <> old.entry_id or new.survey_id <> old.survey_id then
+      raise exception 'A question cannot be moved or re-identified.'
+        using errcode = 'check_violation';
+    end if;
+
+    -- Nor can a seeded question be re-labelled as admin-added to unlock it.
+    if coalesce(new.is_custom, false) <> coalesce(old.is_custom, false) then
+      raise exception 'is_custom cannot be changed after a question is created.'
+        using errcode = 'check_violation';
+    end if;
+
+    -- An admin-added question stays editable until somebody answers it.
+    if coalesce(old.is_custom, false) then
+      select count(*) into answer_count
+      from public.answers a where a.question_id = old.id;
+
+      if answer_count > 0 then
+        raise exception
+          'Question "%" already has % answer(s) and can no longer be edited.',
+          left(old.title, 60), answer_count
+          using errcode = 'check_violation';
+      end if;
+
+      return new;
+    end if;
+
+    -- Seeded questions stay frozen once the survey is locked or answered.
     if has_responses or coalesce(locked, false) then
       raise exception
-        'Survey % is locked or already has responses: existing questions are immutable.',
+        'Survey % is locked or already has responses: questions from the source form are immutable.',
         target_survey
         using errcode = 'check_violation';
     end if;

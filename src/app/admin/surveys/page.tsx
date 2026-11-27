@@ -11,6 +11,7 @@ import {
   addSurveyQuestion,
   createSurveyFromTemplate,
   removeSurveyQuestion,
+  updateSurveyQuestion,
   setSurveyStatus,
   updateDraftSurvey,
 } from "./actions";
@@ -71,7 +72,11 @@ export default async function SurveysPage() {
               surveyId={live.id}
               questions={questionResult.questions}
               canManage={session.canManage}
-              actions={{ add: addSurveyQuestion, remove: removeSurveyQuestion }}
+              actions={{
+                add: addSurveyQuestion,
+                edit: updateSurveyQuestion,
+                remove: removeSurveyQuestion,
+              }}
             />
           ) : (
             /* Say what is missing rather than hiding the panel. */

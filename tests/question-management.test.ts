@@ -56,9 +56,24 @@ describe("the guard permits appending but protects what exists", () => {
     expect(sql).toMatch(/already has % answer\(s\) and cannot be deleted/iu);
   });
 
-  it("still freezes the wording of existing questions once in use", () => {
+  it("still freezes source questions once the survey is in use", () => {
     expect(flat).toContain("if has_responses or coalesce(locked, false) then");
-    expect(sql).toMatch(/existing questions are immutable/iu);
+    expect(sql).toMatch(/questions from the source form are immutable/iu);
+  });
+
+  it("lets an admin-added question be edited until it is answered", () => {
+    const update = sql.slice(sql.indexOf("-- ---- UPDATE ----"));
+    expect(update).toMatch(/already has % answer\(s\) and can no longer be edited/iu);
+    // The custom branch returns before reaching the locked-survey check.
+    expect(update.indexOf("if coalesce(old.is_custom, false) then")).toBeLessThan(
+      update.indexOf("if has_responses or coalesce(locked, false) then"),
+    );
+  });
+
+  it("never lets a question change identity or be relabelled as custom", () => {
+    expect(flat).toContain("if new.entry_id <> old.entry_id or new.survey_id <> old.survey_id then");
+    expect(sql).toMatch(/A question cannot be moved or re-identified/iu);
+    expect(sql).toMatch(/is_custom cannot be changed after a question is created/iu);
   });
 
   it("pins search_path on the guard function", () => {
@@ -128,5 +143,47 @@ describe("the application reads questions from the database", () => {
 
   it("orders additions after the source questions", () => {
     expect(loader).toContain("sort((a, b) => a.index - b.index)");
+  });
+});
+
+describe("editing and the application toggle", () => {
+  const actions = readFileSync(
+    join(process.cwd(), "src", "app", "admin", "surveys", "actions.ts"),
+    "utf8",
+  );
+
+  it("refuses to edit a source question", () => {
+    const edit = actions.slice(actions.indexOf("export async function updateSurveyQuestion"));
+    expect(edit).toContain("if (!question.is_custom)");
+    expect(edit).toMatch(/cannot be edited/iu);
+  });
+
+  it("refuses to edit a question that has answers", () => {
+    const edit = actions.slice(actions.indexOf("export async function updateSurveyQuestion"));
+    expect(edit).toMatch(/can no longer be changed/iu);
+  });
+
+  it("validates options identically for add and edit", () => {
+    // One shared parser, so the two paths cannot drift apart.
+    expect(actions).toContain("function parseOptions(");
+    expect(actions).toContain("const result = parseOptions(parsed.data.options, type);");
+  });
+
+  it("can both open and close applications", () => {
+    const toggle = actions.slice(actions.indexOf("export async function toggleApplications"));
+    expect(toggle).toContain('next !== "active" && next !== "closed"');
+    expect(toggle).toMatch(/Applications are open/iu);
+    expect(toggle).toMatch(/Applications are closed/iu);
+  });
+
+  it("says plainly that closing keeps existing submissions", () => {
+    const toggle = actions.slice(actions.indexOf("export async function toggleApplications"));
+    expect(toggle).toMatch(/already received are untouched/iu);
+  });
+
+  it("revalidates the public pages when the window changes", () => {
+    const toggle = actions.slice(actions.indexOf("export async function toggleApplications"));
+    expect(toggle).toContain('revalidatePath("/survey")');
+    expect(toggle).toContain('revalidatePath("/")');
   });
 });

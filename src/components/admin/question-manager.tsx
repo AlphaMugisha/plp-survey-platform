@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ListChecks,
   Lock,
+  Pencil,
   Plus,
   ShieldCheck,
   Trash2,
@@ -46,13 +47,14 @@ export function QuestionManager({
   surveyId: string;
   questions: ManagedQuestion[];
   canManage: boolean;
-  actions: { add: Action; remove: Action };
+  actions: { add: Action; edit: Action; remove: Action };
 }) {
   const [result, setResult] = React.useState<ActionResult | null>(null);
   const [pending, setPending] = React.useState(false);
   const [adding, setAdding] = React.useState(false);
   const [type, setType] = React.useState<"paragraph" | "multiple_choice">("paragraph");
   const [confirming, setConfirming] = React.useState<number | null>(null);
+  const [editing, setEditing] = React.useState<number | null>(null);
 
   const seeded = questions.filter((q) => !q.isCustom);
   const added = questions.filter((q) => q.isCustom);
@@ -66,6 +68,7 @@ export function QuestionManager({
       if (res.ok) {
         setAdding(false);
         setConfirming(null);
+        setEditing(null);
       }
     } catch (error) {
       setResult({
@@ -198,7 +201,17 @@ export function QuestionManager({
                   {canManage && (
                     <div className="shrink-0">
                       {question.canRemove ? (
-                        confirming === question.entryId ? (
+                        editing === question.entryId ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditing(null)}
+                          >
+                            <X aria-hidden="true" />
+                            Cancel
+                          </Button>
+                        ) : confirming === question.entryId ? (
                           <form
                             action={(fd) => run(actions.remove, fd)}
                             className="flex items-center gap-2"
@@ -224,26 +237,125 @@ export function QuestionManager({
                             </Button>
                           </form>
                         ) : (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={pending}
-                            onClick={() => setConfirming(question.entryId)}
-                          >
-                            <Trash2 aria-hidden="true" />
-                            Remove
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              disabled={pending}
+                              onClick={() => {
+                                setEditing(question.entryId);
+                                setConfirming(null);
+                              }}
+                            >
+                              <Pencil aria-hidden="true" />
+                              Edit
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              disabled={pending}
+                              onClick={() => setConfirming(question.entryId)}
+                            >
+                              <Trash2 aria-hidden="true" />
+                              Remove
+                            </Button>
+                          </div>
                         )
                       ) : (
                         <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-[0.75rem] text-ink-muted">
                           <Lock className="size-3.5" aria-hidden="true" />
-                          Answered
+                          Answered — locked
                         </span>
                       )}
                     </div>
                   )}
                 </div>
+
+                {/* ---- Inline edit ---- */}
+                {editing === question.entryId && canManage && (
+                  <form
+                    className="mt-4 space-y-4 border-t border-border pt-4"
+                    action={(fd) => run(actions.edit, fd)}
+                  >
+                    <input type="hidden" name="surveyId" value={surveyId} />
+                    <input type="hidden" name="entryId" value={question.entryId} />
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`edit-title-${question.entryId}`}>Question</Label>
+                      <Input
+                        id={`edit-title-${question.entryId}`}
+                        name="title"
+                        required
+                        minLength={3}
+                        defaultValue={question.title}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`edit-desc-${question.entryId}`}>
+                        Help text (optional)
+                      </Label>
+                      <Input
+                        id={`edit-desc-${question.entryId}`}
+                        name="description"
+                        defaultValue={question.description ?? ""}
+                      />
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor={`edit-type-${question.entryId}`}>Answer type</Label>
+                        <select
+                          id={`edit-type-${question.entryId}`}
+                          name="type"
+                          defaultValue={
+                            question.type === "multiple_choice"
+                              ? "multiple_choice"
+                              : "paragraph"
+                          }
+                          className="h-12 w-full appearance-none rounded-xl border border-border bg-surface px-4 text-[0.9375rem] text-ink shadow-subtle focus:border-plp-400 focus:shadow-glow-brand focus:outline-none"
+                        >
+                          <option value="paragraph">Written answer</option>
+                          <option value="multiple_choice">Choose one option</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`edit-required-${question.entryId}`}>
+                          Must be answered?
+                        </Label>
+                        <select
+                          id={`edit-required-${question.entryId}`}
+                          name="required"
+                          defaultValue={question.isRequired ? "true" : "false"}
+                          className="h-12 w-full appearance-none rounded-xl border border-border bg-surface px-4 text-[0.9375rem] text-ink shadow-subtle focus:border-plp-400 focus:shadow-glow-brand focus:outline-none"
+                        >
+                          <option value="true">Required</option>
+                          <option value="false">Optional</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`edit-options-${question.entryId}`}>Answer options</Label>
+                      <Textarea
+                        id={`edit-options-${question.entryId}`}
+                        name="options"
+                        rows={4}
+                        defaultValue={(question.options ?? []).join("\n")}
+                        placeholder="One per line. Leave blank for a written answer."
+                      />
+                      <p className="text-[0.75rem] text-ink-muted">
+                        Only used when the answer type is a choice.
+                      </p>
+                    </div>
+
+                    <Button type="submit" loading={pending}>
+                      Save changes
+                    </Button>
+                  </form>
+                )}
               </li>
             ))}
           </ul>

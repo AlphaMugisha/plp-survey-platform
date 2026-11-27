@@ -438,3 +438,153 @@ export async function removeSurveyQuestion(formData: FormData): Promise<ActionRe
 
   return { ok: true, message: `Removed "${question.title}" from the application.` };
 }
+
+/* ------------------------------------------------------------------ *
+ * Edit an admin-added question
+ * ------------------------------------------------------------------ */
+
+const editQuestionSchema = addQuestionSchema.extend({
+  entryId: z.coerce.number().int(),
+});
+
+/** Shared option parsing, so add and edit cannot validate differently. */
+function parseOptions(
+  raw: string | undefined,
+  type: "multiple_choice" | "paragraph",
+): { options: string[] } | { error: string } {
+  const options = (raw ?? "")
+    .split(/\r?\n/u)
+    .map((option) => option.trim())
+    .filter(Boolean);
+
+  if (type === "multiple_choice") {
+    if (options.length < 2) return { error: "Add at least two answer options, one per line." };
+    if (new Set(options.map((o) => o.toLocaleLowerCase())).size !== options.length) {
+      return { error: "Each answer option must be unique." };
+    }
+    if (options.some((o) => o.length > 300)) {
+      return { error: "Keep each answer option under 300 characters." };
+    }
+  }
+  return { options };
+}
+
+/**
+ * Edits a question an administrator added.
+ *
+ * Refuses a question that came from the verified source form, and one that
+ * already has answers — changing the wording under an existing answer would
+ * silently change what that answer meant. Both rules are also enforced by a
+ * database trigger.
+ */
+export async function updateSurveyQuestion(formData: FormData): Promise<ActionResult> {
+  const { error: authError } = await requireManagerOrFail();
+  if (authError) return { ok: false, error: authError };
+
+  const parsed = editQuestionSchema.safeParse({
+    surveyId: formData.get("surveyId"),
+    entryId: formData.get("entryId"),
+    title: formData.get("title"),
+    description: formData.get("description") ?? undefined,
+    type: formData.get("type"),
+    required: formData.get("required"),
+    options: formData.get("options") ?? undefined,
+  });
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid question." };
+  }
+
+  const { surveyId, entryId, title, description, type, required } = parsed.data;
+
+  const result = parseOptions(parsed.data.options, type);
+  if ("error" in result) return { ok: false, error: result.error };
+
+  const supabase = await createServerSupabase();
+
+  const { data: question } = await supabase
+    .from("questions")
+    .select("id, title, is_custom")
+    .eq("survey_id", surveyId)
+    .eq("entry_id", entryId)
+    .maybeSingle();
+
+  if (!question) return { ok: false, error: "That question no longer exists." };
+
+  if (!question.is_custom) {
+    return {
+      ok: false,
+      error:
+        "That question comes from the verified PLP form and cannot be edited. Only questions added here can be changed.",
+    };
+  }
+
+  const { count } = await supabase
+    .from("answers")
+    .select("id", { count: "exact", head: true })
+    .eq("question_id", question.id);
+
+  if ((count ?? 0) > 0) {
+    return {
+      ok: false,
+      error: `"${question.title}" already has ${count} answer(s), so its wording can no longer be changed.`,
+    };
+  }
+
+  const { error } = await supabase
+    .from("questions")
+    .update({
+      title,
+      description: description || null,
+      type,
+      options: type === "multiple_choice" ? result.options : null,
+      is_required: required === "true",
+    })
+    .eq("id", question.id);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/surveys");
+  revalidatePath("/survey");
+  revalidatePath("/admin");
+
+  return { ok: true, message: `Updated "${title}".` };
+}
+
+/* ------------------------------------------------------------------ *
+ * Open / close applications
+ * ------------------------------------------------------------------ */
+
+/**
+ * Flips the live survey between accepting and not accepting submissions.
+ * Content stays locked either way; only the status changes.
+ */
+export async function toggleApplications(formData: FormData): Promise<ActionResult> {
+  const { error: authError } = await requireManagerOrFail();
+  if (authError) return { ok: false, error: authError };
+
+  const surveyId = String(formData.get("surveyId") ?? "");
+  const next = String(formData.get("next") ?? "");
+
+  if (!surveyId || (next !== "active" && next !== "closed")) {
+    return { ok: false, error: "Invalid request." };
+  }
+
+  const patch = new FormData();
+  patch.set("surveyId", surveyId);
+  patch.set("status", next);
+
+  const result = await setSurveyStatus(patch);
+  if (!result.ok) return result;
+
+  revalidatePath("/admin");
+  revalidatePath("/survey");
+  revalidatePath("/");
+
+  return {
+    ok: true,
+    message:
+      next === "active"
+        ? "Applications are open. Students can submit from now on."
+        : "Applications are closed. Submissions already received are untouched.",
+  };
+}
