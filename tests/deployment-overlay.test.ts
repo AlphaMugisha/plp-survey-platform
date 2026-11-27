@@ -164,7 +164,9 @@ describe("adding a year level is additive, never destructive", () => {
 
   it("aborts rather than removing or renaming an existing level", () => {
     expect(sql).toMatch(/Refusing to continue/iu);
-    expect(sql).toMatch(/would remove or rename existing year level/iu);
+    expect(sql).toMatch(/would remove existing year level/iu);
+    // and it names the likeliest cause rather than leaving you guessing
+    expect(sql).toMatch(/deployment_overrides\.sql\) has not been applied yet/iu);
     expect(sql).toContain("if missing is not null then");
   });
 

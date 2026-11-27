@@ -59,7 +59,11 @@ begin
 
   if missing is not null then
     raise exception
-      'Refusing to continue: this would remove or rename existing year level(s): %. Answers already given would no longer match an offered option.',
+      'Refusing to continue: this would remove existing year level(s): %. '
+      'If those are S1-S6, the deployment overrides migration '
+      '(20260101000800_deployment_overrides.sql) has not been applied yet, so this '
+      'database is still the original PLP form. Apply that first. '
+      'Otherwise, an answer already given would stop matching an offered option.',
       missing
       using errcode = 'check_violation';
   end if;
