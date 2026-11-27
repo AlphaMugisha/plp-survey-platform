@@ -35,6 +35,7 @@ import {
 import { fieldsForStep, stepsForQuestions } from "@/lib/survey/steps";
 import type { Question } from "@/lib/survey/source";
 import { isApplication, labels } from "@/lib/survey/framing";
+import { isAcceptableChoice } from "@/lib/survey/fill-in-option";
 import { cn } from "@/lib/utils";
 import type { ApplicationWindowStatus } from "@/lib/survey/application-window";
 
@@ -170,14 +171,31 @@ export function SurveyForm({
 
   /* ---------------- Progress ---------------- */
 
+  /**
+   * Whether a question has a usable answer.
+   *
+   * A chosen fill-in option that has nothing written in the blank — the stored
+   * value is just "Other: " — is NOT an answer, so it must not count towards
+   * progress or clear the missing-answer warning.
+   */
+  const isAnswered = React.useCallback(
+    (q: Question, raw: string | undefined) => {
+      const value = (raw ?? "").trim();
+      if (!value) return false;
+      if (!q.options?.length) return true;
+      return isAcceptableChoice(q, raw ?? "");
+    },
+    [],
+  );
+
   const answeredCount = React.useMemo(() => {
     let n = (values.email ?? "").trim() ? 1 : 0;
     if ((values.country_of_origin ?? "").trim()) n += 1;
     for (const q of questions) {
-      if ((values[q.fieldKey] ?? "").trim()) n += 1;
+      if (isAnswered(q, values[q.fieldKey])) n += 1;
     }
     return n;
-  }, [values, questions]);
+  }, [values, questions, isAnswered]);
 
   const totalFields = questions.length + (surveySource.collects_email.enabled ? 2 : 1);
   const percent = Math.min(100, (answeredCount / totalFields) * 100);
@@ -190,10 +208,10 @@ export function SurveyForm({
     }
     if (!(values.country_of_origin ?? "").trim()) missing.add(COUNTRY_FIELD);
     for (const q of questions) {
-      if (q.required && !(values[q.fieldKey] ?? "").trim()) missing.add(q.fieldKey);
+      if (q.required && !isAnswered(q, values[q.fieldKey])) missing.add(q.fieldKey);
     }
     return missing;
-  }, [values, questions]);
+  }, [values, questions, isAnswered]);
 
   /* ---------------- Navigation ---------------- */
 

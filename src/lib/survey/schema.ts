@@ -8,6 +8,7 @@
  */
 import { z } from "zod";
 import { allQuestions, surveySource, type Question } from "./source";
+import { fillInIssue, isAcceptableChoice } from "./fill-in-option";
 
 export const EMAIL_FIELD = "email" as const;
 export const COUNTRY_FIELD = "country_of_origin" as const;
@@ -28,16 +29,25 @@ function requiredMessage(q: Question): string {
 
 /** Zod schema for one question's answer value. */
 export function schemaForQuestion(q: Question): z.ZodType<string | undefined> {
-  // Choice questions: the answer must be one of the exact original option strings.
+  // Choice questions: the answer must be one of the exact original option
+  // strings, or that question's fill-in option with the blank filled in.
   if (q.options && q.options.length > 0) {
-    const allowed = new Set(q.options);
     const base = z
       .string({ required_error: requiredMessage(q), invalid_type_error: requiredMessage(q) })
-      .refine((v) => allowed.has(v), {
-        message:
-          q.type === "dropdown"
-            ? "Please select your school from the list."
-            : "Please choose one of the options.",
+      .superRefine((v, ctx) => {
+        if (isAcceptableChoice(q, v)) return;
+
+        // A half-finished fill-in answer gets a message about the blank, not
+        // "choose one of the options" — they did choose one.
+        const issue = fillInIssue(q, v);
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            issue ??
+            (q.type === "dropdown"
+              ? "Please select your school from the list."
+              : "Please choose one of the options."),
+        });
       });
     return q.required
       ? (base as z.ZodType<string | undefined>)
@@ -161,11 +171,13 @@ export function validateSubmissionAnswers(
       continue;
     }
 
-    if (q.options && q.options.length > 0 && !q.options.includes(value)) {
+    if (q.options && q.options.length > 0 && !isAcceptableChoice(q, value)) {
       issues.push({
         entryId: q.entry_id,
         field: q.fieldKey,
-        message: "Answer is not one of the allowed options for this question.",
+        message:
+          fillInIssue(q, value) ??
+          "Answer is not one of the allowed options for this question.",
       });
       continue;
     }

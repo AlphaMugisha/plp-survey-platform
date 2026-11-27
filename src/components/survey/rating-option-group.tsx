@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { composeFillIn, fillInPrefix, MAX_FILL_IN } from "@/lib/survey/fill-in-option";
 
 /**
  * Rating / choice control.
@@ -47,7 +48,18 @@ export function RatingOptionGroup({
       aria-invalid={invalid || undefined}
     >
       {options.map((option) => {
-        const selected = value === option;
+        // An option ending in a blank ("Other: __________") is filled in rather
+        // than merely chosen, so it matches on its lead-in text and carries its
+        // own input. See src/lib/survey/fill-in-option.ts.
+        const prefix = fillInPrefix(option);
+        const selected =
+          prefix === null
+            ? value === option
+            : value === option || Boolean(value?.startsWith(prefix));
+        const typed =
+          prefix !== null && selected && value && value !== option
+            ? value.slice(prefix.length)
+            : "";
         const id = `${name}__${slug(option)}`;
         // Leading number, used only for the indicator glyph.
         const ordinal = /^(\d+)/u.exec(option)?.[1];
@@ -61,7 +73,7 @@ export function RatingOptionGroup({
               value={option}
               checked={selected}
               disabled={disabled}
-              onChange={() => onChange(option)}
+              onChange={() => onChange(prefix === null ? option : composeFillIn(prefix, typed))}
               onBlur={onBlur}
               className="peer sr-only"
             />
@@ -95,16 +107,45 @@ export function RatingOptionGroup({
                 {selected ? <Check className="size-[1.0625rem]" strokeWidth={2.75} /> : ordinal}
               </span>
 
-              {/* The exact original option string */}
+              {/* The exact original option string. Once a fill-in option is
+                  chosen, the blank is replaced by the input below, which is
+                  what the blank means on paper. */}
               <span
                 className={cn(
                   "text-[0.9375rem] leading-snug transition-colors duration-250",
                   selected ? "font-medium text-plp-800" : "text-ink-soft",
                 )}
               >
-                {option}
+                {prefix !== null && selected ? prefix.trim() : option}
               </span>
             </label>
+
+            {/* Outside the <label>, so typing in it cannot re-trigger the radio. */}
+            {prefix !== null && selected && (
+              <div className="mt-2 pl-4 sm:pl-5">
+                <input
+                  type="text"
+                  value={typed}
+                  disabled={disabled}
+                  autoFocus
+                  maxLength={MAX_FILL_IN}
+                  onChange={(event) => onChange(composeFillIn(prefix, event.target.value))}
+                  onBlur={onBlur}
+                  aria-label={`${prefix.trim()} please specify`}
+                  placeholder="Please specify…"
+                  className={cn(
+                    "w-full rounded-xl border bg-surface px-3.5 py-2.5",
+                    "text-[0.9375rem] text-ink placeholder:text-ink-faint",
+                    "transition-all duration-250 ease-premium",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plp-500 focus-visible:ring-offset-2",
+                    invalid && typed.trim().length === 0
+                      ? "border-destructive/60"
+                      : "border-plp-300",
+                    disabled && "cursor-not-allowed opacity-60",
+                  )}
+                />
+              </div>
+            )}
           </div>
         );
       })}
