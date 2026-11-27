@@ -146,6 +146,9 @@ const BOLD = c("1");
 const RESET = c("0");
 
 let failures = 0;
+/** Set when a failure looks like the overlay was never applied. */
+let overlayLikelyMissing = false;
+let surveyNotActive = false;
 const lines: string[] = [];
 
 /** Keep failure detail readable — a 180-item list helps nobody. */
@@ -208,7 +211,14 @@ async function main() {
     "Confirmation message matches source byte for byte",
     describeTextDiff(sourceFull.confirmation_message, survey.confirmation_message),
   );
-  check(survey.status === "active", "Status is active", `found "${survey.status}"`);
+  surveyNotActive = survey.status !== "active";
+  check(
+    survey.status === "active",
+    "Status is active",
+    surveyNotActive
+      ? `found "${survey.status}" — applications are not being accepted. Open them from the dashboard.`
+      : undefined,
+  );
   check(survey.is_locked === true, "Content is locked");
   check(survey.collects_email === true, "Email collection enabled");
   check(survey.email_required === true, "Email is required");
@@ -279,6 +289,7 @@ async function main() {
       )}, database has ${brief(JSON.stringify(dbOpts), 90)}`;
     }
   });
+  if (qMismatch !== null && /options differ/u.test(qMismatch)) overlayLikelyMissing = true;
   check(qMismatch === null, "Wording, entry ids, order, flags and options match source exactly", qMismatch ?? undefined);
 
   const scaleQs = qs.filter((q) => Array.isArray(q.options) && (q.options as string[]).length === 5);
@@ -327,6 +338,9 @@ async function main() {
   // The ACTIVE set must match what the app offers.
   const activeSorted = [...activeNames].sort();
   const expectedSorted = [...effectiveSchools].sort();
+  if (JSON.stringify(activeSorted) !== JSON.stringify(expectedSorted)) {
+    overlayLikelyMissing = true;
+  }
   check(
     JSON.stringify(activeSorted) === JSON.stringify(expectedSorted),
     `Active schools match the app (${effectiveSchools.length})`,
@@ -356,8 +370,10 @@ async function main() {
     .select("title")
     .limit(1);
   check(
-    !anonQsErr && (anonQs?.length ?? 0) > 0,
-    "anon CAN read active survey questions",
+    surveyNotActive || (!anonQsErr && (anonQs?.length ?? 0) > 0),
+    surveyNotActive
+      ? "anon questions check skipped — survey is not active"
+      : "anon CAN read active survey questions",
     anonQsErr?.message,
   );
 
@@ -428,7 +444,7 @@ async function main() {
 
 function report() {
   lines.push("");
-  if (failures > 0 && hasDeploymentOverrides) {
+  if (failures > 0 && hasDeploymentOverrides && overlayLikelyMissing) {
     lines.push(
       `${DIM}If the mismatches above are the school list or year levels, the${RESET}`,
     );
@@ -438,6 +454,11 @@ function report() {
     lines.push(
       `${DIM}supabase/migrations/20260101000800_deployment_overrides.sql.${RESET}`,
     );
+    lines.push("");
+  }
+  if (surveyNotActive) {
+    lines.push(`${DIM}The survey is not active, so it is not accepting submissions.${RESET}`);
+    lines.push(`${DIM}Open applications from the dashboard when you are ready.${RESET}`);
     lines.push("");
   }
   if (failures === 0) {
